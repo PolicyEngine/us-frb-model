@@ -1,0 +1,146 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Consumption of fixed capital (JCCAN)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<center> JCCAN: Consumption of fixed capital </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>jccan - jccan_aerr = jygfgn + jygfen + jygsgn + jygsen
+ + .01*ujcca*pxp(-1)*(phr(-1)*kh(-1)*jrh + ppsr(-1)*kps(-1)*jrps
+ + pkpdr(-1)*kpd(-1)*jrpd)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>jccan/xgdpn - jccan_aerr = y_jccan(1)*(1 - y_jccan(2))
+ + y_jccan(2)*jccan(-1)/xgdpn(-1)
+ + (1 - y_jccan(2))*pkbfir(-1)*kbfi(-1)*jrbfi*pxp(-1)*.01/xgdpn(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="details-about-the-simplifications">Details about the Simplifications</h2>
+
+<ul>
+  <li>
+    <p>The equation is now specified as ratio of nominal GDP (XGDPN).</p>
+  </li>
+  <li>The simplification of JCCAN and the fiscal sector allowed us to eliminate from the model the variables corresponding to the following subcategories of consumption of fixed capital (CFC):
+    <ul>
+      <li>JYGFEN: CFC, federal government enterprises, current $</li>
+      <li>JYGFGN: CFC, federal government, general, current $</li>
+      <li>JYGSEN: CFC, state and local government enterprises, current $</li>
+      <li>JYGSGN: CFC, state and local government, general, current $</li>
+    </ul>
+  </li>
+  <li>The multiplicative factor, UJCCA, of the JCCAN identity has also been eliminated.</li>
+  <li>The corporate measure of CFC was also eliminated:
+    <ul>
+      <li>JCCACN: Consumption of fixed capital, corporate, current $</li>
+      <li>UJCCAC: Multiplicative factor in JCCACN identity</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

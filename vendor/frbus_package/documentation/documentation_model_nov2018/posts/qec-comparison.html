@@ -1,0 +1,139 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Desired level of consumption (QEC)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<ul>
+  <li>The linear relationship between the desired level of consumption and permanent income and wealth was replaced by a log-log specification. As in the previous model, the MPC is the same for both types of wealth. As a result, stock market wealth (WPS) and other wealth (WPO) are aggregated. The log-log specification has been adopted for consistency with spending variables in other equations in the model and to accelerate convergence dynamics following transient shocks.</li>
+</ul>
+
+<center> QEC: Desired level of consumption </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(qec) - qec_aerr = log
+(y_qec(1)*zyh
+ + y_qec(2)*dcon*(zyh - zyht)
+ + y_qec(3)*zyht
+ + y_qec(4)*zyhp
+ + y_qec(5)*(wpo + wps))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(qec) - qec_aerr = 
+y_qec(1)
+ + y_qec(2)*log(zyh - zyht - zyhp)
+ + y_qec(3)*log(zyht) + (1
+ - y_qec(2)
+ - y_qec(3)
+ - y_qec(4))*log(zyhp)
+ + y_qec(4)*log(wpo + wps)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The DCON dummy variable and the minor adjustment that resulted from its presence were removed from the equation and FRB/US model as their impact was insufficent to justify their existence.</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

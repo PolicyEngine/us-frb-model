@@ -1,0 +1,138 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">PICNIA: Inflation rate, personal consumption expenditures</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+
+<center> PICNIA: Inflation rate, personal consumption expenditures </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>picnia - picnia_aerr = picxfe
+ + ((ucfs + ucfs(-1))/2)*400*d(log(pcfr))
+ + ((uces + uces(-1))/2)*400*d(log(pcer))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>picnia - picnia_aerr = picxfe
+ + y_picnia(1)*400*(log(pcer) - log(pcer(-1)))
+ + y_picnia(2)*400*(log(pcfr) - log(pcfr(-1)))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="details-about-the-changes">Details about the changes</h2>
+
+<ul>
+  <li>
+    <p>The new version of FRB/US uses constant shares for aggregation, which are represented as coefficients. The time-varying nominal shares used in the previous verson of FRB/US introduced non-linearities and dependencies on the initial conditions that possibly affected negatively the long-run and stochastic properties of the model.</p>
+  </li>
+  <li>
+    <p>Consequently, the following variables have been eliminated from the model:</p>
+    <ul>
+      <li>UCFS: Food share of nominal consumption expenditures.</li>
+      <li>UCES: Energy share of nominal consumption expenditures.</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

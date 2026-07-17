@@ -1,0 +1,275 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Federal Government Expenditures</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+<ul>
+  <li>
+    <p>We have simplified and reduce the expenditure-side of the federal government sector.</p>
+  </li>
+  <li>
+    <p>We have consolidated the federal government consumption (EGFO) and investment (EGFI) expenditure into one series (EGFE).</p>
+  </li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egfo)) - egfo_aerr = 
+y_egfo(1)
+ + y_egfo(2)*log(egfo(-1)/egfot(-1))
+ + y_egfo(3)* d(log(egfo(-1)))
+ + y_egfo(4)* d(log(egfo(-2)))
+ + y_egfo(5)*d(log(egfot))
+ + y_egfo(6)* xgap2
+ + y_egfo(7)* xgap2(-1)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>d(log(egfi)) - egfi_aerr = 
+y_egfi(1)
+ + y_egfi(2)*log(egfi(-1)/egfit(-1))
+ + y_egfi(3)* d(log(egfi(-1)))
+ + y_egfi(4)* d(log(egfi(-2)))
+ + y_egfi(5)*d(log(egfit))
+ + y_egfi(6)* xgap2
+ + y_egfi(7)* xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egfe)) - egfe_aerr = 
+y_egfe(1)
+ + y_egfe(2)*log(egfe(-1)/egfet(-1))
+ + y_egfe(3)* d(log(egfe(-1)))
+ + y_egfe(4)* d(log(egfe(-2)))
+ + y_egfe(5)*d(log(egfet))
+ + y_egfe(6)* xgap2
+ + y_egfe(7)* xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>We have done the same for their nominal (EGFON and EGFIN), trend (EGFOT and EGFIT) and relative price (PGFOR and PGFIR) counterparts.</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>egfon - egfon_aerr = .01*pxp*pgfor*egfo</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>egfin - egfin_aerr = .01*pxp*pgfir*egfi</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>egfen - egfen_aerr = pegfr*pxp*egfe*.01</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egfot)) - egfot_aerr
+ = y_egfot(1)
+ + y_egfot(2)*log(.01*pgfor(-1)*pxp(-1)*egfot(-1)/xgdptn(-1))
+ + y_egfot(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>d(log(egfit)) - egfit_aerr
+ = y_egfit(1)
+ + y_egfit(2)*log(.01*pgfir(-1)*pxp(-1)*egfit(-1)/xgdptn(-1))
+ + y_egfit(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egfet)) - egfet_aerr = y_egfet(1)
+ + y_egfet(2)*log(.01*pegfr(-1)*pxp(-1)*egfet(-1)/xgdptn(-1))
+ + y_egfet(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pgfor) - pgfor_aerr - log(pgfor(-1)) = y_pgfor(1) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(pgfir) - pgfir_aerr - log(pgfir(-1)) = y_pgfir(1) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pegfr) - pegfr_aerr - log(pegfr(-1)) = pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes-and-simplifications">Some details about the changes and simplifications</h2>
+
+<ul>
+  <li>The consolidation of the federal spending equations has allowed the elimination of:
+    <ul>
+      <li>EGF: Federal government consumption and gross investment, cw 2009$</li>
+      <li>EGFN: Federal government consumption and gross investment, current $</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

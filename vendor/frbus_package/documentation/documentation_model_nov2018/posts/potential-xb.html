@@ -1,0 +1,186 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Business Potential Output (XGPOT and XBT)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+
+<ul>
+  <li>The contribution of energy to potential output has been identified as one source of implausibly protracted convergence dynamics.  We have simplified the energy sector and its influence on the supply-side to address these concerns.</li>
+</ul>
+
+<center> Business Potential Output (XBT and XGPOT) </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(xbt) - xbt_aerr = log(xb) + (log(xgpot/xg)
+ - .5*(.035*empn/(.01*pceng*ceng)
+ + .035*empn(-1)/(.01*pceng(-1)*ceng(-1)))*log(empt/emp))/
+(1 - .5*(.035*empn/(.01*pceng*ceng)
+ + .035*empn(-1)/(.01*pceng(-1)*ceng(-1))))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(xgpot) - xgpot_aerr = (y_xgpot(1)*(log(leppot) + log(qlww) + log(lqualt))
+ + y_xgpot(2)*log(ks)
+ + y_xgpot(3)*log(veoa)
+ + log(mfpt))/(1 - y_xgpot(4))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hgx - hgx_aerr = 
+(.7*(hlept + hqlww
+ + 400*d(log(lqualt)))
+ + .265*hks
+ + .035*400*d(log(veoa)) + hmfpt)/.965</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hxbt - hxbt_aerr = (hgx
+ - .5*(.035*empn/(.01*pceng*ceng)
+ + .035*empn(-1)/(.01*pceng(-1)*ceng(-1)))*400*d(log(empt)))/
+(1 - .5*(.035*empn/(.01*pceng*ceng)
+ + .035*empn(-1)/(.01*pceng(-1)*ceng(-1))))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(xbt) - xbt_aerr = y_xbt(1)*(log(leppot) + log(qlww) + log(lqualt))
+ + y_xbt(2)*log(ks)
+ + log(mfpt) + log(xbtr)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hxbt - hxbt_aerr = .725*(hlept + hqlww + 400*d(log(lqualt)))
+ + .275*hks + hmfpt + hxbtr</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes-and-simplifications">Some details about the changes and simplifications</h2>
+
+<ul>
+  <li>
+    <p>The role of energy as a factor of production was eliminated and thus the distinction between XBT and XGPOT, as well as HXBT and HGX, in STDVER became unnecessary.</p>
+  </li>
+  <li>
+    <p>The XBT equation in the new version replaces both XBT and XGPOT equations in the old version.</p>
+  </li>
+  <li>
+    <p>The HXBT equation in the new version replaces both HXBT and HGX equations in the old version.</p>
+  </li>
+  <li>
+    <p>Error terms XBTR and HXBTR were added to equations of XBT and HXBT, respectively.</p>
+  </li>
+  <li>
+    <p>The new version of FRB/US uses a new source of data for capital services, KS, and trend labor quality, LQUALT. The model now relies on the estimates of Fernald’s data sources (the trend of labor quality is computed by applying the HP filter to the original series with a λ coefficient of 6400.</p>
+  </li>
+  <li>The elimination of the energy sector from potential business output also entails the elimination of the following variables:
+    <ul>
+      <li>VEOA: Average energy-output ratio of existing capital stock</li>
+      <li>VEO: Desired energy-output ratio</li>
+      <li>UVEOA: Multiplicative factor in VEOA identity</li>
+      <li>XG: Output of business sector plus oil imports, cw</li>
+    </ul>
+  </li>
+  <li>See the documentation on the changes of the petroleum imports (EMP) equation for additional information on the changes to the modeling of energy in FRB/US.</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

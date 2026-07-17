@@ -1,0 +1,137 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Overview of the Changes to the FRB/US Model</h1>
+
+	<h2 id="introduction">Introduction</h2>
+
+<p>The FRB/US model was launched almost 25 years ago as a large macroeconomic model of the US economy.  References documentation about the FRB/US model and some of its history can be found on the public website.   While the model has been modestly updated and changed over the years, this FEDS Note summarizes a more comprehensive set of modifications introduced with the [October 2018] public release of the model and provides some motivation for why they were made.</p>
+
+<p>Many of the modifications in this release aim to reduce the complexity and scope of the model via the consolidation, aggregation or elimination of various model variables and equations whose contribution to the major properties and uses of FRB/US is relatively minor.  In light of the costs inherent to the operation and maintenance of a large and complex model like FRB/US, these simplifications reflect our judgement is that a benefit-cost analysis suggests a somewhat smaller model.  Other modifications deal with improvements in selected model properties such as the tempering of near unit root dynamics in response to certain shocks.</p>
+
+<p>Although the size of the model has been reduced from more than 500 variables to about 370 variables, by design these changes do not substantially alter the model’s dynamics, especially in the short-to-medium run.  In a broader perspective, these modifications provide a foundation from which future efforts to improve the core of FRB/US can proceed, taking into account various developments that have occurred in the field of macroeconomics over the past 25 years, while at the same time maintaining the overall philosophy that has characterized the model since its inception.</p>
+
+<h2 id="birds-eye-view-of-the-changes-to-the-frbus-model">Bird’s Eye View of the Changes to the FRB/US Model</h2>
+<p>The changes to the FRB/US model can be organized in six categories.</p>
+
+<h3 id="simplification-of-potential-output-and-elimination-of-energy-as-a-factor-of-production">1. Simplification of potential output and elimination of energy as a factor of production</h3>
+
+<p>Energy has been dropped as a factor of production.  Although the model will no longer be able to quantify the effects on potential output of changes in the relative price of energy, the benefits of this capability have always been minor if not negligible.  For example, the contribution of historical energy price movements to the model’s estimate of the four-quarter growth of potential output has rarely exceeded a tenth of a percentage point.  On the other side of the ledger, substantial modeling costs have been eliminated.</p>
+
+<p>Many of these costs come from the need to associate production with a concept of business output that is adjusted (XG) to include oil imports.  Not only did the existence of this non-standard measure of output create maintenance and pedagogical burdens, it also placed a priority on being able to adequately model oil imports, so that the production function’s measure of potential output was accurately translated into domestic potential. But modeling oil imports has become more complicated in the past decade, as the price-sensitivity of domestic production has risen.  This development had made the model’s exogenous treatment of domestic energy production inadequate. If the energy factor were retained, the FRB/US model would need to expand its energy sector to contain an endogenous specification of energy production.  Another issue associated with the translation of adjusted output to the NIPA measure of business output was that it involves chain weighted aggregation, which as discussed below, generates non-stationarities in the model’s dynamics.</p>
+
+<p>We also simplified some other parts of the energy sector, including how oil imports are modeled.  Previously, the price and quantity of domestic energy consumption were the key endogenous drivers of oil imports, which were determined by the difference between domestic energy consumption and (exogenous) production.  In the new version of the model, the ratio of oil imports to GDP is a simple reduced-form function of a stochastic trend and the relative price of oil imports.  This change permits the price and quantity of domestic energy consumption and the quantity of domestic energy production to be removed.</p>
+
+<h3 id="aggregation-of-business-investment">2. Aggregation of business investment.</h3>
+
+<p>We simplified the business (i.e. nonresidential) investment sector by modeling business fixed investment as a whole rather than three separate components (equipment, intellectual property and software, and structures).  Our experience over the past decade indicates that the presence of disaggregated components of investment has never been crucial, while the costs of maintaining the disaggregation have been a noticeable burden.  Simulations show that the behavior of aggregate investment (and the rest of the economy) is similar whether investment is modeled at a disaggregated level or not.  The same general specification that was previously applied to each component of business investment is applied to their aggregate</p>
+
+<h3 id="simplification-of-the-government-sector">3. Simplification of the government sector</h3>
+
+<p>We have consolidated many components of the fiscal sector, both across the federal and state and local (S&amp;L) levels of government and, where separate federal and S&amp;L variables remain, within each level.  The simplified version preserves key federal variables (e.g. debt and surplus).  To the extent that these key federal variables are now specified as functions of the newly created consolidated fiscal variables, their equations include adjustment factors to isolate the federal contribution.  The only area where the federal and S&amp;L distinction is preserved is (gross) government expenditures.  Here, the distinction is also important to accurately model the remaining federal variables.  Some simplifications of the expenditure side of the government sector are nonetheless possible, as the disaggregation of (gross) expenditures at each level of government can be reduced from three to two components.</p>
+
+<h3 id="replacement-of-all-chain-and-divisia-aggregation-formulas-by-linear-approximation-with-fixed-weights">4. Replacement of all chain and Divisia aggregation formulas by linear approximation with fixed weights.</h3>
+
+<p>Following the approach used in the National Accounts for constructing historical measures of quantity aggregates, FRB/US has long used some forms of chain aggregation for constructing simulated values of such aggregates.  Recently, however, we have identified the non-linear nature of the chain aggregation formulas (or their near equivalents) as one of the main reasons behind artificial asymmetries in the response of key economic variables to the model’s shocks.  Such asymmetries are one consequence of the path dependent dynamics that these types of formulas create in a model like FRB/US.  Path dependence also adds extra unit roots to the model, which in turn cause many types of transitory shocks to have unwarranted (albeit small) long-run macroeconomic effects.  The new version of the model moves to a formulation for aggregation (log-linear with time-invariant weights) that does not generate these types of spurious behavior.  The benefits from this shift exceed any costs associated with the introduction of approximation errors by the use of fixed weights for aggregation.</p>
+
+<h3 id="elimination-of-the-compounded-annualized-rate-series">5. Elimination of the compounded annualized rate series</h3>
+
+<p>The previous version of FRB/US contained two concepts of most interest rates: the effective annualized yield and the stated interest rate.  The former accounts for compounding over the full year and this concept was assumed to govern the behavior of agents in the model.  The latter concept corresponds to the way market interest rates are quoted in practice.  In this release, effective interest rates have been eliminated from the model and quoted rates are assumed to govern behavior.  With the low interest rates prevailing under current circumstances, the quantitative differences between the concepts is relatively small, the elimination of one of them appeared to be a natural course of action.</p>
+
+<h3 id="other-miscellaneous-simplifications-and-improvements">6. Other miscellaneous simplifications and improvements.</h3>
+
+<p>The new version contains some other modifications to parts of FRB/US whose contributions are marginal. The most salient changes in this category are:</p>
+
+<ul>
+  <li>The simplification of the block associated with the consumption of fixed capital (CFC).
+    <ul>
+      <li>Many minor variables capturing the contribution of the government CFC have been dropped.</li>
+      <li>The equation for CFC in the private sector is simplified.</li>
+    </ul>
+  </li>
+  <li>Some minor household income variables (property and rent related) are consolidated.</li>
+  <li>Variables that have very close counterparts in the model have been eliminated. Examples of such variables include a second set of aggregate measures of the exchange rate and foreign prices that differ only by the bundle of countries use to calculate the weights.</li>
+  <li>The modifications to the variables and equations for CFC and household income aim to improve the long-run dynamics (i.e. 10 years or later) of FRB/US. These aspects of the model have shown in some simulations to lead to undesirable features in the long-term while the modifications show no apparent effects on the short-run properties.</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

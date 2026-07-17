@@ -1,0 +1,247 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Imports excluding Petroleum (EMO and PMO)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+<center> EMO: Imports of goods and services ex. petroleum, cw 2009$ </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(emo) - emo_aerr = 
+y_emo(1)
+ + y_emo(2)*log(emo(-1)*(pmo(-1)/100)/(uemot(-1)*xgden(-1)))
+ + y_emo(3)*(xgap2 - xgap2(-1))/100
+ + y_emo(4)*(xgap2(-1) - xgap2(-2))/100
+ + y_emo(5)*log(ddockm)
+ + y_emo(6)*dlog(ddockm)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(emo) - emo_aerr = 
+y_emo(1)
+ + y_emo(2)*log(emo(-1)*(pmo(-1)/100)/(uemot(-1)*xgdpn(-1)))
+ + y_emo(3)*(xgap2 - xgap2(-1))/100
+ + y_emo(4)*(xgap2(-1) - xgap2(-2))/100
+ + y_emo(5)*log(ddockm)
+ + y_emo(6)*dlog(ddockm)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<center> PMO: Price index for imports ex. petroleum, cw </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(pmo) - pmo_aerr = 
+y_pmo(1)
+ + y_pmo(2)*(log(qpmo) + .64*log(fpcm(-1)/fpxm(-1))
+ + .36*log(pxb(-1)) - log(pmo(-1)))
+ + y_pmo(3)*dlog(fpcm/fpxm)
+ + y_pmo(4)*dlog(pxb)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(pmo) - pmo_aerr = 
+y_pmo(1)
+ + y_pmo(2)*(log(qpmo) + .64*log(fpc(-1)/fpx(-1)) + .36*log(pxb(-1)) - log(pmo(-1)))
+ + y_pmo(3)*dlog(fpc/fpx) + (1
+ - y_pmo(3))*dlog(pxb)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="details-about-the-simplifications">Details about the simplifications</h2>
+
+<ul>
+  <li>The replacement of variables particular to these equations by very similar but far more common series is the main revision to the EMO and PMO equations.
+    <ul>
+      <li>Some of these peculiar variables were nothing more than their broader counterparts up to an exogenous multiplicative factor, which added little to the dynamics of the model and our economic understanding, e.g. FPCM is the product of the multiplicative factor UFPCM and FPC.</li>
+    </ul>
+  </li>
+  <li>The variables that were replaced (eliminated) are:
+    <ul>
+      <li>XGDE: Domestic absorption, cw</li>
+      <li>XGDEN: Nominal Absorption, current $</li>
+      <li>FPCM: Foreign aggregate consumer price (G39, bilateral non-oil import trade weights)</li>
+      <li>FPXM: Nominal exchange rate (G39, bilateral import trade weights)</li>
+    </ul>
+  </li>
+</ul>
+
+<!--
+
+
+
+
+
+
+
+
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(xgde) - xgde_aerr = log(xgde(-1))
+ + .5*((xgdpn/xgden + xgdpn(-1)/xgden(-1))*d(log(xgdp))
+ - (exn/xgden + exn(-1)/xgden(-1))*d(log(ex))
+ + (emon/xgden + emon(-1)/xgden(-1))*d(log(emo))
+ + (empn/xgden + empn(-1)/xgden(-1))*d(log(emp)))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+-->
+
+<!--
+
+
+
+
+
+
+
+
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>xgden - xgden_aerr = xgdpn + emn - exn</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+-->
+
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

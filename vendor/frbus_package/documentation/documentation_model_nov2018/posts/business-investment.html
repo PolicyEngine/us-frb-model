@@ -1,0 +1,318 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Business Investment</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+
+<h3 id="business-investment">Business investment</h3>
+
+<ul>
+  <li>We consolidated three different business investment variables (EPD, EPS, EPI) into a single business fixed investment variable (EBFI).  This page only shows the changes relative to EPD for simplicity.</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(epd) - epd_aerr = 
+(y_epd(1)*(log(qepd(-2)/epd(-2)))
+ + y_epd(2)* dlog(epd(-1))
+ + y_epd(3)* dlog(epd(-2)) + zxbd(-1) + zvpd(-1))*(1
+ - y_epd(4))
+ + y_epd(4)*(dlog(xbo(-1)) + hgvpd(-1))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>epdn - epdn_aerr = 0.01*ppdr*pxp*epd</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>dlog(ebfi) - ebfi_aerr = 
+(y_ebfi(1)*(log(qebfi(-1)/ebfi(-1)))
+ + y_ebfi(2)*dlog(ebfi(-1))
+ + y_ebfi(3)*dlog(ebfi(-2))
+ + y_ebfi(4)*zebfi)*(1
+ - y_ebfi(5))
+ + y_ebfi(5)*(dlog(xb(-1)) - hgpbfir(-1)/400)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>ebfin - ebfin_aerr = 0.01*ebfi*pbfir*pxp</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>We consolidated the relative price variables (e.g. PPDR), trend growth rate (e.g. HGVPD), and target level (e.g. QEPD).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(ppdr) - ppdr_aerr - log(ppdr(-1)) = y_ppdr(1) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hgpdr - hgpdr_aerr = y_hgpdr(1)*hgpdr(-1)
+ + y_hgpdr(2)*400*log(ppdr/ppdr(-1))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hgvpd - hgvpd_aerr = y_hgvpd(1)*hgvpd(-1)
+ + y_hgvpd(2)*log(vpd/vpd(-1))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(qepd) - qepd_aerr = y_qepd(1)
+ + y_qepd(2)*log(xbo)
+ + y_qepd(3)*log(vpd)
+ + y_qepd(4)*log(hgx/100 + jrpd)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pbfir) - pbfir_aerr = log(pbfir(-1)) + pipxnc/400 + dpadj - d(log(pxp))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>hgpbfir - hgpbfir_aerr = .975*hgpbfir(-1)
+ + .025*400*(log(pbfir*pxp/pxb/(pbfir(-1)*pxp(-1)/pxb(-1))))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>qebfi - qebfi_aerr = xb*vbfi*(hxbt/100 - .01*hgpbfir + jrbfi)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h3 id="capital-stock">Capital stock</h3>
+
+<ul>
+  <li>Variables relating to business capital were simplified to reflect the aggregate representation of business capital: capital stock equations (KPD), depreciation rates (JRPD), multiplicative factor (UPKPD), price ratio (PKPDR), and income from capital stocks (YKPDN)</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>kpd - kpd_aerr = 0.25*epd + (1 - jrpd/4)*kpd(-1)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>pkpdr - pkpdr_aerr = upkpd*ppdr</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>ykpdn - ykpdn_aerr = .01*rtpd*pxb*(kpd + kpd(-1))/2</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>kbfi - kbfi_aerr = (pbfir/pkbfir)*ebfi/4 + (1 - jrbfi/4)*kbfi(-1)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>pkbfir - pkbfir_aerr = upkbfir*pbfir</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>ykbfin - ykbfin_aerr = .01*rtbfi*pxb*(kbfi + kbfi(-1))/2</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>Exogenous factors were created for the fixed business investment series: the depreciation rate has become JRBFI and the multiplificative factor associated with the relative price of capital has become UPKBFIR.</li>
+</ul>
+
+<h3 id="user-costs-and-capital-taxes">User costs and capital taxes</h3>
+
+<ul>
+  <li>The user costs and tax rates that previously applied to the three different types of capital now apply to the aggregate capital measure.  These include the depreciation allowance (TAPDD), investment tax credit (TAPDT), after tax cost of capital (RPD), user cost of capital (RTPD), and the target capital to output ratio that depends on these tax rates (VPD).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>rpd - rpd_aerr = 0.5*(7.2 + (1 - trfcim)*(rg5e + rbbbe - rg10e) - zpib5)
+ + 0.5*req</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>rtpd - rtpd_aerr = (.01*rpd + jrpd - .01*hgpdr)
+*((1 - .01*tapdt - trfcim*(1 - tapddp*.01*tapdt)*tapdd)/(1 - trfcim))
+*((pxp*pkpdr + pxp(-1)*pkpdr(-1))/2)/pxb</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>vpd - vpd_aerr = uvpd/rtpd</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>rbfi - rbfi_aerr = 0.5*(7.2 + (1 - trfcim)*(rg5 + rbbb - rg10) - zpib5)
+ + 0.5*req</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>rtbfi - rtbfi_aerr = (.01*rbfi + jrbfi - .01*hgpbfir)
+*((1 - .01*tritc - trfcim*(1 - tapddp*.01*tritc)*tdpv)/(1 - trfcim))
+*(pkbfir*pxp/pxb)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>vbfi - vbfi_aerr = uvbfi*(pkbfir/pbfir)/rtbfi</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The present value of depreciation allowances for BFI is represented by the exogenous factor (TDPV) and the investment tax credit for BFI by the exogenous factor (TRITC).</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

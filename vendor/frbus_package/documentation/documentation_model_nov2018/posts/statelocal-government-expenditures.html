@@ -1,0 +1,276 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">State and Local Government Expenditures</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<ul>
+  <li>
+    <p>We have simplified and reduced the expenditure-side of the state and local government sector.</p>
+  </li>
+  <li>
+    <p>We have consolidated the state and local government consumption (EGSO) and investment (EGSI) expenditure into one series (EGSE).</p>
+  </li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egso)) - egso_aerr = 
+y_egso(1)
+ + y_egso(2)*log(egso(-1)/egsot(-1))
+ + y_egso(3)* d(log(egso(-1)))
+ + y_egso(4)* d(log(egso(-2)))
+ + y_egso(5)*d(log(egsot))
+ + y_egso(6)* xgap2
+ + y_egso(7)* xgap2(-1)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>d(log(egsi)) - egsi_aerr = 
+y_egsi(1)
+ + y_egsi(2)*log(egsi(-1)/egsit(-1))
+ + y_egsi(3)* d(log(egsi(-1)))
+ + y_egsi(4)* d(log(egsi(-2)))
+ + y_egsi(5)*d(log(egsit))
+ + y_egsi(6)* xgap2
+ + y_egsi(7)* xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egse)) - egse_aerr = 
+y_egse(1)
+ + y_egse(2)*log(egse(-1)/egset(-1))
+ + y_egse(3)* d(log(egse(-1)))
+ + y_egse(4)* d(log(egse(-2)))
+ + y_egse(5)*d(log(egset))
+ + y_egse(6)* xgap2
+ + y_egse(7)* xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>We have done the same for their nominal (EGSON and EGSIN), trend (EGSOT and EGSIT) and relative price (PGSOR and PGSIR) counterparts.</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>egson - egson_aerr = .01*pxp*pgsor*egso</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>egsin - egsin_aerr = .01*pxp*pgsir*egsi</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>egsen - egsen_aerr = pegsr*pxp*egse*.01</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egsot)) - egsot_aerr
+ = y_egsot(1)
+ + y_egsot(2)*log(.01*pgsor(-1)*pxp(-1)*egsot(-1)/xgdptn(-1))
+ + y_egsot(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>d(log(egsit)) - egsit_aerr
+ = y_egsit(1)
+ + y_egsit(2)*log(.01*pgsir(-1)*pxp(-1)*egsit(-1)/xgdptn(-1))
+ + y_egsit(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(egfet)) - egfet_aerr = y_egfet(1)
+ + y_egfet(2)*log(.01*pegfr(-1)*pxp(-1)*egfet(-1)/xgdptn(-1))
+ + y_egfet(3)*(hggdpt + hggdpt(-1) + hggdpt(-2) + hggdpt(-3))/1600</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pgsor) - pgsor_aerr - log(pgsor(-1)) = y_pgsor(1) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(pgsir) - pgsir_aerr - log(pgsir(-1)) = y_pgsir(1) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pegsr) - pegsr_aerr = log(pegsr(-1)) + pipxnc/400
+ + dpadj - d(log(pxp))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes-and-simplifications">Some details about the changes and simplifications</h2>
+
+<ul>
+  <li>The consolidation of the state and local government spending equations has allowed the elimination of:
+    <ul>
+      <li>EGS: State and Local government consumption and gross investment, cw</li>
+      <li>EGSN: State and Local government consumption and gross investment, current $</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

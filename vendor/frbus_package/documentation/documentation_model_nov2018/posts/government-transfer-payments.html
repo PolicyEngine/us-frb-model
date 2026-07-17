@@ -1,0 +1,215 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Government Transfer Payments</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<ul>
+  <li>Federal and state and local (S&amp;L)  government net transfer payments (GFTN and GSTN) were consolidated into a single government transfer net payments variable (GTN).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gftn - gftn_aerr = .01*pgdp*gft</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>gftn - gftn_aerr = .01*pgdp*gft</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gtn - gtn_aerr = .01*pgdp*gtr</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>Real (deflated by PGDP) federal and S&amp;L government net transfer payments (GFT and GST) were consolidated into a single government transfer net payments variable (GTR).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gft - gft_aerr = (gftrd + gftrt)*xgdpt</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>gst - gst_aerr = (gstrd + gstrt)*xgdpt</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gtr - gtr_aerr = (gtrd + gtrt)*xgdpt</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The deviation of the ratios of federal and S&amp;L transfers to GDP from their trend ratios were replaced by a single and consolidated variable, GTRD.</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gftrd - gftrd_aerr = 
+y_gftrd(1)
+ + y_gftrd(2)*gftrd(-1)
+ + y_gftrd(3)*xgap2</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>gstrd - gstrd_aerr = 
+y_gstrd(1)
+ + y_gstrd(2)*gstrd(-1)
+ + y_gstrd(3)*xgap2</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gtrd - gtrd_aerr = 
+y_gtrd(1)*gtrd(-1)
+ + y_gtrd(2)*xgap2</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<p>The eoxgenous variables GFTRT and GSTRT (Federal and State/Local government, trend ratio of transfer payments to GDP) have been combined to become GTRT.</p>
+
+<h2 id="some-details-of-the-changes-and-simplifications">Some details of the changes and simplifications</h2>
+
+<ul>
+  <li>We have simplified and reduce the number of variables forming the government transfer payment block through the consolidation of the federal and S&amp;L variables.</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

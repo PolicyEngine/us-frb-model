@@ -1,0 +1,141 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Corporate profits (YNICPN)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>ynicpn - ynicpn_aerr = uynicp*(@recode(
+(ynin - yniln - yniin - ynisen - tfibn - tsibn + gfsubn + gssubn)
+&gt;(tfcin + tscin + .01*xgdpn),
+ynin - yniln - yniin - ynisen - tfibn - tsibn + gfsubn + gssubn,
+tfcin + tscin + .01*xgdpn))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>ynicpn - ynicpn_aerr = @recode((ynin - yniln - ynirn + uynicpnr*xgdpn)&gt;(tcin + .01*xgdpn), (ynin - yniln - ynirn + uynicpnr*xgdpn), (tcin + .01*xgdpn))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>uynicpnr - uynicpnr_aerr = y_uynicpnr(1)*(1 - y_uynicpnr(2))
+ + y_uynicpnr(2)*uynicpnr(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-of-the-simplifications">Some Details of the Simplifications</h2>
+
+<ul>
+  <li>
+    <p>The equation was simplified so that the dynamics of corporate profits are primarly determined by the difference between total income and the sum of the household labor and rental&amp;proprietors’ income. The wedge between measured corporate income and the aformentioned difference is assumed to have a stable relationship with nominal GDP (XGDPN); their ratio, YNICPNR,  follows a simple autogressive process.</p>
+  </li>
+  <li>
+    <p>The following variables, which either did not have any feedback into or need in the model were eliminated:</p>
+    <ul>
+      <li>YCSN: Net corporate cash flow with IVA and CCA</li>
+      <li>UYNICP: Multiplicative factor in YNICPN identity</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

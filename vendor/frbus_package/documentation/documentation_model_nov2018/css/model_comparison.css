@@ -1,0 +1,29 @@
+.outer-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.column-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.column-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+.equation-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.equation {
+}
+
+.borderbox {
+    border: 1px solid #ccc;
+}

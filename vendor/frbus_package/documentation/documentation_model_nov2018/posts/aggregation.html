@@ -1,0 +1,180 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Fixed weight aggregation</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<ul>
+  <li>
+    <p>The old version of FRB/US used the Divisia index for most of its aggregation. It introduced undesirable non-linear dynamics in the stochastic simulations and dependence on the initial conditions with respect to projecting the model forward. The costs of these features motivated us to rely instead on a fixed-weigthed aggregation scheme.</p>
+  </li>
+  <li>
+    <p>The new version of the model uses fixed, constant shares over time for aggregation. For example, for adjusted final sales (XP), the changes entail the new equations:</p>
+  </li>
+</ul>
+
+<center> XP: Final sales plus imports less government labor </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(xp) - xp_aerr = log(xp(-1))
+ + .5*(ecnian/xpn + ecnian(-1)/xpn(-1))*d(log(ecnia))
+ + .5*(ehn/xpn + ehn(-1)/xpn(-1)) *d(log(eh))
+ + .5*(epdn/xpn + epdn(-1)/xpn(-1)) *d(log(epd))
+ + .5*(epin/xpn + epin(-1)/xpn(-1)) *d(log(epi))
+ + .5*(epsn/xpn + epsn(-1)/xpn(-1)) *d(log(eps))
+ + .5*(egfon/xpn + egfon(-1)/xpn(-1)) *d(log(egfo))
+ + .5*(egfin/xpn + egfin(-1)/xpn(-1)) *d(log(egfi))
+ + .5*(egson/xpn + egson(-1)/xpn(-1)) *d(log(egso))
+ + .5*(egsin/xpn + egsin(-1)/xpn(-1)) *d(log(egsi))
+ + .5*(exn/xpn + exn(-1)/xpn(-1)) *d(log(ex))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(xp) - xp_aerr = log(xp(-1)) + y_xp(1)*log(ecnia/ecnia(-1)) + y_xp(2)*log(eh/eh(-1))
+ + (y_xp(3))*log(ebfi/ebfi(-1))
+ + (y_xp(4))*log(egfe/egfe(-1))
+ + (y_xp(5))*log(egse/egse(-1)) + y_xp(6)*log(ex/ex(-1))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<center> PXP: Price index for final sales plus imports less gov. labor </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(pxp)) - pxp_aerr = 
+.5*(ecnian/xpn + ecnian(-1)/xpn(-1))*d(log(pcnia))
+ + .5*((xpn - ecnian)/xpn + (xpn(-1) - ecnian(-1))/xpn(-1))*d(log(pxnc))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(pxp) - pxp_aerr = log(pxp(-1))
+ + y_pxp(1)*log(pcnia/pcnia(-1))
+ + y_pxp(2)*log(pxnc/pxnc(-1))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The other variables that have been affected by that change are: PXP, ECNIA, PCOR, PICNIA, WPON, XFS and XGDP.</li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

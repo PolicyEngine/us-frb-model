@@ -1,0 +1,215 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Petroleum imports (EMP)</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>emp - emp_aerr = uemp*(ceng - xeng)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>dlog(ceng) - ceng_aerr = 
+y_ceng(1)*(log(ceng(-1)) - log(xg(-1)*veoa(-1)))
+ + y_ceng(2)*dlog(xg)
+ + y_ceng(3)*dlog(xg(-1))
+ + y_ceng(4)*dlog(ceng(-1))
+ + y_ceng(5)*dlog(veoa(-1))
+ + y_ceng(6)*hgx(-1)/400</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>xeng - xeng_aerr = uxeng*xgpot</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>d(log(pcengr)) - pcengr_aerr = 
+y_pcengr(1)
+ + y_pcengr(2)*d(log(pcengr(-1)))
+ + y_pcengr(3)*log(pcengr(-1))
+ + y_pcengr(4)*log(poilr(-1))
+ + y_pcengr(5)*d(log(poilr))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(emp/xgdp) - emp_aerr = log(emptrt)
+ + y_emp(1)*d(log(pmp/pxb))
+ + y_emp(2)*xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes">Some details about the changes</h2>
+
+<ul>
+  <li>
+    <p>Past experience has shown that there is no obvious benefit in specifying petroleum imports (EMP) as the difference between demand (CENG) and supply (XENG). In conjunction with the elimination of the adjusted concept of business output (XG) from the model, EMP is now modeled in a reduced-form fashion.</p>
+  </li>
+  <li>
+    <p>In the new verion of the model, the deviation of the ratio of real petroleum imports over real GDP from its long-run counterpart is affected in the short-run by relative price of petroleum imports and economic activity represented by the output gap.</p>
+  </li>
+  <li>
+    <p>The oil imports to GDP ratio, EMPTRT, is an exogenous process.</p>
+  </li>
+  <li>
+    <p>The simplification of the energy sector has led to simplification to the PCER equation. PCE energy inflation is now directy influenced by petroleum import inflation (relative to PCE core inflation).</p>
+  </li>
+</ul>
+
+<center> PCER: Price index for personal consumption expenditures on energy </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(pcer)) - pcer_aerr = 
+y_pcer(1)*log(
+(y_pcer(2)*pceng(-1) + (1
+ - y_pcer(2))*pcxfe(-1))/(pcer(-1)*pcxfe(-1)))
+ + y_pcer(3)*d(log(
+(y_pcer(2)*pceng + (1
+ - y_pcer(2))*pcxfe) /pcxfe))
+ + y_pcer(4)*d(log(
+(y_pcer(2)*pceng(-1) + (1
+ - y_pcer(2))*pcxfe(-1))/pcxfe(-1)))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>d(log(pcer)) - pcer_aerr = 
+y_pcer(1)*d(log(pmp/pcxfe))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The change implied the elimination of the following energy-related variables:
+    <ul>
+      <li>CENG:  Consumption of crude energy (oil, coal, natural gas),  $</li>
+      <li>XENG:  Crude energy production, cw</li>
+      <li>UXENG: Multiplicative factor in XENG identity</li>
+      <li>UEMP:  Multiplicative factor in EMP identity</li>
+      <li>EMPT:  Petroleum imports trend, cw</li>
+      <li>PCENG: Price index for aggregate energy consumption</li>
+      <li>PCENGR: Price index for aggregate energy consumption (relative to PXB)</li>
+    </ul>
+  </li>
+</ul>
+
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

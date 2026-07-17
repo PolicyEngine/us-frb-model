@@ -1,0 +1,219 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Federal Government Budget</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<ul>
+  <li>The consolidation of a large set of federal and S&amp;L variables has led to the simplifcation of the federal government’s budget equations.</li>
+</ul>
+
+<center> GFSRPN: Federal government budget surplus, current $ </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfsrpn - gfsrpn_aerr = tfpn + tfcin
+ + tfibn + tfsin + tfdiv
+ - egfln - egfon - gftn - gfintn
+ - gfsubn - gfsn</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfsrpn - gfsrpn_aerr = tpn + tcin
+ - egfln - 0.64*egfen - gtn - gfintn
+ + ugfsrp*xgdpn</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<center> GFDBTN: Federal government debt stock, current $ </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfdbtn - gfdbtn_aerr = ugfdbt*(gfdbtn(-1)
+ - .25*gfsrpn + .25*egfin
+ - .25*jygfgn - .25*jygfen)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfdbtn - gfdbtn_aerr = ugfdbt*(gfdbtn(-1)
+ - .25*(gfsrpn - 0.36*egfen))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>New auxiliary variables were created to facilitates the automation and derivations of linearized versions of the FRB/US model.</li>
+</ul>
+
+<center> GFEXPN: Sum of positive terms in the federal surplus identity, current $ </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfexpn - gfexpn_aerr = egfln + 0.64*egfen + gtn + gfintn</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<center> GFRECN: Sum of negative terms in the federal surplus identity (sign reversed), current $ </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>gfrecn - gfrecn_aerr = tpn + tcin + ugfsrp*xgdpn</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes-and-simplifications">Some details about the changes and simplifications</h2>
+
+<ul>
+  <li>
+    <p>The following variables were eliminated from the model.</p>
+
+    <ul>
+      <li>GFS: Federal government grants-in-aid to S&amp;L government, deflated by PGDP</li>
+      <li>GFSN: Federal government grants-in-aid to S&amp;L government, current $</li>
+      <li>GFSUB: Federal government subsidies less surplus, deflated by PGDP</li>
+      <li>GFSUBN: Federal government subsidies less surplus, current $</li>
+      <li>GSSUB: S&amp;L government subsidies less surplus, deflated by PGDP</li>
+      <li>GSSUBN: S&amp;L government subsidies less surplus, current $</li>
+    </ul>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

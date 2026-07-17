@@ -1,0 +1,214 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Household Permanent Income Components</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US Model</h2>
+
+<center> YHGAP: Income, household, total, ratio to XGDP, cyclical component </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>yhgap - yhgap_aerr = 100*(yhshr/zyhst - 1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>yhgap - yhgap_aerr = 100*log(yhshr/zyhst)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<center> YHTGAP: Income, household, transfer, ratio to YH, cyclical component </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>yhtgap - yhtgap_aerr = 100*(yhtshr/zyhtst - 1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>yhtgap - yhtgap_aerr = 100*log(yhtshr/zyhtst)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-of-the-simplifications">Some Details of the Simplifications</h2>
+
+<ul>
+  <li>
+    <p>A slightly different convention has been adopted for the “permanent income” group of variables.</p>
+  </li>
+  <li>
+    <p>We have replaced the percentage deviation convention by a log change approximation. This change facilitates the automation of the linearization of FRB/US.</p>
+  </li>
+  <li>
+    <p>The equations of the trend shares were respecified accordingly.</p>
+  </li>
+</ul>
+
+<center> ZYHST: Expected trend ratio of household income to GDP </center>
+<center> ZYHPST: Expected trend share of property income in household income </center>
+<center> ZYHTST: Expected trend share of transfer income in household income </center>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>zyhst - zyhst_aerr = zyhst(-1) + y_zyhst(1)*(yhshr - zyhst(-1))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>zyhpst - zyhpst_aerr = zyhpst(-1) + y_zyhpst(1)*(yhpshr - zyhpst(-1))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>zyhtst - zyhtst_aerr = zyhtst(-1) + y_zyhtst(1)*(yhtshr - zyhtst(-1))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>log(zyhst) - zyhst_aerr = log(zyhst(-1)) + y_zyhst(1)*yhgap(-1)/100</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(zyhpst) - zyhpst_aerr = log(zyhpst(-1)) + y_zyhpst(1)*yhpgap(-1)/100</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>log(zyhtst) - zyhtst_aerr = log(zyhtst(-1)) + y_zyhtst(1)*yhtgap(-1)/100</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>

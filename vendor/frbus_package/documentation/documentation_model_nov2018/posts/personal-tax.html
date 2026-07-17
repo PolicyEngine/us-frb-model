@@ -1,0 +1,247 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>FRBUS Documentation</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/suite.css" rel="stylesheet">
+
+    <link href="../css/model_comparison.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div id="navbar" class="collapse navbar-collapse">
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</nav><!-- /.navbar -->
+
+    <div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+	
+      <h1 class="post-title">Personal Income Tax and Non-Tax Receipts</h1>
+
+	<h2 id="changes-to-the-frbus-model">Changes to the FRB/US model</h2>
+
+<ul>
+  <li>The federal and state and local (S&amp;L) personal income tax and nontax receipts (TFPN and TSPN) were consolidated into personal income tax and nontax receipts (TPN).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>tfpn - tfpn_aerr = trfp*(ypn - gftn - gstn)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>tspn - tspn_aerr = trsp*(ypn - gftn - gstn)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>tpn - tpn_aerr = trp*(ypn - gtn)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The average federal and S&amp;L Average federal tax rate for personal income tax and nontax receipts (TRFP and TRSP) were consolidated into personal income tax and nontax receipts (TRP).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>trfp - trfp_aerr = 
+y_trfp(1)*trfpt
+ + y_trfp(2)* (trfp(-1) - trfpt(-1))
+ + y_trfp(3)* (trfp(-2) - trfpt(-2))
+ + y_trfp(4)*xgap2(-1)</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>trsp - trsp_aerr = 
+y_trsp(1)*trsp(-1)
+ + y_trsp(2)* trspt
+ + y_trsp(3)* trspt(-1)
+ + y_trsp(4)*xgap2(-1)
+ + y_trsp(5)*d(trfp)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>trp - trp_aerr = 
+y_trp(1)*trpt
+ + y_trp(2)* (trp(-1) - trpt(-1))
+ + y_trp(3)* (trp(-2) - trpt(-2))
+ + y_trp(4)*xgap2(-1)</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<ul>
+  <li>The average federal and S&amp;L Average federal tax rate trend for personal income tax and nontax receipts (TRFPT and TRSPT) were consolidated into personal income tax and nontax receipts (TRPT).</li>
+</ul>
+
+<div class="outer-container">
+  <div class="column-container">
+    <div class="column-title">
+      Old model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>trfpt - trfpt_aerr = dfpex*trfptx
+ + dfpdbt*(trfpt(-1)
+ + y_trfpt(1)*(gfdbtn(-1)/xgdpn(-1) - gfdrt(-1))
+ + y_trfpt(2)*d(gfdbtn(-1)/xgdpn(-1) - gfdrt(-1)))
+ + dfpsrp*(trfpt(-1)
+ + y_trfpt(3)*((gfsrpn(-1) - egfin(-1) + jygfgn(-1)
+ + jygfen(-1))/xgdpn(-1) - gfsrt(-1)))</pre>
+      </div>
+      
+      <div class="equation">
+	<pre>trspt - trspt_aerr = dfpex*trsptx
+ + dfpdbt*(trspt(-1)
+ + y_trspt(1)*(gsdbtn(-1)/xgdpn(-1) - gsdrt(-1))
+ + y_trspt(2)*d(gsdbtn(-1)/xgdpn(-1) - gsdrt(-1)))
+ + dfpsrp*(trspt(-1)
+ + y_trspt(3)*((gssrpn(-1) - egsin(-1) + jygsgn(-1)
+ + jygsen(-1))/xgdpn(-1) - gssrt(-1)))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="column-container">
+    <div class="column-title">
+      New model
+    </div>
+    <div class="equation-container">
+      
+      <div class="equation">
+	<pre>trpt - trpt_aerr = dfpex*trptx
+ + dfpdbt*(trpt(-1)
+ + y_trpt(1)*(gfdbtn(-1)/xgdpn(-1) - gfdrt(-1))
+ + y_trpt(2)*d(gfdbtn(-1)/xgdpn(-1) - gfdrt(-1)))
+ + dfpsrp*(trpt(-1)
+ + y_trpt(3)*((gfsrpn(-1)/xgdpn(-1))
+ - (gfsrt(-1) + 0.005*xgap2(-1))))</pre>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<h2 id="some-details-about-the-changes-and-simplifications">Some details about the changes and simplifications</h2>
+
+<ul>
+  <li>
+    <p>We have consolidated the federal and S&amp;L tax and non-tax receipts series into a single one for each pair of series.</p>
+  </li>
+  <li>
+    <p>The exogenous variable TRFPTX has become TRPTX.</p>
+  </li>
+  <li>
+    <p>Despite the consolidation, the long-run fiscal target (set by the usual switches) remains either the <em>federal</em> government debt or surplus ratio as these two variables have been preserved in the new version of the model.</p>
+  </li>
+  <li>
+    <p>A small cyclical adjustment to the surplus-to-GDP target (GFSRT) ratio has been added to the equation of the trend of the average personal income tax rate (TRPT) in the new model.</p>
+  </li>
+</ul>
+
+
+	<!-- <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar-container">
+  <nav id="sidebar">
+    <h4>Model Documentation</h4>
+    <div class="list-group list-group-root well">
+      
+    </div>
+  </nav>
+</div>
+ -->
+	
+	
+      </div><!--/row-->
+      
+      <!-- <hr>
+      
+      <footer>
+      <p>&copy; 2015 Company, Inc.</p>
+      </footer> -->
+      
+    </div><!--/.container-->
+    
+  
+    <!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>window.jQuery || document.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><\/script>')</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"></script>
+
+
+
+    
+  </body>
+</html>
