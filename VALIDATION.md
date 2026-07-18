@@ -57,6 +57,40 @@ respective step tolerances on values of order 1e-4, not a semantic difference.
 (With the vendor at its default looser tolerances (`scipy.optimize.root`,
 xtol 1e-6), the max abs difference is ~1.7e-5, again concentrated in zgap05.)
 
+### Test 2b — the same check against the current (2026) pyfrbus
+
+The vendored reference is pyfrbus 1.0.0 (files dated 2022-04-06). The Board now
+ships pyfrbus 1.1.1 (2026-02-05), so the check above was repeated against that
+release to confirm the agreement is not an artifact of one old version. The
+model definition is unchanged between the two — `models/model.xml` and the
+LONGBASE data are byte-identical — so this isolates solver differences. The
+1.1.1 release needs none of the patches listed above: `scikit-umfpack` is now an
+optional import with a `splu` fallback, pandas is pinned `>=2.1,<3`, and the
+symengine Max/Min issue no longer bites.
+
+| comparison (284 endos × 20 quarters) | max abs | max rel |
+|---|---|---|
+| ours vs pyfrbus 1.0.0 (the committed reference) | 6.0e-9 | 4.9e-8 |
+| ours vs pyfrbus 1.1.1 | 1.4e-8 | 1.8e-7 |
+| pyfrbus 1.1.1 vs pyfrbus 1.0.0 | 1.3e-8 | 1.3e-7 |
+
+The third row is the informative one: **the Fed's own two releases differ from
+each other by as much as this implementation differs from either.** All three
+residuals sit at the same solver-tolerance scale and are concentrated in the
+same near-zero series (`wpsn`, `zgap05`). The 1.1.1 solver reuses its LU
+factorization across Newton iterations, recomputing only when the residual fails
+to halve; that changes the iterate path, not the fixed point, which is why the
+differences stay at tolerance scale.
+
+For the tracking invariant (Test 1), pyfrbus 1.1.1 reproduces LONGBASE to
+1.1e-8 max abs — this implementation's 5.6e-17 is the tighter of the two.
+
+The committed reference stays on 1.0.0 so the gate has a fixed anchor; this
+subsection records the 1.1.1 cross-check. Only the VAR-expectations path was
+exercised. The 1.1.1 release also fixes a lead-substitution guard in
+`jacobian.py` that affects the MCE path only, which this implementation does not
+yet support and which was therefore not tested.
+
 ## Test 3 — sanity: monetary tightening
 
 100bp funds-rate shock, deviations from baseline:
