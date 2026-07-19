@@ -105,6 +105,23 @@ yet support and which was therefore not tested.
 Signs and magnitudes are consistent with the simulation properties described
 in the FRB/US documentation (`vendor/frbus_package/documentation/`).
 
+## How this is enforced in CI
+
+`.github/workflows/ci.yml` gates every push and pull request on all three
+tests. Nothing below is `continue-on-error`, and the tolerances quoted above
+are the ones asserted in code -- they are not to be loosened to make a build
+pass.
+
+| job | gate |
+|---|---|
+| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), and Test 3 as separate steps, so a failure names the broken invariant |
+| `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the 1.3e-8 build-to-build noise floor documented in Test 2b) |
+| `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.10/3.11/3.12 plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
+
+`scripts/generate_vendor_reference.sh` takes an optional output path; CI passes
+a scratch path so the committed anchor is never rewritten by a CI run (the job
+additionally fails if `tests/data/` is modified in place).
+
 ## Solver equivalence notes
 
 - Our solver is a per-period damped Newton on the full 284-equation
