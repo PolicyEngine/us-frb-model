@@ -5,6 +5,7 @@ pyfrbus (vendor/pyfrbus_package, with relaxed dependency pins and its Newton
 solver at xtol=1e-8) on the identical experiment; see VALIDATION.md.
 """
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,12 @@ import pytest
 START = pd.Period("2026Q1")
 END = pd.Period("2030Q4")
 VENDOR_CSV = Path(__file__).parent / "data" / "vendor_shock_2026q1_2030q4.csv"
+
+# Documented gate tolerances (see VALIDATION.md, Test 2). Both this
+# implementation and the vendor solve F(x)=0 to xtol=1e-8, so agreement is
+# expected at solver-tolerance scale (observed 6.0e-9 abs / 4.9e-8 rel).
+CROSSVAL_ABS_TOL = 1e-6
+CROSSVAL_REL_TOL = 1e-6
 
 
 @pytest.fixture(scope="module")
@@ -28,33 +35,97 @@ def shock_sim(model, longbase):
     return with_adds, sim
 
 
-def test_cross_validation_vs_pyfrbus(model, shock_sim):
-    """Test 2: full-vector comparison against the Fed's pyfrbus."""
-    _, sim = shock_sim
-    vendor = pd.read_csv(VENDOR_CSV, index_col=0)
+def _compare_to_vendor(sim, csv_path):
+    """Full-vector comparison of our solution against a vendor pyfrbus CSV."""
+    vendor = pd.read_csv(csv_path, index_col=0)
     vendor.index = pd.PeriodIndex(vendor.index, freq="Q")
 
     ours = sim.loc[START:END, vendor.columns]
+    assert ours.shape == vendor.shape, "endogenous vector shape mismatch"
+
     abs_diff = (ours - vendor).abs().to_numpy()
     rel_diff = abs_diff / np.maximum(np.abs(vendor.to_numpy()), 1e-8)
+    max_abs, max_rel = np.nanmax(abs_diff), np.nanmax(rel_diff)
 
-    assert np.nanmax(abs_diff) < 1e-6
-    assert np.nanmax(rel_diff) < 1e-6
+    assert max_abs < CROSSVAL_ABS_TOL, f"max abs diff {max_abs:.3e} vs {csv_path}"
+    assert max_rel < CROSSVAL_REL_TOL, f"max rel diff {max_rel:.3e} vs {csv_path}"
+    return max_abs, max_rel
 
 
-def test_sanity_signs(shock_sim):
-    """Test 3: monetary tightening lowers output and inflation, raises lur."""
+def test_cross_validation_vs_pyfrbus(model, shock_sim):
+    """Test 2 (hard gate): full-vector comparison against the committed
+    reference produced by the Fed's own pyfrbus."""
+    _, sim = shock_sim
+    _compare_to_vendor(sim, VENDOR_CSV)
+
+
+@pytest.mark.skipif(
+    not os.environ.get("FRESH_VENDOR_CSV"),
+    reason="set FRESH_VENDOR_CSV to a CSV just produced by "
+    "scripts/generate_vendor_reference.sh (CI vendor-reference job does this)",
+)
+def test_cross_validation_vs_freshly_generated_vendor(model, shock_sim):
+    """Test 2c (hard gate in the vendor-reference CI job).
+
+    The committed reference is a fixed anchor and could in principle drift out
+    of sync with what the vendor package actually produces. This re-runs the
+    Fed's pyfrbus from vendor/ in CI and compares against that fresh solution,
+    so the vendor gate exercises the vendor code rather than a stale CSV.
+    """
+    _, sim = shock_sim
+    _compare_to_vendor(sim, Path(os.environ["FRESH_VENDOR_CSV"]))
+
+
+def test_monetary_irf_economic_sanity(shock_sim):
+    """Test 3 (hard gate): economic sanity of the monetary-tightening IRF.
+
+    Experiment: +100bp shock to ``rffintay_aerr`` in 2026Q1, VAR
+    (backward-looking) expectations, demo fiscal configuration.
+
+    A tightening must lower output and inflation and raise unemployment, with
+    magnitudes inside the band below. The band is NOT fitted to this model's
+    output; it is taken from the published simulation properties of FRB/US
+    under VAR expectations:
+
+      * Brayton, Laubach & Reifschneider, "The FRB/US Model: A Tool for
+        Macroeconomic Policy Analysis", FEDS Notes, 2014 -- a 100bp funds-rate
+        tightening lowers real GDP by a few tenths of a percent, peaking after
+        roughly two years, and lowers core inflation by a few hundredths to
+        ~0.2pp over the same horizon.
+      * FRB/US package documentation shipped in
+        ``vendor/frbus_package/documentation/``.
+
+    Observed values in this implementation (VALIDATION.md, Test 3):
+    rff impact +1.000pp, xgdp trough -0.55% in 2027Q4, lur peak +0.26pp,
+    picxfe trough -0.034pp. The bands are deliberately wider than these so the
+    test gates on economics, not on bit-level reproduction (that is Tests 1-2).
+    """
     base, sim = shock_sim
     rff_delta = sim.loc[START:END, "rff"] - base.loc[START:END, "rff"]
     gdp_pct = 100 * (sim.loc[START:END, "xgdp"] / base.loc[START:END, "xgdp"] - 1)
     lur_delta = sim.loc[START:END, "lur"] - base.loc[START:END, "lur"]
     pi_delta = sim.loc[START:END, "picxfe"] - base.loc[START:END, "picxfe"]
 
-    # Funds rate rises ~1pp on impact
-    assert 0.8 < rff_delta.iloc[0] < 1.2
-    # Output falls, with a trough between -0.2% and -1.2% (FRB/US VAR properties)
-    assert -1.2 < gdp_pct.min() < -0.2
-    # Unemployment rises
-    assert 0.1 < lur_delta.max() < 0.6
-    # Core inflation falls
-    assert -0.15 < pi_delta.min() < -0.005
+    # --- signs -------------------------------------------------------------
+    assert rff_delta.iloc[0] > 0, "tightening must raise the funds rate"
+    assert gdp_pct.min() < 0, "tightening must lower output"
+    assert pi_delta.min() < 0, "tightening must lower core inflation"
+    assert lur_delta.max() > 0, "tightening must raise unemployment"
+
+    # --- magnitudes, inside the documented band ----------------------------
+    # Impact response is the shock itself, ~100bp.
+    assert 0.8 < rff_delta.iloc[0] < 1.2, f"rff impact {rff_delta.iloc[0]:.3f}pp"
+    # Output trough: "a few tenths to ~1 percent".
+    assert -1.2 < gdp_pct.min() < -0.2, f"xgdp trough {gdp_pct.min():.3f}%"
+    # Okun-consistent unemployment response.
+    assert 0.1 < lur_delta.max() < 0.6, f"lur peak {lur_delta.max():.3f}pp"
+    # Core inflation responds modestly and sluggishly under VAR expectations.
+    assert -0.15 < pi_delta.min() < -0.005, f"picxfe trough {pi_delta.min():.4f}pp"
+
+    # --- timing ------------------------------------------------------------
+    # The output trough is a lagged effect, not an impact effect: monetary
+    # transmission peaks after roughly 1-3 years, never in the shock quarter.
+    trough_q = gdp_pct.to_numpy().argmin()
+    assert 3 <= trough_q <= 15, f"xgdp trough at quarter {trough_q}, expected 3-15"
+    # Output must be (weakly) below baseline throughout the tightening.
+    assert gdp_pct.max() < 0.05, f"xgdp rises {gdp_pct.max():.3f}% above baseline"

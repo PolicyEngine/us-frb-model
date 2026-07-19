@@ -18,8 +18,15 @@
 #      the vendor code obtained under sympy 1.3.
 #   4. pandas is pinned <2 (vendor writes into read-only DataFrame buffers).
 # vendor/ itself is never modified.
+#
+# Usage: generate_vendor_reference.sh [OUTPUT_CSV]
+#   OUTPUT_CSV defaults to tests/data/vendor_shock_2026q1_2030q4.csv (the
+#   committed reference). CI passes a scratch path instead so it can compare a
+#   FRESHLY generated vendor solution against this implementation without
+#   touching the committed anchor.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+OUT="${1:-$REPO/tests/data/vendor_shock_2026q1_2030q4.csv}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -65,7 +72,9 @@ uv venv "$WORK/venv" -p 3.11
 uv pip install -p "$WORK/venv/bin/python" "$WORK/pyfrbus_ref" "pandas==1.5.3" "numpy<2"
 
 cd "$REPO"
-"$WORK/venv/bin/python" - <<'EOF'
+OUT="$OUT" "$WORK/venv/bin/python" - <<'EOF'
+import os
+
 import pandas as pd
 from pyfrbus.frbus import Frbus
 from pyfrbus.load_data import load_data
@@ -78,6 +87,7 @@ data.loc[start:end, "dfpsrp"] = 1
 with_adds = model.init_trac(start, end, data)
 with_adds.loc[start, "rffintay_aerr"] += 1
 sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": 1e-8})
-sim.loc[start:end, model.endo_names].to_csv("tests/data/vendor_shock_2026q1_2030q4.csv")
-print("wrote tests/data/vendor_shock_2026q1_2030q4.csv")
+out = os.environ["OUT"]
+sim.loc[start:end, model.endo_names].to_csv(out)
+print(f"wrote {out}")
 EOF
