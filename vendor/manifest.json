@@ -1,0 +1,16 @@
+{
+  "source": "Federal Reserve Board FRB/US public packages",
+  "retrieved": "2026-07-17",
+  "model_package": {
+    "release": "pyfrbus 1.0.0",
+    "artifact": "pyfrbus.zip",
+    "sha256": "b8f7488235cc939f2beb9fdfb525c1c424a5654373a850bf537a7d900dd45fe9",
+    "model_xml_sha256": "3227f4d2a1d48d6c59e055b11c719a2c40f29e2dfd5094601ec16c24fdd4f24b"
+  },
+  "data_package": {
+    "release": "April 2026 LONGBASE (download page labelled May 5, 2026)",
+    "artifact": "data_only_package.zip",
+    "sha256": "15babe3871f91dd6000b6d5df02ab838f6faddae2135d7e1b106e79eeefdde8b",
+    "longbase_sha256": "6f2cc04e815800975bde234402c40a4815e92c268df93ced26cd27ac1b055bf4"
+  }
+}

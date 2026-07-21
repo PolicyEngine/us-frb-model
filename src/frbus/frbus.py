@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 from frbus import equations, lexing, runtime, solver, symbolic
@@ -30,6 +31,7 @@ class Frbus:
         spec: ModelSpec = parse_model(filepath)
         self.spec = spec
         self.endo_names: list[str] = list(spec.endo_names)
+        self.stoch_shocks: list[str] = list(spec.stoch_shocks)
 
         # Append tracking residual (add-factor) to every equation: lhs = rhs + <endo>_trac
         eqs = [
@@ -151,3 +153,48 @@ class Frbus:
         vals = data.to_numpy(copy=True)
         vals = solver.solve_periods(idxs, vals, self._endo_idxs, self._feqs, self._fjac, opts)
         return pd.DataFrame(vals, index=data.index, columns=data.columns)
+
+    def stochsim(
+        self,
+        nrepl: int,
+        input_data: pd.DataFrame,
+        simstart,
+        simend,
+        residstart,
+        residend,
+        *,
+        seed: int = 1000,
+        options: dict | None = None,
+    ) -> list[pd.DataFrame | str]:
+        """Run joint historical-residual bootstrap simulations.
+
+        Every simulated quarter draws one historical quarter and applies its
+        complete demeaned vector of stochastic-equation tracking residuals.
+        Joint draws preserve contemporaneous cross-equation dependence. Failed
+        replications remain visible as error strings.
+        """
+        if nrepl < 1:
+            raise ValueError("nrepl must be positive")
+        data = self._ensure_columns(input_data)
+        shocks = [f"{name}_trac" for name in self.stoch_shocks]
+        missing = [name for name in shocks if name not in data.columns]
+        if missing:
+            raise MissingDataError(missing[0])
+
+        sim_periods = pd.period_range(simstart, simend, freq="Q")
+        residuals = data.loc[residstart:residend, shocks]
+        if residuals.empty or residuals.isna().any().any():
+            raise ValueError("residual window must be non-empty and finite")
+        residuals = residuals - residuals.mean(axis=0)
+
+        rng = np.random.default_rng(seed)
+        source_rows = rng.integers(0, len(residuals), size=(nrepl, len(sim_periods)))
+        solutions: list[pd.DataFrame | str] = []
+        for rows in source_rows:
+            scenario = data.copy()
+            scenario.loc[sim_periods, shocks] += residuals.iloc[rows].to_numpy()
+            try:
+                solutions.append(self.solve(simstart, simend, scenario, options=options))
+            except Exception as exc:
+                solutions.append(f"{type(exc).__name__}: {exc}")
+        return solutions

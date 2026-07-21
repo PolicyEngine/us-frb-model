@@ -27,6 +27,7 @@ class ModelSpec:
     exo_names: list[str]
     constants: dict[str, float]
     mce_vars: list[str] = field(default_factory=list)
+    stoch_shocks: list[str] = field(default_factory=list)
 
 
 def _clean(eq: str) -> str:
@@ -65,6 +66,11 @@ def parse_model(filepath: str) -> ModelSpec:
     mce_vars = [
         n.text for n in root.xpath("./variable[mce_equation]/name") if n.text is not None
     ]
+    stoch_shocks = [
+        n.text
+        for n in root.xpath("./variable[stochastic_type!='NO']/name")
+        if n.text is not None
+    ]
 
     return ModelSpec(
         endo_names=endo_names,
@@ -72,4 +78,5 @@ def parse_model(filepath: str) -> ModelSpec:
         exo_names=exo_names,
         constants=constants,
         mce_vars=mce_vars,
+        stoch_shocks=stoch_shocks,
     )
