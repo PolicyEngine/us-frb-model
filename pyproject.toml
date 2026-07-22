@@ -23,6 +23,13 @@ dev = ["pytest>=7.0", "ruff>=0.4"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/frbus"]
 
+# Ship the model definition and baseline dataset inside the wheel so a plain
+# `pip install` works without a repo checkout (MacroMod issue #69). The
+# directory is `_data` (not `data`) to avoid clashing with frbus/data.py.
+[tool.hatch.build.targets.wheel.force-include]
+"vendor/pyfrbus_package/models/model.xml" = "frbus/_data/model.xml"
+"vendor/data_only_package/LONGBASE.TXT" = "frbus/_data/LONGBASE.TXT"
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
