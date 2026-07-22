@@ -29,7 +29,14 @@ def solver_defaults(options: dict | None) -> dict:
 
 def _preconditioner(jac: csr_matrix) -> csr_matrix:
     """Diagonal row scaling by max abs entry, to improve conditioning."""
-    scale = 1.0 / np.ravel(abs(jac).max(axis=1).todense())
+    row_max = np.ravel(abs(jac).max(axis=1).todense())
+    zero_rows = np.flatnonzero(row_max == 0.0)
+    if zero_rows.size:
+        raise ComputationError(
+            "Jacobian has all-zero rows (structurally singular system) at "
+            f"equation indices {zero_rows.tolist()[:20]}"
+        )
+    scale = 1.0 / row_max
     n = jac.shape[0]
     return csr_matrix((scale, (range(n), range(n))), shape=(n, n))
 

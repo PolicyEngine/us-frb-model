@@ -6,15 +6,26 @@ solver at xtol=1e-8) on the identical experiment; see VALIDATION.md.
 """
 
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+import scenarios  # noqa: E402  (shared shock definitions, see scripts/scenarios.py)
+
 START = pd.Period("2026Q1")
 END = pd.Period("2030Q4")
-VENDOR_CSV = Path(__file__).parent / "data" / "vendor_shock_2026q1_2030q4.csv"
+DATA_DIR = Path(__file__).parent / "data"
+VENDOR_CSV = DATA_DIR / "vendor_shock_2026q1_2030q4.csv"
+
+
+def vendor_csv(scenario: str) -> Path:
+    if scenario == "monetary":
+        return VENDOR_CSV
+    return DATA_DIR / f"vendor_shock_{scenario}_2026q1_2030q4.csv"
 
 # Documented gate tolerances (see VALIDATION.md, Test 2). Both this
 # implementation and the vendor solve F(x)=0 to xtol=1e-8, so agreement is
@@ -24,15 +35,25 @@ CROSSVAL_REL_TOL = 1e-6
 
 
 @pytest.fixture(scope="module")
-def shock_sim(model, longbase):
-    data = longbase.copy()
-    # Demo fiscal configuration: surplus-ratio targeting
-    data.loc[START:END, "dfpdbt"] = 0
-    data.loc[START:END, "dfpsrp"] = 1
-    with_adds = model.init_trac(START, END, data)
-    with_adds.loc[START, "rffintay_aerr"] += 1  # 100bp funds-rate shock
-    sim = model.solve(START, END, with_adds)
-    return with_adds, sim
+def run_scenario(model, longbase):
+    """Solve a named scenario from scripts/scenarios.py, cached per module."""
+    cache: dict[str, tuple[pd.DataFrame, pd.DataFrame]] = {}
+
+    def _run(name: str):
+        if name not in cache:
+            data = longbase.copy()
+            scenarios.set_policy(name, data, START, END)
+            with_adds = model.init_trac(START, END, data)
+            scenarios.apply_shock(name, with_adds, START, END)
+            cache[name] = (with_adds, model.solve(START, END, with_adds))
+        return cache[name]
+
+    return _run
+
+
+@pytest.fixture(scope="module")
+def shock_sim(run_scenario):
+    return run_scenario("monetary")
 
 
 def _compare_to_vendor(sim, csv_path):
@@ -52,11 +73,14 @@ def _compare_to_vendor(sim, csv_path):
     return max_abs, max_rel
 
 
-def test_cross_validation_vs_pyfrbus(model, shock_sim):
+@pytest.mark.parametrize("scenario", scenarios.SCENARIOS)
+def test_cross_validation_vs_pyfrbus(scenario, run_scenario):
     """Test 2 (hard gate): full-vector comparison against the committed
-    reference produced by the Fed's own pyfrbus."""
-    _, sim = shock_sim
-    _compare_to_vendor(sim, VENDOR_CSV)
+    references produced by the Fed's own pyfrbus, one per scenario in
+    scripts/scenarios.py (monetary, fiscal egfe, tax trp, and a non-inertial
+    Taylor-rule variant)."""
+    _, sim = run_scenario(scenario)
+    _compare_to_vendor(sim, vendor_csv(scenario))
 
 
 @pytest.mark.skipif(
@@ -64,15 +88,17 @@ def test_cross_validation_vs_pyfrbus(model, shock_sim):
     reason="set FRESH_VENDOR_CSV to a CSV just produced by "
     "scripts/generate_vendor_reference.sh (CI vendor-reference job does this)",
 )
-def test_cross_validation_vs_freshly_generated_vendor(model, shock_sim):
+def test_cross_validation_vs_freshly_generated_vendor(run_scenario):
     """Test 2c (hard gate in the vendor-reference CI job).
 
-    The committed reference is a fixed anchor and could in principle drift out
-    of sync with what the vendor package actually produces. This re-runs the
-    Fed's pyfrbus from vendor/ in CI and compares against that fresh solution,
-    so the vendor gate exercises the vendor code rather than a stale CSV.
+    The committed references are fixed anchors and could in principle drift
+    out of sync with what the vendor package actually produces. This re-runs
+    the Fed's pyfrbus from vendor/ in CI (scenario named by VENDOR_SCENARIO,
+    default monetary) and compares against that fresh solution, so the vendor
+    gate exercises the vendor code rather than a stale CSV.
     """
-    _, sim = shock_sim
+    scenario = os.environ.get("VENDOR_SCENARIO", "monetary")
+    _, sim = run_scenario(scenario)
     _compare_to_vendor(sim, Path(os.environ["FRESH_VENDOR_CSV"]))
 
 

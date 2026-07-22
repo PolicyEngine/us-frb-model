@@ -6,6 +6,14 @@ vendor/ and README.md for provenance.
 
 from frbus.data import default_data_path, default_model_path, load_data
 from frbus.frbus import Frbus
+from frbus.uncertainty import StochsimBands, stochsim_bands
 
-__all__ = ["Frbus", "default_data_path", "default_model_path", "load_data"]
+__all__ = [
+    "Frbus",
+    "StochsimBands",
+    "default_data_path",
+    "default_model_path",
+    "load_data",
+    "stochsim_bands",
+]
 __version__ = "0.1.0"

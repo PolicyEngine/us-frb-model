@@ -62,6 +62,10 @@ jobs:
   # PR/push; failures gate. Takes ~1 minute.
   vendor-reference:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [monetary, fiscal_egfe, tax_trp, taylor_noninertial]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -70,14 +74,18 @@ jobs:
           uv venv --python 3.12
           uv pip install -e ".[dev]"
       - name: Regenerate vendor reference from vendor/pyfrbus_package
-        run: bash scripts/generate_vendor_reference.sh "$RUNNER_TEMP/fresh_vendor.csv"
+        run: >-
+          bash scripts/generate_vendor_reference.sh
+          "$RUNNER_TEMP/fresh_vendor.csv" "${{ matrix.scenario }}"
       - name: Gate - ours vs freshly generated vendor solution (< 1e-6)
         env:
           FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor.csv
+          VENDOR_SCENARIO: ${{ matrix.scenario }}
         run: uv run pytest -q --no-header -rA tests/test_shock.py
       - name: Gate - committed reference has not drifted from vendor
         env:
           FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor.csv
+          VENDOR_SCENARIO: ${{ matrix.scenario }}
         run: uv run python scripts/check_reference_drift.py
       - name: Fail if the committed reference was modified in place
         run: git diff --exit-code -- tests/data/
