@@ -36,3 +36,27 @@ def test_model_setup(model):
     assert "xgdp_trac" in model.exo_names
     assert "xgdp_aerr" in model.exo_names
     assert "xgdp" in model.endo_names
+
+
+def test_used_exos_match_whole_identifiers(model):
+    """Every retained exogenous variable must appear as a whole identifier in
+    some equation -- substring hits (e.g. "rff" inside "rffintay") must not
+    count. Verified against the raw equation text with word boundaries."""
+    import re
+
+    spec = model.spec
+    eqs = [
+        eq + f"+{endo}_trac"
+        for eq, endo in zip(spec.equations, spec.endo_names, strict=True)
+    ]
+    declared = set(spec.exo_names)
+    kept = [
+        exo
+        for exo in model._orig_exo_names
+        if exo in declared  # skip generated _aerr/_trac names
+    ]
+    for exo in kept:
+        pat = re.compile(rf"(?<![\w]){re.escape(exo)}(?![\w])")
+        assert any(pat.search(eq) for eq in eqs), (
+            f"{exo} kept as used exo but never appears as a whole token"
+        )

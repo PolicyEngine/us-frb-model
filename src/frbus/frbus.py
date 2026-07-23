@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import pandas as pd
 
-from frbus import equations, lexing, runtime, solver, symbolic
-from frbus.exceptions import MissingDataError
+from frbus import equations, lexing, runtime, solver, symbolic, uncertainty
+from frbus.exceptions import FrbusError, MissingDataError
 from frbus.parse import ModelSpec, parse_model
 
 
@@ -39,8 +41,13 @@ class Frbus:
             for eq, endo in zip(spec.equations, self.endo_names, strict=True)
         ]
 
-        # Exogenous variables: those used in equations, plus _aerr and _trac terms
-        used_exos = [exo for exo in spec.exo_names if any(exo in eq for eq in eqs)]
+        # Exogenous variables: those used in equations, plus _aerr and _trac terms.
+        # Match on whole identifiers, not substrings: "rff" must not count as
+        # used just because "rffintay" appears in an equation.
+        identifiers = set()
+        for eq in eqs:
+            identifiers.update(re.findall(r"[A-Za-z_]\w*", eq))
+        used_exos = [exo for exo in spec.exo_names if exo in identifiers]
         self.exo_names: list[str] = (
             used_exos
             + [f"{endo}_aerr" for endo in self.endo_names]
@@ -195,6 +202,41 @@ class Frbus:
             scenario.loc[sim_periods, shocks] += residuals.iloc[rows].to_numpy()
             try:
                 solutions.append(self.solve(simstart, simend, scenario, options=options))
-            except Exception as exc:
+            except FrbusError as exc:
+                # Only model errors (non-convergence, numerical failures) are
+                # recorded as failed draws; programming errors propagate.
                 solutions.append(f"{type(exc).__name__}: {exc}")
         return solutions
+
+    def stochsim_bands(
+        self,
+        nrepl: int,
+        input_data: pd.DataFrame,
+        simstart,
+        simend,
+        residstart,
+        residend,
+        *,
+        series: list[str] | None = None,
+        coverage: tuple[float, ...] = (68.0, 90.0),
+        seed: int = 1000,
+        options: dict | None = None,
+    ) -> uncertainty.StochsimBands:
+        """Percentile uncertainty bands from ``stochsim`` replications.
+
+        See :func:`frbus.uncertainty.stochsim_bands`; ``series`` defaults to
+        the headline set (xgdp, xgap2, lur, picxfe, rff).
+        """
+        return uncertainty.stochsim_bands(
+            self,
+            nrepl,
+            input_data,
+            simstart,
+            simend,
+            residstart,
+            residend,
+            series=series,
+            coverage=coverage,
+            seed=seed,
+            options=options,
+        )

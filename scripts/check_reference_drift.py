@@ -29,12 +29,17 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-COMMITTED = (
-    Path(__file__).resolve().parents[1]
-    / "tests"
-    / "data"
-    / "vendor_shock_2026q1_2030q4.csv"
-)
+_DATA = Path(__file__).resolve().parents[1] / "tests" / "data"
+
+
+def _committed_path() -> Path:
+    scenario = os.environ.get("VENDOR_SCENARIO", "monetary")
+    if scenario == "monetary":
+        return _DATA / "vendor_shock_2026q1_2030q4.csv"
+    return _DATA / f"vendor_shock_{scenario}_2026q1_2030q4.csv"
+
+
+COMMITTED = _committed_path()
 
 ABS_TOL = 1e-6
 REL_TOL = 1e-5

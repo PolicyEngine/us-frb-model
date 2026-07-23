@@ -19,14 +19,22 @@
 #   4. pandas is pinned <2 (vendor writes into read-only DataFrame buffers).
 # vendor/ itself is never modified.
 #
-# Usage: generate_vendor_reference.sh [OUTPUT_CSV]
-#   OUTPUT_CSV defaults to tests/data/vendor_shock_2026q1_2030q4.csv (the
-#   committed reference). CI passes a scratch path instead so it can compare a
-#   FRESHLY generated vendor solution against this implementation without
-#   touching the committed anchor.
+# Usage: generate_vendor_reference.sh [OUTPUT_CSV] [SCENARIO]
+#   SCENARIO is one of the names in scripts/scenarios.py (default: monetary).
+#   OUTPUT_CSV defaults to the committed reference for that scenario
+#   (tests/data/vendor_shock_2026q1_2030q4.csv for monetary,
+#   tests/data/vendor_shock_<scenario>_2026q1_2030q4.csv otherwise). CI passes
+#   a scratch path instead so it can compare a FRESHLY generated vendor
+#   solution against this implementation without touching the committed anchor.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="${1:-$REPO/tests/data/vendor_shock_2026q1_2030q4.csv}"
+SCENARIO="${2:-monetary}"
+if [ "$SCENARIO" = "monetary" ]; then
+  DEFAULT_OUT="$REPO/tests/data/vendor_shock_2026q1_2030q4.csv"
+else
+  DEFAULT_OUT="$REPO/tests/data/vendor_shock_${SCENARIO}_2026q1_2030q4.csv"
+fi
+OUT="${1:-$DEFAULT_OUT}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -72,20 +80,24 @@ uv venv "$WORK/venv" -p 3.11
 uv pip install -p "$WORK/venv/bin/python" "$WORK/pyfrbus_ref" "pandas==1.5.3" "numpy<2"
 
 cd "$REPO"
-OUT="$OUT" "$WORK/venv/bin/python" - <<'EOF'
+OUT="$OUT" SCENARIO="$SCENARIO" "$WORK/venv/bin/python" - <<'EOF'
 import os
+import sys
 
 import pandas as pd
 from pyfrbus.frbus import Frbus
 from pyfrbus.load_data import load_data
 
+sys.path.insert(0, "scripts")
+from scenarios import END, START, apply_shock, set_policy  # noqa: E402
+
+scenario = os.environ["SCENARIO"]
 data = load_data("vendor/data_only_package/LONGBASE.TXT")
 model = Frbus("vendor/pyfrbus_package/models/model.xml")
-start, end = pd.Period("2026Q1"), pd.Period("2030Q4")
-data.loc[start:end, "dfpdbt"] = 0
-data.loc[start:end, "dfpsrp"] = 1
+start, end = pd.Period(START), pd.Period(END)
+set_policy(scenario, data, start, end)
 with_adds = model.init_trac(start, end, data)
-with_adds.loc[start, "rffintay_aerr"] += 1
+apply_shock(scenario, with_adds, start, end)
 sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": 1e-8})
 out = os.environ["OUT"]
 sim.loc[start:end, model.endo_names].to_csv(out)
