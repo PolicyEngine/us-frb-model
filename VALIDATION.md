@@ -124,6 +124,58 @@ yet support and which was therefore not tested.
 Signs and magnitudes are consistent with the simulation properties described
 in the FRB/US documentation (`vendor/frbus_package/documentation/`).
 
+## Test 4 — fiscal multipliers gated against published ranges (slow gate)
+
+The fiscal-multiplier properties previously quoted for this implementation
+were computed once and never re-checked. `tests/test_multipliers.py` now
+recomputes them on every scheduled-validation run (marked `slow`; full
+nonlinear solves over 2026Q1–2028Q4) and gates them against ranges from the
+published literature, so a regression in the fiscal block cannot pass CI
+silently. Experiments: sustained +1%-of-GDP government purchases (`egfe`
+exogenized) and a sustained −2pp personal tax-rate cut (`trp` exogenized,
+ex-ante real revenue as denominator), VAR expectations, demo fiscal
+configuration; policy switches shared with `scripts/scenarios.py`.
+
+| multiplier (calendar-year) | value | gate | band source |
+|---|---|---|---|
+| purchases, yr 1, inertial Taylor rule | 0.72 | 0.7–1.0 | Coenen et al. (AEJ: Macro 2012); Whalen & Reichling (CBO WP 2015-02) |
+| purchases, yr 2, funds rate pegged | 0.90 | 0.8–1.2 | Coenen et al. 2012, two-year monetary accommodation |
+| tax cut, yr 1 | 0.22 | 0.15–0.45 | Whalen & Reichling: CBO tax-cut multiplier ≈ 0.3 |
+| tax cut, yr 2 | 0.32 | 0.15–0.45 | as above; also gated yr2 > yr1 |
+
+The bands gate on economics, not on reproducing the exact decimals (bit-level
+reproduction is Tests 1–2).
+
+## LONGBASE vs the 2026 outturns (report, not a gate)
+
+The pinned LONGBASE vintage (April 2026) carries the Fed staff's near-term
+projected path, and its first two quarters are now observable.
+`scripts/backtest_longbase.py` compares that path against realized FRED data
+(fetched from the public CSV endpoints; a snapshot fetched **2026-08-04** is
+committed at `tests/data/fred_outturns_snapshot.csv` so the machinery test in
+`tests/test_backtest.py` is hermetic). First backtest, error = LONGBASE −
+outturn:
+
+| quarter | variable | LONGBASE | outturn | error |
+|---|---|---|---|---|
+| 2026Q1 | real GDP growth, annualized (xgdp / GDPC1) | 2.42 | 2.09 | +0.33 |
+| 2026Q2 | real GDP growth, annualized (xgdp / GDPC1) | 2.41 | 1.50 | +0.91 |
+| 2026Q1 | unemployment rate (lur / UNRATE) | 4.46 | 4.33 | +0.12 |
+| 2026Q2 | unemployment rate (lur / UNRATE) | 4.44 | 4.27 | +0.17 |
+| 2026Q1 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 4.42 | −1.69 |
+| 2026Q2 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 3.42 | −0.69 |
+| 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
+| 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
+
+Reading: activity and the funds rate were close (GDP growth overshot by
+0.3–0.9pp, unemployment by ~0.15pp), but the baseline substantially
+underprojected core PCE inflation, by 1.7pp in 2026Q1 and 0.7pp in 2026Q2.
+This is a property of the Fed's baseline data, not of this implementation, so
+it is **deliberately not gated**: the scheduled `longbase-backtest` CI job
+re-runs the comparison against fresh FRED data with `continue-on-error`, and
+only the report machinery itself is gated (hermetically, on the committed
+snapshot). The generated report is committed under `backtests/`.
+
 ## How this is enforced in CI
 
 `.github/workflows/ci.yml` gates every push and pull request on all three
@@ -135,7 +187,8 @@ pass.
 |---|---|
 | `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), and Test 3 as separate steps, so a failure names the broken invariant |
 | `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the 1.3e-8 build-to-build noise floor documented in Test 2b) |
-| `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.10/3.11/3.12 plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
+| `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.10/3.11/3.12, the Test 4 fiscal-multiplier gate (`-m slow`), plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
+| `longbase-backtest` | Weekly, **non-gating** (`continue-on-error`): re-runs `scripts/backtest_longbase.py --fetch` against fresh FRED data and prints the LONGBASE-vs-outturn report |
 
 `scripts/generate_vendor_reference.sh` takes an optional output path; CI passes
 a scratch path so the committed anchor is never rewritten by a CI run (the job

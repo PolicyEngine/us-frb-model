@@ -1,0 +1,82 @@
+{
+  "description": "April 2026 LONGBASE baseline vs realized FRED outturns (error = LONGBASE - outturn). Report only; not a gate.",
+  "vintage": "LONGBASE.TXT, April 2026",
+  "quarters": [
+    "2026Q1",
+    "2026Q2"
+  ],
+  "rows": [
+    {
+      "quarter": "2026Q1",
+      "fred_id": "GDPC1",
+      "variable": "xgdp",
+      "concept": "real GDP growth (annualized q/q %)",
+      "longbase": 2.422,
+      "outturn": 2.089,
+      "error": 0.333
+    },
+    {
+      "quarter": "2026Q2",
+      "fred_id": "GDPC1",
+      "variable": "xgdp",
+      "concept": "real GDP growth (annualized q/q %)",
+      "longbase": 2.407,
+      "outturn": 1.5,
+      "error": 0.907
+    },
+    {
+      "quarter": "2026Q1",
+      "fred_id": "UNRATE",
+      "variable": "lur",
+      "concept": "unemployment rate (%, quarterly avg)",
+      "longbase": 4.456,
+      "outturn": 4.333,
+      "error": 0.123
+    },
+    {
+      "quarter": "2026Q2",
+      "fred_id": "UNRATE",
+      "variable": "lur",
+      "concept": "unemployment rate (%, quarterly avg)",
+      "longbase": 4.438,
+      "outturn": 4.267,
+      "error": 0.172
+    },
+    {
+      "quarter": "2026Q1",
+      "fred_id": "PCEPILFE",
+      "variable": "picxfe",
+      "concept": "core PCE inflation (annualized q/q %)",
+      "longbase": 2.732,
+      "outturn": 4.422,
+      "error": -1.69
+    },
+    {
+      "quarter": "2026Q2",
+      "fred_id": "PCEPILFE",
+      "variable": "picxfe",
+      "concept": "core PCE inflation (annualized q/q %)",
+      "longbase": 2.727,
+      "outturn": 3.419,
+      "error": -0.692
+    },
+    {
+      "quarter": "2026Q1",
+      "fred_id": "FEDFUNDS",
+      "variable": "rff",
+      "concept": "federal funds rate (%, quarterly avg)",
+      "longbase": 3.785,
+      "outturn": 3.64,
+      "error": 0.145
+    },
+    {
+      "quarter": "2026Q2",
+      "fred_id": "FEDFUNDS",
+      "variable": "rff",
+      "concept": "federal funds rate (%, quarterly avg)",
+      "longbase": 3.673,
+      "outturn": 3.633,
+      "error": 0.039
+    }
+  ]
+}

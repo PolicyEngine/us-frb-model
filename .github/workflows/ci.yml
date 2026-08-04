@@ -24,8 +24,8 @@ jobs:
           uv pip install -e ".[dev]"
       - name: Ruff
         run: uv run ruff check src tests examples scripts
-      - name: Tests
-        run: uv run pytest -q
+      - name: Tests (fast suite; slow-marked tests run in scheduled-validation)
+        run: uv run pytest -q -m "not slow"
 
   # Hard correctness gates, run as separate steps so a failure names the
   # invariant that broke. These MUST pass: no continue-on-error, and the
@@ -108,7 +108,9 @@ jobs:
           uv venv --python ${{ matrix.python-version }}
           uv pip install -e ".[dev]"
       - name: Full suite with gates
-        run: uv run pytest -q --no-header -rA
+        run: uv run pytest -q --no-header -rA -m "not slow"
+      - name: Gate - fiscal multipliers inside published ranges (slow)
+        run: uv run pytest -q --no-header -rA -m slow tests/test_multipliers.py
       - name: Regenerate vendor reference
         run: bash scripts/generate_vendor_reference.sh "$RUNNER_TEMP/fresh_vendor.csv"
       - name: Gate - ours vs freshly generated vendor solution
@@ -119,3 +121,23 @@ jobs:
         env:
           FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor.csv
         run: uv run python scripts/check_reference_drift.py
+
+  # NON-gating: compare the pinned April 2026 LONGBASE baseline against
+  # realized FRED outturns and print the report. LONGBASE is the Fed's
+  # baseline, not this implementation's forecast, so a widening gap is
+  # information, never a build failure (the report machinery itself IS gated,
+  # hermetically, by tests/test_backtest.py in the fast suite).
+  longbase-backtest:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          uv pip install -e ".[dev]"
+      - name: Report - LONGBASE vs fresh FRED outturns (non-gating)
+        continue-on-error: true
+        run: uv run python scripts/backtest_longbase.py --fetch --out "$RUNNER_TEMP/backtest"
