@@ -62,9 +62,28 @@ A runnable version is in `examples/monetary_policy_shock.py`.
 
 ## Validation
 
-See `VALIDATION.md` for full tables. Summary: after `init_trac`, solving the
-baseline reproduces LONGBASE; shock experiments are cross-validated against
-the Fed's own pyfrbus running in a separate environment.
+See `VALIDATION.md` for full tables. Summary, in order of how much each one
+actually tells you:
+
+- **Cross-validation (the real evidence).** Four shock scenarios — monetary,
+  fiscal `egfe`, tax `trp`, and a non-inertial Taylor variant — agree with the
+  Fed's own pyfrbus across all 284 endogenous variables and 20 quarters to
+  6.0e-9 abs / 4.9e-8 rel. For scale, the Board's own pyfrbus 1.0.0 and 1.1.1
+  releases differ from *each other* by 1.3e-8, so this sits at the reference
+  implementation's own noise floor.
+- **Fiscal multipliers** lie inside published ranges (purchases 0.72 in year 1
+  under the inertial Taylor rule, 0.90 in year 2 with the funds rate pegged),
+  and the full rule × horizon grid is ordered as theory requires.
+- **Tracking invariant.** After `init_trac`, solving the baseline reproduces
+  LONGBASE to 5.6e-17. **This is an identity, not a validation result** —
+  `init_trac` defines the add-factors as minus the residuals at the input
+  data, so it holds for *any* input; the repo gates a scrambled-baseline
+  version of the same test to keep that honest. Do not cite it as agreement
+  with the Fed's data.
+
+Nothing here is a forecast evaluation. LONGBASE is the Board's illustrative
+baseline, not a Fed forecast, and no pseudo-out-of-sample accuracy of any kind
+is established for this model.
 
 ## Development
 

@@ -8,10 +8,10 @@ All experiments use the VAR (backward-looking expectations) model over
 
 Tests 1–3 run as pytest gates (`tests/test_tracking.py`, `tests/test_shock.py`).
 
-## Test 1 — tracking invariant (hard gate)
+## Test 1 — tracking invariant (hard gate, but see the caveat)
 
-After `init_trac`, solving the baseline must reproduce LONGBASE for all 284
-endogenous variables. Result: **machine precision**.
+After `init_trac`, solving the baseline reproduces LONGBASE for all 284
+endogenous variables to **5.6e-17**.
 
 | metric | value | gate |
 |---|---|---|
@@ -20,6 +20,43 @@ endogenous variables. Result: **machine precision**.
 
 Worst variables (max abs error): frs10 5.6e-17, fpi10 5.6e-17, dpadj 5.4e-20,
 dpgap 5.4e-20, delrff 1.4e-20.
+
+### What this number does and does not mean
+
+**It is not evidence that the model agrees with the Fed's data, and it must
+not be quoted as if it were.** The agreement is true by construction:
+
+1. `init_trac` sets each equation's add-factor to *minus that equation's
+   residual evaluated at the input data*, so after tracking, `solve` is
+   algebraically the identity on whatever it was tracked to — for any input.
+2. `solve_periods` additionally seeds Newton with the current row of the input
+   data, i.e. with the answer. At the tracked baseline 282 of 284 equations
+   have a **bit-exactly zero** residual before the solver runs at all, and the
+   largest is 8.7e-19. Newton converges without moving.
+3. The residual 5.6e-17 is therefore floating-point non-associativity of
+   `A - (A - B) - B` in re-evaluating the equations, not solver accuracy and
+   not economics. 5,645 of the 5,680 compared cells are bit-identical; only 35
+   differ at all.
+
+The decisive demonstration is gated in
+`tests/test_tracking.py::test_tracking_invariant_holds_for_arbitrary_data`:
+scrambling the baseline by multiplying every endogenous series by an
+independent random factor in [0.5, 1.5] — destroying every accounting identity
+and every estimated relation in the model — still passes the identical gate:
+
+| baseline handed to `init_trac` | max abs | max rel | passes the gate? |
+|---|---|---|---|
+| LONGBASE | 5.6e-17 | 5.6e-17 | yes |
+| LONGBASE + 5% iid noise on every endogenous cell | 4.4e-11 | 1.8e-13 | yes |
+| every endogenous series × U[0.5, 1.5] (identities destroyed) | 6.7e-9 | 9.1e-12 | yes |
+
+So the test is worth keeping — it pins that `init_trac` and `solve` remain
+exact inverses, which would catch a real regression in the add-factor
+machinery — but it carries **zero economic information**. The substantive
+evidence in this document is Test 2 (agreement with the Fed's own pyfrbus on
+*shocked* paths, where add-factors are frozen and the solver does real work)
+and Test 4 (multipliers against published ranges). Reproduce the table above
+with `pytest tests/test_tracking.py`.
 
 ## Test 2 — cross-validation against vendor pyfrbus
 
@@ -102,7 +139,13 @@ to halve; that changes the iterate path, not the fixed point, which is why the
 differences stay at tolerance scale.
 
 For the tracking invariant (Test 1), pyfrbus 1.1.1 reproduces LONGBASE to
-1.1e-8 max abs — this implementation's 5.6e-17 is the tighter of the two.
+1.1e-8 max abs against this implementation's 5.6e-17. **This is not a quality
+ranking and must not be presented as one.** Both are add-factor identities
+(see the caveat under Test 1); the gap is that this implementation seeds Newton
+with the data row it is about to reproduce and therefore returns it unchanged,
+whereas the vendor's block-decomposed solver iterates to its own step
+tolerance. A smaller number here means less arithmetic was done, not that the
+economics are closer to the Board's.
 
 The committed reference stays on 1.0.0 so the gate has a fixed anchor; this
 subsection records the 1.1.1 cross-check. Only the VAR-expectations path was
@@ -123,6 +166,58 @@ yet support and which was therefore not tested.
 
 Signs and magnitudes are consistent with the simulation properties described
 in the FRB/US documentation (`vendor/frbus_package/documentation/`).
+
+Two internal-coherence cross-checks on the same run (recomputed 2026-08):
+
+* **Okun's law.** The output trough (−0.551%) and the unemployment peak
+  (+0.258pp) occur in the same quarter, 2027Q4, and their ratio is 2.13 —
+  right on the conventional Okun coefficient of ~2. The two blocks are
+  estimated separately, so this is a real consistency check.
+* **Inflation vs the price level.** Core inflation `picxfe` is an *annualized
+  quarterly* rate (its equation is `400*log(...)`), so a sustained −0.03pp
+  should cumulate to roughly −0.03 × 5 years ≈ −0.15% on the price level by
+  2030Q4. Observed `pcpi` deviation: −0.134%. Consistent.
+* The funds rate crosses **below** baseline from 2028Q1 (−0.26pp trough in
+  2029Q3): the rule reverses as the output gap and inflation undershoot. That
+  is the expected closed-loop behaviour, not drift.
+
+The inflation response is small in absolute terms (−0.034pp at trough for a
+100bp shock). That is a known property of FRB/US under *VAR* expectations —
+the price block is highly inertial and backward-looking — and not a defect of
+this implementation; but it does mean the implied sacrifice ratio is high, and
+scenarios whose conclusion turns on the inflation response should say so.
+
+### Period stacking — a genuine trap in the add-factor interface
+
+`_aerr` shocks are add-factors on an equation, applied **per quarter**. Adding
+the same shock in N consecutive quarters does *not* hold the endogenous
+variable N quarters at the impact response: the impulses accumulate on top of
+the equation's own persistence. For `rffintay_aerr` (whose rule carries 0.85 of
+last quarter's funds rate forward):
+
+| quarters shocked | peak Δrff | when | Δrff q1..q4 | xgdp trough |
+|---|---|---|---|---|
+| 1 | +1.000 pp | 2026Q1 | 1.000, 0.822, 0.654, 0.490 | −0.55% |
+| 2 | +1.822 pp | 2026Q2 | 1.000, 1.822, 1.478, 1.147 | −1.08% |
+| 4 | **+2.971 pp** | 2026Q4 | 1.000, 1.822, 2.478, 2.971 | −2.08% |
+| 8 | +3.680 pp | 2027Q4 | (as above, then flattening) | −3.82% |
+
+A caller who reads "the shock is held for 4 periods" and expects a sustained
++100bp will overstate the tightening roughly **threefold**. The same applies to
+fiscal levers, and there it is arguably worse because the units hide it:
+`egfe_aerr` is an add-error on an equation written in *log-differences*, so
+holding +0.01 for four quarters raises the **level** of federal purchases by
+2.90%, not 1.00%:
+
+| quarters shocked | egfe level dev, q1 | q4 | peak |
+|---|---|---|---|
+| 1 | +1.00% | +0.56% | +1.00% |
+| 4 | +1.00% | +2.90% | +2.90% |
+| 8 | +1.00% | +2.90% | +4.72% |
+
+Gated by `tests/test_shock.py::test_sustained_add_factor_shocks_compound`. Any
+wrapper exposing a `periods` argument must document this on **every** lever it
+exposes, not only the monetary ones.
 
 ## Test 4 — fiscal multipliers gated against published ranges (slow gate)
 
@@ -145,6 +240,60 @@ configuration; policy switches shared with `scripts/scenarios.py`.
 
 The bands gate on economics, not on reproducing the exact decimals (bit-level
 reproduction is Tests 1–2).
+
+### The full purchases grid
+
+Quoting 0.72 (year 1, active rule) next to 0.90 (year 2, pegged) compares two
+different experiments. The whole grid, recomputed 2026-08 on the same
+sustained +1%-of-GDP `egfe` experiment, is the informative object:
+
+| monetary rule | year 1 | year 2 | year 3 | rff dev, yr 1 |
+|---|---|---|---|---|
+| inertial Taylor (`dmpintay=1`) | 0.725 | 0.643 | 0.458 | +0.23 pp |
+| non-inertial Taylor (`dmptay=1`) | 0.596 | 0.417 | 0.306 | +0.59 pp |
+| funds rate pegged | 0.769 | 0.905 | 1.010 | 0.000 pp |
+
+Under an active rule the multiplier **decays** as policy leans against the
+stimulus, and decays faster under the non-inertial rule because that rule
+raises the funds rate 0.59pp in year 1 against 0.23pp for the inertial one.
+Under a peg it **builds** towards 1. This ordering is now gated
+(`test_purchases_multiplier_grid_is_ordered_as_theory_requires`).
+
+Two independent implementations of the peg — `dmpex=1` with `rfffix` held on
+the baseline path, and `exogenize(['rff'])` — give identical multipliers to
+four decimals, which cross-checks both closures.
+
+#### Hazard: policy switches must be set *before* `init_trac`
+
+A peg is only a peg if the switches are in the data when the tracking
+residuals are computed, and if the deviation is taken against a baseline that
+was itself solved under the peg. Flipping `dmpintay`/`dmpex` on the *shocked*
+frame after `init_trac`, and then deviating against the Taylor-rule baseline,
+silently produces a run that is **not** pegged:
+
+| peg applied | max &#124;Δrff&#124;, quarters 1-8 | yr-1 mult | yr-2 mult |
+|---|---|---|---|
+| before `init_trac` (correct) | **0.000e+00** | 0.769 | 0.904 |
+| after `init_trac`, shocked frame only | 1.23e-01 | 0.792 | **0.994** |
+
+The mechanism: at the LONGBASE baseline the rule's own value `rffintay`
+exceeds the actual funds rate `rff` by 0.07–0.12pp, and with `dmpintay=1` at
+tracking time that wedge is absorbed into the `rff` block's add-factor. Flip to
+`dmpex=1` afterwards and the wedge is still subtracted, so `rff` settles
+0.07–0.12pp *below* its own `rfffix` target — an unintended monetary easing
+stacked on top of the fiscal stimulus, which inflates the multiplier by ~0.09.
+
+The tell is cheap and should be asserted in any pegged experiment:
+`(sim['rff'] - base['rff']).abs().max()` must be 0, and so must
+`(sim['rff'] - data['rfffix']).abs().max()`.
+
+The **0.99** figure previously quoted in `tests/test_multipliers.py` for the
+year-2 pegged multiplier was stale; the recomputed value is 0.90 (0.99 is
+close to the year-*3* value, 1.01). The gate itself was always 0.8–1.2 and
+always passed, so nothing was mis-gated — only mis-documented. This file
+already said 0.90.
+
+Reproduce with `pytest -m slow tests/test_multipliers.py`.
 
 ## LONGBASE vs the 2026 outturns (report, not a gate)
 

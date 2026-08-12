@@ -82,7 +82,7 @@ class Frbus:
         self.endo_names = [e for e in self._orig_endo_names if e not in self._exoglist]
         self._lexed_eqs = [
             eq
-            for eq, endo in zip(self._orig_lexed_eqs, self._orig_endo_names, strict=False)
+            for eq, endo in zip(self._orig_lexed_eqs, self._orig_endo_names, strict=True)
             if endo not in self._exoglist
         ]
         self.exo_names = self._orig_exo_names + sorted(self._exoglist)
@@ -90,6 +90,21 @@ class Frbus:
 
     def _ensure_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         """Return a copy of ``data`` with zero-filled _aerr/_trac columns added."""
+        # A non-numeric column makes DataFrame.to_numpy() return an object
+        # array; the solve then runs on Python objects and silently returns an
+        # object-dtype frame, so downstream comparisons and .abs() misbehave.
+        # Fail loudly instead of producing a plausible-looking wrong answer.
+        bad = [
+            str(col)
+            for col, dtype in data.dtypes.items()
+            if not pd.api.types.is_numeric_dtype(dtype)
+        ]
+        if bad:
+            raise FrbusError(
+                "input data must be entirely numeric; non-numeric columns: "
+                f"{bad[:10]}{' ...' if len(bad) > 10 else ''}. Convert with "
+                "DataFrame.astype(float) (frbus.load_data does this for you)."
+            )
         data = data.copy()
         missing = [
             name
@@ -131,9 +146,20 @@ class Frbus:
 
     @staticmethod
     def _period_idxs(start, end, data: pd.DataFrame) -> list[int]:
-        periods = pd.period_range(start, end, freq="Q")
+        start_p, end_p = pd.Period(start, freq="Q"), pd.Period(end, freq="Q")
+        if end_p < start_p:
+            raise ValueError(
+                f"end ({end_p}) precedes start ({start_p}); the simulation "
+                "window is inclusive and must run forwards"
+            )
         index = list(data.index)
-        return list(range(index.index(periods[0]), index.index(periods[-1]) + 1))
+        for label, period in (("start", start_p), ("end", end_p)):
+            if period not in index:
+                raise ValueError(
+                    f"{label} ({period}) is outside the data index, which runs "
+                    f"{index[0]}..{index[-1]}"
+                )
+        return list(range(index.index(start_p), index.index(end_p) + 1))
 
     # ------------------------------------------------------------------- api
 

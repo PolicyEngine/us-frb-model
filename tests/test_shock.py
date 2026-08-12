@@ -155,3 +155,42 @@ def test_monetary_irf_economic_sanity(shock_sim):
     assert 3 <= trough_q <= 15, f"xgdp trough at quarter {trough_q}, expected 3-15"
     # Output must be (weakly) below baseline throughout the tightening.
     assert gdp_pct.max() < 0.05, f"xgdp rises {gdp_pct.max():.3f}% above baseline"
+
+
+def test_sustained_add_factor_shocks_compound(model, longbase):
+    """Holding an add-error for N quarters is NOT an N-quarter level shock.
+
+    This is the single most misreadable thing about the add-factor interface,
+    so it is pinned here rather than left to prose. ``rffintay_aerr`` is an
+    add-error on the *inertial* Taylor rule, which carries 0.85 of last
+    quarter's funds rate forward. Adding +1.0 in each of four quarters
+    therefore does not hold the funds rate 100bp above baseline for a year --
+    the impulses accumulate on top of that persistence and the peak deviation
+    is close to +3pp, with an output cost to match.
+
+    Any wrapper exposing a ``periods`` argument must document this; a caller
+    who reads "the shock is held for 4 periods" and expects a sustained
+    +100bp will overstate the tightening roughly threefold.
+    """
+    data = longbase.copy()
+    scenarios.set_policy("monetary", data, START, END)
+    base = model.init_trac(START, END, data)
+
+    peaks = {}
+    for n in (1, 4):
+        shocked = base.copy()
+        shocked.loc[START : START + n - 1, "rffintay_aerr"] += 1.0
+        sim = model.solve(START, END, shocked)
+        rff = sim.loc[START:END, "rff"] - base.loc[START:END, "rff"]
+        gdp = 100 * (sim.loc[START:END, "xgdp"] / base.loc[START:END, "xgdp"] - 1)
+        peaks[n] = (rff.max(), gdp.min())
+
+    # A single impulse is the honest "100bp shock": peak ~= the shock itself.
+    assert 0.95 < peaks[1][0] < 1.05, f"periods=1 rff peak {peaks[1][0]:.3f}pp"
+    # Four impulses peak near +3pp, NOT +1pp (observed 2.971pp).
+    assert 2.7 < peaks[4][0] < 3.3, f"periods=4 rff peak {peaks[4][0]:.3f}pp"
+    assert peaks[4][0] > 2.5 * peaks[1][0], "stacking must be visibly nonlinear in N"
+    # ... and the output cost scales with it (observed -0.551% vs -2.082%).
+    assert peaks[4][1] < 2.5 * peaks[1][1], (
+        f"periods=4 xgdp trough {peaks[4][1]:.3f}% vs periods=1 {peaks[1][1]:.3f}%"
+    )
