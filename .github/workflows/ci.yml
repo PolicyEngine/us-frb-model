@@ -33,7 +33,13 @@ jobs:
   #   * tracking invariant: baseline reproduces LONGBASE to < 1e-8 abs
   #   * cross-validation:   matches the Fed's pyfrbus to < 1e-6 abs and rel
   #   * economic sanity:    monetary tightening IRF inside a documented band
+  #   * fiscal multipliers: inside published ranges
   # See VALIDATION.md for the derivation of each tolerance.
+  #
+  # NOTE on the tracking invariant: it is an add-factor identity and passes on
+  # arbitrary data (tests/test_tracking.py pins this). It gates the software,
+  # not the economics -- the cross-validation and multiplier steps below are
+  # the substantive gates.
   correctness-gates:
     runs-on: ubuntu-latest
     steps:
@@ -53,6 +59,11 @@ jobs:
         run: >-
           uv run pytest -q --no-header -rA
           tests/test_shock.py::test_monetary_irf_economic_sanity
+      # Marked `slow`, but the module runs in ~1s, so there is no reason to
+      # leave the only gate on the model's headline economic properties to a
+      # weekly job.
+      - name: Gate - fiscal multipliers inside published ranges
+        run: uv run pytest -q --no-header -rA -m slow tests/test_multipliers.py
 
   # Regenerates the cross-validation reference by actually running the Fed's
   # pyfrbus (vendor/pyfrbus_package, patched copy in a throwaway py3.11 venv)
