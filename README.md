@@ -57,8 +57,11 @@ A runnable version is in `examples/monetary_policy_shock.py`.
 - `Frbus(path)`, `.init_trac(start, end, data)`, `.solve(start, end, data)`,
   `.exogenize([...])` — mirroring the essentials of pyfrbus's `Frbus` class.
 - **Not implemented:** MCE (rational-expectations) equation variants —
-  `Frbus(path, mce=...)` raises `NotImplementedError`. `mcontrol` and
-  stochastic simulations are also out of scope.
+  `Frbus(path, mce=...)` raises `NotImplementedError`. `mcontrol` is also
+  out of scope.
+- Stochastic simulation: `Frbus.stochsim()` and `.stochsim_bands()`
+  (seeded residual bootstrap, `src/frbus/uncertainty.py`) give percentile
+  bands around a deterministic solve.
 
 ## Validation
 
