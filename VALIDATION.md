@@ -311,14 +311,20 @@ outturn:
 | 2026Q2 | real GDP growth, annualized (xgdp / GDPC1) | 2.41 | 1.50 | +0.91 |
 | 2026Q1 | unemployment rate (lur / UNRATE) | 4.46 | 4.33 | +0.12 |
 | 2026Q2 | unemployment rate (lur / UNRATE) | 4.44 | 4.27 | +0.17 |
-| 2026Q1 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 4.42 | −1.69 |
-| 2026Q2 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 3.42 | −0.69 |
+| 2026Q1 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.77 | 4.42 | −1.65 |
+| 2026Q2 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.76 | 3.42 | −0.65 |
+
+Both sides of every growth row are annualized compounded q/q rates. The core
+PCE rows were first published as −1.69/−0.69 by comparing `picxfe` itself,
+which model.xml defines as `400·dlog(pcxfe)` (a log rate), against the
+compounded FRED rate; the LONGBASE side now compounds the `pcxfe` level, as
+the GDP row always did (corrected 2026-11-05).
 | 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
 | 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
 
 Reading: activity and the funds rate were close (GDP growth overshot by
 0.3–0.9pp, unemployment by ~0.15pp), but the baseline substantially
-underprojected core PCE inflation, by 1.7pp in 2026Q1 and 0.7pp in 2026Q2.
+underprojected core PCE inflation, by 1.65pp in 2026Q1 and 0.65pp in 2026Q2.
 This is a property of the Fed's baseline data, not of this implementation, so
 it is **deliberately not gated**: the scheduled `longbase-backtest` CI job
 re-runs the comparison against fresh FRED data with `continue-on-error`, and
