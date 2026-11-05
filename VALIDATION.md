@@ -313,14 +313,14 @@ outturn:
 | 2026Q2 | unemployment rate (lur / UNRATE) | 4.44 | 4.27 | +0.17 |
 | 2026Q1 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.77 | 4.42 | −1.65 |
 | 2026Q2 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.76 | 3.42 | −0.65 |
+| 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
+| 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
 
 Both sides of every growth row are annualized compounded q/q rates. The core
 PCE rows were first published as −1.69/−0.69 by comparing `picxfe` itself,
 which model.xml defines as `400·dlog(pcxfe)` (a log rate), against the
 compounded FRED rate; the LONGBASE side now compounds the `pcxfe` level, as
 the GDP row always did (corrected 2026-11-05).
-| 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
-| 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
 
 Reading: activity and the funds rate were close (GDP growth overshot by
 0.3–0.9pp, unemployment by ~0.15pp), but the baseline substantially
