@@ -296,8 +296,8 @@ output gap trough −0.50 (VAR), −0.19 (mcap), −0.19 (mcap+wp); core PCE tro
 −0.034, −0.018, −0.009. Purchases multiplier (Taylor rule, `dfpsrp=1`), year 1/year 2: 0.725/0.643 (VAR),
 0.774/0.696 (mcap), 0.778/0.707 (mcap+wp). On this closure MCE adds ~0.05 in year 1, a fraction of
 the gap to the Coenen FRB-US line in section 4 (≈0.95); MCE on the matched
-closure was not run. The macro site says so: the
-FRB/US landing, methodology and validation pages all state "VAR expectations"
-and that MCE and forward guidance are out of scope (PolicyEngine/macro
+closure was not run. The macro site states the mode: the FRB/US landing,
+methodology and validation pages all say "VAR expectations" and that MCE and
+forward guidance are out of scope; the second half is now out of date for MCE (PolicyEngine/macro
 `frb-us/index.html`, `frb-us/methodology/index.html` line 295,
 `frb-us/validation/index.html` lines 268–269, at commit 153cf41).
