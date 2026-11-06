@@ -10,12 +10,17 @@
 # when the stacked system is first set up; a fresh Frbus is built per run, so
 # the terminals are LONGBASE after END, which is what this implementation reads.
 #
-# Usage: generate_vendor_mce_reference.sh OUTPUT_CSV MCE
-#   MCE is one of mcap, wp, mcap+wp, all.
+# Usage: generate_vendor_mce_reference.sh OUTPUT_CSV MCE [XTOL]
+#   MCE is one of mcap, wp, mcap+wp, all. XTOL (Newton step tolerance) defaults
+#   to 1e-8. Under mce="wp" the vendor's Newton step stalls at ~1.3e-8 (residual
+#   already at the floor) and raises after maxiter=50, so CI passes 1e-7 for wp;
+#   the same stall is why this implementation also stops on a residual test
+#   (ftol, src/frbus/solver.py).
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$1"
 MCE="$2"
+XTOL="${3:-1e-8}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -61,7 +66,7 @@ uv venv "$WORK/venv" -p 3.11
 uv pip install -p "$WORK/venv/bin/python" "$WORK/pyfrbus_ref" "pandas==1.5.3" "numpy<2"
 
 cd "$REPO"
-OUT="$OUT" MCE="$MCE" "$WORK/venv/bin/python" - <<'EOF'
+OUT="$OUT" MCE="$MCE" XTOL="$XTOL" "$WORK/venv/bin/python" - <<'EOF'
 import os
 import sys
 import time
@@ -81,8 +86,8 @@ set_policy("monetary", data, start, end)
 t0 = time.time()
 with_adds = model.init_trac(start, end, data)
 apply_shock("monetary", with_adds, start, end)
-sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": 1e-8})
+sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": float(os.environ["XTOL"])})
 out = os.environ["OUT"]
 sim.loc[start:end, model.orig_endo_names].to_csv(out)
-print(f"wrote {out} (mce={mce}, {time.time() - t0:.0f}s)")
+print(f"wrote {out} (mce={mce}, xtol={os.environ['XTOL']}, {time.time() - t0:.0f}s)")
 EOF
