@@ -1,10 +1,11 @@
 """Model-consistent expectations (MCE): opt-in stacked-time solve.
 
 The hard gate (slow-marked, run as a CI correctness-gate step) compares the
-100bp monetary shock under ``mce="mcap"`` and ``mce="mcap+wp"`` against
+100bp monetary shock under each of ``mce="mcap"``, ``"wp"``, ``"mcap+wp"`` and
+``"all"`` against
 committed solutions from the Board's own pyfrbus on the identical experiment
 (scripts/generate_vendor_mce_reference.sh), at the same 1e-6 tolerance as the
-VAR cross-validation gate; observed agreement is ~2e-9.
+VAR cross-validation gate; observed agreement is 1e-9 to 1.5e-8.
 """
 
 import os
@@ -121,7 +122,7 @@ def _solve_monetary(mode: str, longbase) -> pd.DataFrame:
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("mode", ["mcap", "mcap+wp"])
+@pytest.mark.parametrize("mode", ["mcap", "wp", "mcap+wp", "all"])
 def test_mce_matches_vendor_pyfrbus(mode, longbase):
     """Hard gate: full 284 x 20 vector against the Board's pyfrbus."""
     fresh = os.environ.get("FRESH_VENDOR_MCE_CSV")
