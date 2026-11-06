@@ -51,6 +51,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 import expectations_comparison as ec  # noqa: E402
+
 from frbus import load_data  # noqa: E402
 
 # Coefficients of the November 2018 model (Jan 2019 package) that differ from
