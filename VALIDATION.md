@@ -255,6 +255,15 @@ exposes, not only the monetary ones.
 
 ## Test 4 — fiscal multipliers gated against published ranges (slow gate)
 
+Sources, exact table/figure numbers and like-for-like conversions for every
+band below are in [docs/benchmarks.md](docs/benchmarks.md). Two band-source
+labels in the table were inaccurate and are corrected there: Whalen &
+Reichling give no "central" tax-cut multiplier of 0.3 (0.3 is the low end of
+the two-year lower- and middle-income row, in the Fed-not-tightening regime),
+and Coenen et al. publish their multipliers as charts, not a table.
+`tests/test_benchmarks.py` adds gates on CBO-table-derived bands, the fiscal
+closure switch, and the 2022–23 tightening episode (section 4 of that file).
+
 The fiscal-multiplier properties previously quoted for this implementation
 were computed once and never re-checked. `tests/test_multipliers.py` now
 recomputes them on every scheduled-validation run (marked `slow`; full
@@ -383,11 +392,15 @@ Results (2026-11-06):
   should be quoted with it.
 * **Transfers** have a year-1 multiplier of 0.28 and a year-2 multiplier of
   0.30, linear and symmetric. This is below purchases in both years, which is
-  gated. It is also below the low end of CBO's range for transfers to persons
-  (about 0.4–2.1 in its ARRA reports). That range assumes targeted, high-MPC
-  recipients and accommodative monetary policy. FRB/US transfers feed
-  permanent-income consumption against an active Taylor rule. The CBO range is
-  not vendored and is cited for orientation only.
+  gated. CBO's 0.4–2.1 for transfers to individuals (Feb 2015, Table 3) is a
+  Fed-not-tightening range, so comparing it with this active-rule 0.28 mixes
+  regimes. On matched comparisons the model is still below: 0.315 with the
+  funds rate pegged and the fiscal rule off, against 0.4–2.1; and 0.28 against
+  0.36–1.52 derived from CBO's typical-Fed-response path. See
+  [docs/benchmarks.md](docs/benchmarks.md), which sources every benchmark to
+  a table and page, converts CBO's quarterly path to this repo's
+  sustained-shock definition, and shows the fiscal closure explains only
+  ~0.02 of the year-1 gap.
 * **Tax cuts** have a year-1 multiplier of 0.22 and a year-2 multiplier of
   0.32 at every size from 1 to 4pp, linear and symmetric. These match Test 4.
 * **Fiscal reversion.** After an 8-quarter purchases or transfers shock ends,

@@ -70,6 +70,10 @@ jobs:
         run: uv run pytest -q --no-header -rA -m slow tests/test_scenario_sweep.py
       - name: Gate - sweep checks re-run on the committed paths (and shown to fail)
         run: uv run pytest -q --no-header -rA tests/test_scenario_sweep_bounds.py
+      # ~16 solves, a few seconds: CBO-table-derived multiplier bands, the
+      # fiscal-closure switch, and the 2022-23 tightening episode.
+      - name: Gate - benchmarks and the 2022-23 episode
+        run: uv run pytest -q --no-header -rA -m slow tests/test_benchmarks.py
 
   # Regenerates the cross-validation reference by actually running the Fed's
   # pyfrbus (vendor/pyfrbus_package, patched copy in a throwaway py3.11 venv)

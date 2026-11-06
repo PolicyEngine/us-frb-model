@@ -1,0 +1,194 @@
+[
+  {
+    "instrument": "purchases",
+    "monetary": "taylor",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.7249250874409041,
+      "2": 0.6428320208944929
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.7249623975965847,
+      "2": 0.6430807870012212
+    },
+    "drff_year1_pp": 0.23357142561041644,
+    "dtrp_year1_pp": 0.2528748076582814,
+    "dtrp_year2_pp": 0.6838980457062889
+  },
+  {
+    "instrument": "purchases",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.7477779863144023,
+      "2": 0.7353312806235447
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.7476976723497064,
+      "2": 0.7354526861591326
+    },
+    "drff_year1_pp": 0.23870300703899072,
+    "dtrp_year1_pp": 0.08685391127740694,
+    "dtrp_year2_pp": 0.16805360877123407
+  },
+  {
+    "instrument": "purchases",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.7692354502734388,
+      "2": 0.9044759838621881
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.7690207655675574,
+      "2": 0.9042395545673654
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": 0.2552988810114114,
+    "dtrp_year2_pp": 0.7029315893113203
+  },
+  {
+    "instrument": "purchases",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.7923953551278697,
+      "2": 1.005376865699299
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.7920605509260437,
+      "2": 1.0049837914808457
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": 0.09046854296804949,
+    "dtrp_year2_pp": 0.20105833191234254
+  },
+  {
+    "instrument": "transfers",
+    "monetary": "taylor",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.2777012150362206,
+      "2": 0.30278537168282427
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2725251880824897,
+      "2": 0.2899644468257301
+    },
+    "drff_year1_pp": 0.08623213486816561,
+    "dtrp_year1_pp": 0.18661489136974074,
+    "dtrp_year2_pp": 0.569862988632408
+  },
+  {
+    "instrument": "transfers",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.298843422114511,
+      "2": 0.39545484130524483
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2929345054073551,
+      "2": 0.3756321508459781
+    },
+    "drff_year1_pp": 0.09082687123578059,
+    "dtrp_year1_pp": 0.03313565030827054,
+    "dtrp_year2_pp": 0.07549377104985738
+  },
+  {
+    "instrument": "transfers",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.2939209636057904,
+      "2": 0.40863664888811757
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.28820291747503335,
+      "2": 0.3883283703689733
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": 0.18745664551637065,
+    "dtrp_year2_pp": 0.5765571320911961
+  },
+  {
+    "instrument": "transfers",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.31544284136552225,
+      "2": 0.5120261025949459
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.3089553727468275,
+      "2": 0.4824385326313019
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": 0.03443255845551191,
+    "dtrp_year2_pp": 0.08827909965466729
+  },
+  {
+    "instrument": "taxes",
+    "monetary": "taylor",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.2239447592854719,
+      "2": 0.3191342197275368
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2236817244303968,
+      "2": 0.3190206865702705
+    },
+    "drff_year1_pp": 0.06711672901395838,
+    "dtrp_year1_pp": -1.4430130143783624,
+    "dtrp_year2_pp": -1.4254754628187907
+  },
+  {
+    "instrument": "taxes",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.2239447592854719,
+      "2": 0.3191342197275368
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2236817244303968,
+      "2": 0.3190206865702705
+    },
+    "drff_year1_pp": 0.06711672901395838,
+    "dtrp_year1_pp": -1.4430130143783624,
+    "dtrp_year2_pp": -1.4254754628187907
+  },
+  {
+    "instrument": "taxes",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.23539661582571872,
+      "2": 0.4031899547401949
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2350660062113541,
+      "2": 0.402889831611547
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": -1.4430130143783624,
+    "dtrp_year2_pp": -1.4254754628187907
+  },
+  {
+    "instrument": "taxes",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.23539661582571872,
+      "2": 0.4031899547401949
+    },
+    "xgdp_pct_year_mean": {
+      "1": 0.2350660062113541,
+      "2": 0.402889831611547
+    },
+    "drff_year1_pp": 0.0,
+    "dtrp_year1_pp": -1.4430130143783624,
+    "dtrp_year2_pp": -1.4254754628187907
+  }
+]
