@@ -9,7 +9,7 @@ series and writes a small JSON + markdown report:
     --------  ---------  ------------------------------------------------
     xgdp      GDPC1      real GDP growth, annualized q/q % from levels
     lur       UNRATE     unemployment rate, quarterly average of months
-    picxfe    PCEPILFE   core PCE inflation, annualized compounded q/q % of
+    pcxfe     PCEPILFE   core PCE inflation, annualized compounded q/q % of
                          the quarterly-average index (LONGBASE side from the
                          pcxfe level, not picxfe, which is a log rate)
     rff       FEDFUNDS   federal funds rate, quarterly average of months
@@ -53,7 +53,10 @@ QUARTERS = [pd.Period("2026Q1"), pd.Period("2026Q2")]
 SERIES = {
     "GDPC1": {"variable": "xgdp", "concept": "real GDP growth (annualized q/q %)"},
     "UNRATE": {"variable": "lur", "concept": "unemployment rate (%, quarterly avg)"},
-    "PCEPILFE": {"variable": "picxfe", "concept": "core PCE inflation (annualized q/q %)"},
+    "PCEPILFE": {
+        "variable": "pcxfe",
+        "concept": "core PCE inflation (annualized compounded q/q % of pcxfe)",
+    },
     "FEDFUNDS": {"variable": "rff", "concept": "federal funds rate (%, quarterly avg)"},
 }
 

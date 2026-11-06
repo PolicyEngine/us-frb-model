@@ -45,8 +45,8 @@
     {
       "quarter": "2026Q1",
       "fred_id": "PCEPILFE",
-      "variable": "picxfe",
-      "concept": "core PCE inflation (annualized q/q %)",
+      "variable": "pcxfe",
+      "concept": "core PCE inflation (annualized compounded q/q % of pcxfe)",
       "longbase": 2.77,
       "outturn": 4.422,
       "error": -1.652
@@ -54,8 +54,8 @@
     {
       "quarter": "2026Q2",
       "fred_id": "PCEPILFE",
-      "variable": "picxfe",
-      "concept": "core PCE inflation (annualized q/q %)",
+      "variable": "pcxfe",
+      "concept": "core PCE inflation (annualized compounded q/q % of pcxfe)",
       "longbase": 2.764,
       "outturn": 3.419,
       "error": -0.654
