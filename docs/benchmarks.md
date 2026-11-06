@@ -111,6 +111,16 @@ FRB-US was run under, so none is assumed here.
   approx. 0.7 (QUEST) to 1.1 (BoC-GEM). FRB-US has the **largest** general-
   transfers multiplier of the six in Figs. 7 and 28.
 
+**Board documentation.** The Board's own published FRB/US documentation
+contains no fiscal-multiplier experiment. The 2014 FEDS Note ("The FRB/US
+Model: A Tool for Macroeconomic Policy Analysis", 3 April 2014,
+<https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html>)
+has two figures: funds-rate and MFP shocks under VAR vs MCE (Fig. 1) and
+stochastic simulations (Fig. 2). It mentions fiscal rules only as a design
+feature. The vendored `FRBUS_Simulation_Basics.pdf` (§6) documents the
+fiscal switches `dfpex`/`dfpsrp`/`dfpdbt` but reports no multipliers. So
+Coenen et al. is the only published source of FRB-US fiscal multipliers found.
+
 ## 2. Converting the published numbers to this repo's definition
 
 This repo's multiplier (tests/test_multipliers.py, scripts/scenario_sweep.py)
@@ -170,8 +180,13 @@ site's numbers use; "exog" switches it off for the whole window.
    +0.68pp in year 2; with the rule off, +0.09 / +0.17). Switching it off
    moves the year-1 multipliers by only +0.02 (purchases 0.725 → 0.748,
    transfers 0.278 → 0.299); year 2 moves more (0.643 → 0.735; 0.303 → 0.395).
-   Coenen et al. hold taxes fixed during the stimulus, so the year-2
-   comparisons should use the "exog" rows, but the year-1 gaps remain.
+   Coenen et al. hold taxes fixed during the stimulus, so the matched rows are
+   "exog". Year 1: purchases 0.748 vs approx. 0.95 and transfers 0.299 vs
+   approx. 0.48, gaps of ~0.2 that are larger than the ±0.1 chart-reading
+   error. Year 2: purchases 0.735 vs approx. 0.8 and transfers 0.395 vs
+   approx. 0.44, gaps of ~0.05–0.07 that sit inside the reading error. **The
+   year-1 shortfall is the finding; the year-2 one mostly dissolves once the
+   closure is matched.**
 3. **Expectations mode and model vintage.** This repo implements VAR
    expectations only (`Frbus(mce=...)` raises `NotImplementedError`; see
    `docs/mce-feasibility.md`). The Coenen et al. runs used the 2009-10
