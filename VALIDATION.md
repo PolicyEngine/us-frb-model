@@ -182,9 +182,11 @@ Two internal-coherence cross-checks on the same run (recomputed 2026-08):
   is the expected closed-loop behaviour, not drift.
 
 The inflation response is small in absolute terms (−0.034pp at trough for a
-100bp shock). That is a known property of FRB/US under *VAR* expectations —
-the price block is highly inertial and backward-looking — and not a defect of
-this implementation; but it does mean the implied sacrifice ratio is high, and
+100bp shock). The Board publishes the same response for the current model
+(Laforte 2018, −0.0345pp; table below). Under *VAR* expectations nearly all of
+it comes through the reduced-form forecasts `zpicxfe`/`zpieci`, which
+carry 0.98 of the weight in the NKPCs (`docs/inflation-transmission.md`). It
+is not a defect of this implementation; but it does mean the implied sacrifice ratio is high, and
 scenarios whose conclusion turns on the inflation response should say so.
 
 ### Against the Fed's published FRB/US simulations

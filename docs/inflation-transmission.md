@@ -25,7 +25,7 @@ on 6 Nov 2026. The shock is in 2020Q1.
 
 | 100bp ping, VAR expectations | this repo (2026Q1 shock) | Board, new (post-2018) model | Board, previous model |
 |---|---|---|---|
-| core PCE inflation, trough | **−0.034pp, quarter 8** | **−0.0345pp, quarter 8 (2021Q4)** | −0.0617pp, quarter 6 |
+| core PCE inflation (annualised q/q `picxfe`; the Board's table gives no concept, and the quarter-8 timing matches q/q, not 4q, whose trough here is quarter 10), trough | **−0.034pp, quarter 8** | **−0.0345pp, quarter 8 (2021Q4)** | −0.0617pp, quarter 6 |
 | output gap, trough | −0.50pp, quarter 7 | −0.486pp, quarter 8 | −0.459pp, quarter 9 |
 | unemployment, peak | +0.26pp, quarter 8 | +0.219pp, quarter 8 | +0.215pp, quarter 9 |
 | funds rate, impact / undershoot | +1.00 / −0.26pp | +1.00 / −0.27pp | +0.95 / −0.30pp |
