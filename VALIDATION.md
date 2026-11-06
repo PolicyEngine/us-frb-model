@@ -461,6 +461,53 @@ re-runs the comparison against fresh FRED data with `continue-on-error`, and
 only the report machinery itself is gated (hermetically, on the committed
 snapshot). The generated report is committed under `backtests/`.
 
+## Test 5 — model-consistent expectations (opt-in) against pyfrbus and Laforte (2018)
+
+`Frbus(path, mce=...)` swaps in the `<mce_equation>` variants of the selected
+groups (`mcap`: 12 financial-market expectations; `wp`: `zpicxfe`, `zpieci`;
+`all` adds the 11 `mcother` ones) and solves the window as one stacked
+system. Leads past `end` read the input data (pyfrbus's terminal condition).
+Newton stops on the step 2-norm (`xtol`) or, for MCE only, on the stacked
+residual 2-norm (`ftol`, default 1e-8). The second rule is needed because on
+80- and 160-quarter windows the residual reaches ~1.2e-9 by the third
+iteration while the step norm stalls at a round-off floor above `xtol=1e-8`.
+
+**Against the Board's pyfrbus (hard gate).** 100bp shock (`rffintay_aerr` +1
+in 2026Q1, demo fiscal configuration), 2026Q1–2030Q4, all 284 endogenous
+variables. Committed references come from
+`scripts/generate_vendor_mce_reference.sh` (the Board's pyfrbus with
+`mce=...`, Newton at `xtol=1e-8`), and the `vendor-mce-reference` CI job
+regenerates them fresh on every PR.
+
+| mode | max abs diff | max rel diff | worst cell |
+|---|---|---|---|
+| mcap | 9.9e-10 | 1.5e-10 | wpsn 2030Q1 |
+| mcap+wp | 1.7e-9 | 2.6e-10 | wpsn 2030Q3 |
+
+Gate tolerance 1e-6 abs and rel, the same as Test 2.
+
+**Against the Board's published MCE ping (slow gate).** Laforte (2018), FEDS
+Notes, Figure 11, "New Version" (MCE for the financial and wage-price
+sectors, footnote 3, so `mcap+wp`); values in
+`docs/data/laforte2018_fig11_mce_ping.json`. Ours: same shock from 2040Q1 with
+the `programs/pings.prg` settings over 160 quarters.
+
+| | 10y impact | output gap trough | unemployment peak | core PCE trough | rff q2 | rff q4 |
+|---|---|---|---|---|---|---|
+| Laforte 2018 | +0.156 | −0.186 (q6) | +0.098 (q4) | −0.0077 (q6) | 0.837 | 0.561 |
+| ours, mcap+wp | +0.154 | −0.180 (q5) | +0.117 (q6) | −0.0112 (q7) | 0.837 | 0.560 |
+| ours, VAR | +0.332 | −0.451 (q7) | +0.272 (q8) | −0.0343 (q8) | 0.825 | 0.503 |
+
+The financial block and the output gap match closely. Unemployment (1.2×)
+and core inflation (1.45×) are larger than published. The note uses the 2018
+model vintage and the vendored model is later, so a gap of this size in the
+wage-price outcomes is not evidence of an error; the pyfrbus match above is
+the test of the implementation. Gate bands: rff q1–q8 and 10y impact within
+0.01pp, output gap trough within 10%, unemployment peak within 25%, core PCE
+trough within a factor of 2.
+
+VAR versus MCE on the headline experiments: `results/expectations_comparison.md`.
+
 ## How this is enforced in CI
 
 `.github/workflows/ci.yml` gates every push and pull request on all three
@@ -487,5 +534,10 @@ additionally fails if `tests/data/` is modified in place).
   `rtol=5e-4`. The vendor decomposes each period into recursive/simultaneous
   blocks; both approaches solve the same F(x)=0, so solutions agree up to
   solver tolerance, as the tables show.
-- MCE (rational expectations) variants are not implemented
-  (`NotImplementedError`) and are excluded from validation.
+- MCE (opt-in, `Frbus(..., mce=...)`) is solved as one stacked-time system
+  over the window (`src/frbus/mce.py`); pyfrbus also stacks the window
+  (User Guide, "MCE Solver Algorithm") but duplicates the equation text per
+  period, while we compile each equation once in period-relative form and
+  place its Jacobian blocks for every period. Same equations, same unknowns,
+  same terminal condition (input data after `end`), so the same F(x)=0; see
+  "Test 5" for the agreement.
