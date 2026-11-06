@@ -83,6 +83,6 @@ with_adds = model.init_trac(start, end, data)
 apply_shock("monetary", with_adds, start, end)
 sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": 1e-8})
 out = os.environ["OUT"]
-sim.loc[start:end, model.endo_names].to_csv(out)
+sim.loc[start:end, model.orig_endo_names].to_csv(out)
 print(f"wrote {out} (mce={mce}, {time.time() - t0:.0f}s)")
 EOF
