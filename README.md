@@ -60,9 +60,15 @@ A runnable version is in `examples/monetary_policy_shock.py`.
   markets), `"wp"` (wage-price), `"mcap+wp"` or `"all"`, as in pyfrbus. The
   default stays VAR expectations. MCE solves stack the whole window in one
   sparse Newton solve (`src/frbus/mce.py`), with terminal values for leads
-  past `end` read from the input data; `ConvergenceError` if Newton does not
-  reach `xtol`/`rtol`. Gated against the Board's pyfrbus in `mcap` and
-  `mcap+wp` (tests/test_mce.py). `mcontrol` is out of scope.
+  past `end` read from the input data. Newton stops on the step (`xtol`) or,
+  for MCE only, on the stacked residual (`ftol`, 1e-8) followed by one more
+  Newton step; `ConvergenceError` otherwise. All four modes are gated against
+  the Board's pyfrbus on a 100bp shock, all 284 variables x 20 quarters, at
+  < 1e-6 (observed 1e-9 to 1.5e-8; tests/test_mce.py, VALIDATION.md Test 5). The
+  results in `results/expectations_comparison.md`,
+  `results/expectations_matched_closures.md` and
+  `results/episode_2022_tightening_mce_*.md` compare VAR and MCE.
+  `mcontrol` is out of scope.
 - Stochastic simulation: `Frbus.stochsim()` and `.stochsim_bands()`
   (seeded residual bootstrap, `src/frbus/uncertainty.py`) give percentile
   bands around a deterministic solve.

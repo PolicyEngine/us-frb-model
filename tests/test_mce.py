@@ -5,7 +5,7 @@ The hard gate (slow-marked, run as a CI correctness-gate step) compares the
 ``"all"`` against
 committed solutions from the Board's own pyfrbus on the identical experiment
 (scripts/generate_vendor_mce_reference.sh), at the same 1e-6 tolerance as the
-VAR cross-validation gate; observed agreement is ~2e-9.
+VAR cross-validation gate; observed agreement is 1e-9 to 1.5e-8.
 """
 
 import os

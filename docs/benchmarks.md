@@ -191,10 +191,11 @@ site's numbers use; "exog" switches it off for the whole window.
    expectations; MCE is opt-in (section 5 has the cross-mode numbers). The Coenen et al. runs used the 2009-10
    FRB-US, whose expectations mode the WP does not state, with a 40%
    hand-to-mouth share (their Table 1); the 2026 model's consumption block and
-   coefficients are different. On the Taylor/srp closure MCE raises the
-   year-1 purchases multiplier by only ~0.05 (0.725 to 0.774/0.778, section
-   5), which suggests the expectations mode is not the main source of the
-   ~0.2 gap; the vintage remains untested. The FRB-US lines are chart readings
+   coefficients are different. MCE raises the year-1 purchases multiplier
+   by ~0.05 on the matched no-accommodation closure (Taylor/exog: 0.748 to
+   0.800 under mcap+wp) and by ~0.09 under the peg (peg/exog: 0.792 to
+   0.884), section 5. That closes about a quarter of the ~0.2 gap, so the
+   expectations mode is not the main source; the vintage remains untested. The FRB-US lines are chart readings
    (±0.1), so a gap below ~0.1 would not be meaningful.
 4. **Horizon definition.** CBO's multipliers are cumulative over "several
    quarters" per dollar of a one-time outlay; ours are calendar-year ratios
@@ -295,8 +296,39 @@ and `results/expectations_comparison.md` compares the modes. 100bp shock:
 output gap trough −0.50 (VAR), −0.19 (mcap), −0.19 (mcap+wp); core PCE trough
 −0.034, −0.018, −0.009. Purchases multiplier (Taylor rule, `dfpsrp=1`), year 1/year 2: 0.725/0.643 (VAR),
 0.774/0.696 (mcap), 0.778/0.707 (mcap+wp). On this closure MCE adds ~0.05 in year 1, a fraction of
-the gap to the Coenen FRB-US line in section 4 (≈0.95); MCE on the matched
-closure was not run. The macro site states the mode: the FRB/US landing,
+the gap to the Coenen FRB-US line in section 4 (≈0.95).
+
+Matched closures (`scripts/expectations_comparison.py --matched`,
+`results/expectations_matched_closures.md`; closures over 2026Q1–2030Q4,
+LONGBASE settings after, 40-year window). Year 1 / year 2:
+
+| closure | VAR | mcap | mcap+wp | Coenen Fig. 25, FRB-US |
+|---|---|---|---|---|
+| Taylor, taxes exogenous | 0.748 / 0.735 | 0.796 / 0.789 | 0.800 / 0.800 | approx. 0.95 / 0.8 (no accommodation) |
+| peg, surplus rule | 0.769 / 0.904 | 0.836 / 0.899 | 0.835 / 0.891 | approx. 1.05 / 1.25 (2-year accommodation) |
+| peg, taxes exogenous | 0.792 / 1.005 | 0.882 / 1.074 | 0.884 / 1.075 | same |
+
+The VAR rows equal the section 4 rows (a check that the 40-year window does
+not change VAR answers). The peg here lasts five years, against Coenen's two,
+so the remaining peg shortfall is if anything understated. Under MCE the long
+rate falls in year 1 under the peg (−0.08 to −0.12pp) because agents know the
+funds rate is held while the stimulus raises inflation.
+
+2022–23 tightening under MCE (`scripts/episode_2022_tightening.py --mce`,
+`results/episode_2022_tightening_mce_*.md`). The window runs to 2065Q4 so the
+terminal condition does not bind on 2022–25; from 2026Q1 both runs use
+LONGBASE's own rule. Under MCE the counterfactual's agents know the whole
+funds-rate path: in A that rates stay at the floor through 2025, in B that
+the rule takes over in 2024. Mean four-quarter core PCE effect 2022–2024,
+A / B: −0.12 / −0.11pp (VAR), −0.17 / −0.10pp (mcap), −0.61 / −0.19pp
+(mcap+wp). Largest unemployment effect, A: +5.08pp (VAR, 2025Q4), +2.90pp
+(mcap+wp, 2024Q4). So MCE makes the 100bp-ping inflation response smaller
+(core trough −0.034 to −0.009) but makes this episode's inflation effect
+larger in A, because a known four-year peg is a large anticipated
+easing that the forward-looking wage-price block prices in at once. Both are
+far below Najjar and Shapiro's ~3pp. Running the episode on the 40-year
+window under VAR gives the 16-quarter numbers to < 1e-12
+(`--long-window`). The macro site states the mode: the FRB/US landing,
 methodology and validation pages all say "VAR expectations" and that MCE and
 forward guidance are out of scope; the second half is now out of date for MCE (PolicyEngine/macro
 `frb-us/index.html`, `frb-us/methodology/index.html` line 295,

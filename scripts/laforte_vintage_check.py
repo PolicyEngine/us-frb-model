@@ -22,7 +22,9 @@ ba01c0cd39380520...). Diffing its mods/model.xml against the vendored one
   the qecd/qeh trend-growth moving averages lengthened; the rffrule floor
   moved from @recode into rff; seven variables dropped.
 
-So the price-wage coefficients cannot explain the gap. This script re-runs
+So the price-wage coefficients cannot explain the gap. The 2018 baseline
+(LONGBASE of 28 Nov 2018) is archived only as an EViews .edb, so it is not
+used here. This script re-runs
 the Laforte ping (scripts/expectations_comparison.py set-up) with the
 coefficient changes reversed, and with the shock dated 2020Q1 (Laforte's
 dates) and 2030Q1 instead of 2040Q1, to see what does move the core trough.

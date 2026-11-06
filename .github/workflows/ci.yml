@@ -81,7 +81,7 @@ jobs:
       - name: Gate - inflation transmission and the episode vs pyfrbus
         run: uv run pytest -q --no-header -rA -m slow tests/test_inflation_transmission.py
       # Opt-in MCE (stacked-time) solve: mcap, wp, mcap+wp and all 100bp shock against
-      # committed pyfrbus solutions (< 1e-6; observed ~2e-9). A few seconds.
+      # committed pyfrbus solutions (< 1e-6; observed 1e-9 to 1.5e-8). A few seconds.
       - name: Gate - MCE solve vs committed pyfrbus reference
         run: uv run pytest -q --no-header -rA tests/test_mce.py
 
