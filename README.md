@@ -74,9 +74,21 @@ actually tells you:
   6.0e-9 abs / 4.9e-8 rel. For scale, the Board's own pyfrbus 1.0.0 and 1.1.1
   releases differ from *each other* by 1.3e-8, so this sits at the reference
   implementation's own noise floor.
-- **Fiscal multipliers** lie inside published ranges (purchases 0.72 in year 1
-  under the inertial Taylor rule, 0.90 in year 2 with the funds rate pegged),
-  and the full rule × horizon grid is ordered as theory requires.
+- **Fiscal multipliers.** Purchases and tax cuts lie inside the published
+  ranges in `VALIDATION.md` Test 4: purchases 0.72 in year 1 under the
+  inertial Taylor rule and 0.90 in year 2 with the funds rate pegged; tax cuts
+  0.22 in year 1. The rule × horizon grid is ordered as theory requires.
+  **The 0.72 is for a 1%-of-GDP rise and is size-dependent:** the same model
+  gives about 0.80 for small shocks and 0.90 for a 1%-of-GDP cut, because GDP
+  aggregates component growth in logs (issue #11). Transfers give 0.28 in year
+  1, below purchases and below the range usually quoted for transfers to
+  persons; that comparator is not vendored here.
+- **Monetary policy, against the Fed's own published runs.** For a 100bp
+  funds-rate shock the output-gap trough (−0.50pp) sits between the 2014 FEDS
+  Note (−0.4) and the 2013 price–wage note (≈ −0.53). Core inflation falls by
+  0.034pp at the trough, about 40% of the published −0.08pp, on both
+  inflation concepts. After a fiscal shock ends, output undershoots by about
+  45% of the peak as the funds rate comes back.
 - **Tracking invariant.** After `init_trac`, solving the baseline reproduces
   LONGBASE to 5.6e-17. **This is an identity, not a validation result** —
   `init_trac` defines the add-factors as minus the residuals at the input
@@ -86,13 +98,17 @@ actually tells you:
 
 Nothing here is a forecast evaluation. LONGBASE is the Board's illustrative
 baseline, not a Fed forecast, and no pseudo-out-of-sample accuracy of any kind
-is established for this model.
+is established for this model. The two-quarter LONGBASE backtest in
+`VALIDATION.md` is close on GDP growth, unemployment and the funds rate, and
+under-projected core PCE inflation (annualized q/q): 2.77% against 4.42% in
+2026Q1 (−1.65pp) and 2.76% against 3.42% in 2026Q2 (−0.65pp). That is a
+property of the Fed's baseline data, not of this implementation.
 
 ## Development
 
 ```bash
-pytest           # tests, including the tracking-invariant gate
-ruff check src tests examples
+uv run --extra dev pytest   # tests, including the tracking-invariant gate
+uv run --extra dev ruff check src tests examples
 ```
 
 ## License
