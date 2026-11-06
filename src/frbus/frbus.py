@@ -11,6 +11,9 @@ from frbus import equations, lexing, mce, runtime, solver, symbolic, uncertainty
 from frbus.exceptions import FrbusError, MissingDataError
 from frbus.parse import MCE_TYPES, ModelSpec, parse_model
 
+#: Default residual tolerance (2-norm over the stacked system) for MCE solves.
+MCE_FTOL = 1e-8
+
 
 class Frbus:
     """FRB/US model with VAR (default) or model-consistent expectations.
@@ -212,13 +215,19 @@ class Frbus:
         VAR mode solves period by period. MCE mode solves all periods at once
         (stacked time); Newton stops when the step 2-norm is below ``xtol``
         and raises :class:`~frbus.exceptions.ConvergenceError` if the residual
-        2-norm is then above ``rtol`` or ``maxiter`` is exceeded.
+        2-norm is then above ``rtol`` or ``maxiter`` is exceeded. MCE solves
+        also stop once the stacked residual 2-norm is below ``ftol``
+        (default ``MCE_FTOL`` = 1e-8): on long windows the step norm stalls at
+        a round-off floor above ``xtol`` (observed ~1e-6 at 160 quarters)
+        while the residual is already ~1e-9.
         """
         opts = solver.solver_defaults(options)
         data = self._setup(input_data)
         idxs = self._period_idxs(start, end, data)
         vals = data.to_numpy(copy=True)
         if self.mce is not None:
+            if opts["ftol"] is None:
+                opts["ftol"] = MCE_FTOL
             vals = self._stacked.solve(vals, np.array(idxs), solver.newton, opts)
             return pd.DataFrame(vals, index=data.index, columns=data.columns)
         vals = solver.solve_periods(idxs, vals, self._endo_idxs, self._feqs, self._fjac, opts)

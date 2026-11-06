@@ -17,6 +17,11 @@ DEFAULT_OPTIONS = {
     "maxiter": 100,
     "precond": True,
     "debug": False,
+    # Residual tolerance: also stop once the residual 2-norm falls below it.
+    # None (the VAR default) keeps the step-size test only. The MCE solve sets
+    # 1e-8 because on long stacked windows the Newton step stalls at a
+    # round-off floor above xtol while the residual is already ~1e-9.
+    "ftol": None,
 }
 
 
@@ -54,6 +59,7 @@ def newton(
     maxiter: int = options["maxiter"]
     precond: bool = options["precond"]
     debug: bool = options["debug"]
+    ftol: float | None = options.get("ftol")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -96,6 +102,8 @@ def newton(
         step = np.linalg.norm(delta)
         if np.isnan(step):
             raise ConvergenceError("Newton solver has diverged, no solution found.")
+        if ftol is not None and np.linalg.norm(fun_val) < ftol:
+            return guess
         if step < xtol:
             resid = np.linalg.norm(fun_val)
             if resid < rtol:
