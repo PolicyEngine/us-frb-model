@@ -1,0 +1,34 @@
+{
+  "source": {
+    "shock": "tests/data/vendor_shock_2026q1_2030q4.csv",
+    "baseline": "vendor/data_only_package/LONGBASE.TXT",
+    "experiment": "+1pp one-quarter add-factor to rffintay (2026Q1), inertial Taylor rule, VAR expectations, dfpdbt=0 dfpsrp=1"
+  },
+  "rff_impact": 1.0001,
+  "xgdp_trough_pct": {
+    "value": -0.5512,
+    "quarter": "2027Q4"
+  },
+  "xgap2_trough": {
+    "value": -0.5012,
+    "quarter": "2027Q3"
+  },
+  "lur_peak": {
+    "value": 0.2584,
+    "quarter": "2027Q4"
+  },
+  "picxfe_trough": {
+    "value": -0.0336,
+    "quarter": "2027Q4"
+  },
+  "core_pce_4q_trough": {
+    "value": -0.0341,
+    "quarter": "2028Q2"
+  },
+  "wage_bill_2027_pct": {
+    "pl_pct": -0.0758,
+    "lhp_pct": -0.5695,
+    "pl_plus_lhp": -0.6453,
+    "exact_product": -0.6449
+  }
+}

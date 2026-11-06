@@ -64,6 +64,12 @@ jobs:
       # weekly job.
       - name: Gate - fiscal multipliers inside published ranges
         run: uv run pytest -q --no-header -rA -m slow tests/test_multipliers.py
+      # About 30 solves, ~6s: zero shock = baseline, linearity, symmetry,
+      # reversion and persistence over monetary and fiscal shock grids.
+      - name: Gate - scenario sweep properties
+        run: uv run pytest -q --no-header -rA -m slow tests/test_scenario_sweep.py
+      - name: Gate - sweep checks re-run on the committed paths (and shown to fail)
+        run: uv run pytest -q --no-header -rA tests/test_scenario_sweep_bounds.py
 
   # Regenerates the cross-validation reference by actually running the Fed's
   # pyfrbus (vendor/pyfrbus_package, patched copy in a throwaway py3.11 venv)
