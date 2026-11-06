@@ -80,7 +80,7 @@ jobs:
       # pyfrbus solution (scripts/generate_vendor_episode_reference.sh).
       - name: Gate - inflation transmission and the episode vs pyfrbus
         run: uv run pytest -q --no-header -rA -m slow tests/test_inflation_transmission.py
-      # Opt-in MCE (stacked-time) solve: mcap and mcap+wp 100bp shock against
+      # Opt-in MCE (stacked-time) solve: mcap, wp, mcap+wp and all 100bp shock against
       # committed pyfrbus solutions (< 1e-6; observed ~2e-9). A few seconds.
       - name: Gate - MCE solve vs committed pyfrbus reference
         run: uv run pytest -q --no-header -rA tests/test_mce.py
@@ -130,7 +130,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mce: [mcap, "mcap+wp"]
+        mce: [mcap, wp, "mcap+wp", all]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
