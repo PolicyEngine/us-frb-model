@@ -148,3 +148,42 @@ def test_mce_differs_from_var(longbase):
     assert abs(var["zrff10"].iloc[0] - mcwp["zrff10"].iloc[0]) > 1e-3
     base = longbase.loc[str(START), "picxfe"]
     assert mcwp["picxfe"].iloc[0] - base < -1e-3  # forward-looking wage-price block
+
+
+def test_var_solver_defaults_unchanged():
+    # The residual stopping rule is MCE-only; VAR solves keep the step test.
+    from frbus import solver
+
+    assert solver.solver_defaults(None)["ftol"] is None
+    assert solver.solver_defaults(None)["xtol"] == 1e-8
+
+
+# Laforte (2018) FEDS Note, Figure 11, "New Version": 100bp funds-rate shock
+# under MCE for the financial and wage-price sectors (footnote 3: MCAP+WP).
+# docs/data/laforte2018_fig11_mce_ping.json. The model vintage differs (2018
+# vs the vendored model), so the bands are wider for the wage-price outcomes
+# than for the financial ones; see VALIDATION.md, Test 5.
+LAFORTE_JSON = Path(__file__).resolve().parents[1] / "docs" / "data" / (
+    "laforte2018_fig11_mce_ping.json"
+)
+
+
+@pytest.mark.slow
+def test_mce_ping_matches_laforte_2018(longbase):
+    import json
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    import expectations_comparison as ec
+
+    pub = json.loads(LAFORTE_JSON.read_text())["summary"]
+    ours = ec.monetary(longbase, "mcap+wp", ec.PING_START, ec.PING_END, fed_pings=True)
+    path = ours["path_q1_q12"]
+    # Financial block: the funds-rate path and the 10-year yield on impact.
+    assert np.allclose(path["rff"][:8], pub["rff_q"], atol=0.01)
+    assert abs(ours["rg10_impact"] - pub["r10_impact"]) < 0.01
+    # Real side: output gap trough within 10%, unemployment peak within 25%.
+    assert abs(ours["xgap2_trough"][0] / pub["gap_trough"][0] - 1) < 0.10
+    assert abs(ours["lur_peak"][0] / pub["lur_peak"][0] - 1) < 0.25
+    # Core inflation: same sign, within a factor of two (observed 1.45x).
+    ratio = ours["picxfe_trough"][0] / pub["core_trough"][0]
+    assert 0.5 < ratio < 2.0
