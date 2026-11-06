@@ -11,11 +11,12 @@
 # the terminals are LONGBASE after END, which is what this implementation reads.
 #
 # Usage: generate_vendor_mce_reference.sh OUTPUT_CSV MCE [XTOL] [MAXITER]
-#   MCE is one of mcap, wp, mcap+wp, all. XTOL (Newton step tolerance) defaults
-#   to 1e-8. Under mce="wp" the vendor's Newton step stalls at ~1.3e-8 (residual
-#   already at the floor) and raises after maxiter=50, so CI passes 1e-7 for wp;
-#   the same stall is why this implementation also stops on a residual test
-#   (ftol, src/frbus/solver.py).
+#   MCE is one of mcap, wp, mcap+wp, all. XTOL (Newton step tolerance)
+#   defaults to 1e-8 and MAXITER to pyfrbus's 50. Under mce="wp" the vendor's
+#   Newton steps crawl at ~1.3e-8 and it raises after 50 iterations; with
+#   MAXITER=2000 it converges at xtol=1e-8 in ~50s (stacked residual 2.4e-10),
+#   so CI passes 2000 for wp. The committed wp reference uses 1e-8 / 2000;
+#   stopping it at 3e-8 or 1e-7 moves it by < 1e-8.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$1"

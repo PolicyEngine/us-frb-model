@@ -132,9 +132,10 @@ jobs:
       matrix:
         mce: [mcap, wp, "mcap+wp", all]
         include:
-          # pyfrbus's Newton step stalls at ~1.3e-8 under wp; see the script.
+          # pyfrbus's Newton step crawls at ~1.3e-8 under wp and needs ~50s
+          # and more than its default 50 iterations; see the script.
           - mce: wp
-            xtol: "1e-7"
+            maxiter: "2000"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -145,7 +146,7 @@ jobs:
       - name: Regenerate MCE vendor reference from vendor/pyfrbus_package
         run: >-
           bash scripts/generate_vendor_mce_reference.sh
-          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" "${{ matrix.xtol || '1e-8' }}"
+          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" 1e-8 "${{ matrix.maxiter || '50' }}"
       - name: Gate - ours (MCE) vs freshly generated vendor solution (< 1e-6)
         env:
           FRESH_VENDOR_MCE_CSV: ${{ runner.temp }}/fresh_vendor_mce.csv

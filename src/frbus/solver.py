@@ -103,7 +103,13 @@ def newton(
         if np.isnan(step):
             raise ConvergenceError("Newton solver has diverged, no solution found.")
         if ftol is not None and np.linalg.norm(fun_val) < ftol:
-            return guess
+            # The residual test can pass straight after a large step, when the
+            # iterate is still off by about the size of the next step (mce="wp",
+            # 20 quarters: residual 3.6e-9 but wpsn 1.3e-4 from pyfrbus). Take
+            # one more full Newton step from here (one LU; it lands on the
+            # round-off floor) and keep it if it evaluates cleanly.
+            scale_fn = _preconditioner if precond else None
+            return _polish(feqs, jac, guess, fun_val, data, ftol, scale_fn)
         if step < xtol:
             resid = np.linalg.norm(fun_val)
             if resid < rtol:
@@ -113,6 +119,27 @@ def newton(
             )
 
     raise ConvergenceError(f"Exceeded maxiter = {maxiter} in Newton solver")
+
+
+def _polish(feqs, jac, guess, fun_val, data, ftol, scale_fn=None) -> np.ndarray:
+    """One undamped Newton step from an iterate that already meets ``ftol``.
+
+    The stepped point is returned if it evaluates cleanly and still meets
+    ``ftol``; otherwise the input iterate is.
+    """
+    scale = scale_fn(jac) if scale_fn is not None else None
+    lhs = scale @ jac if scale is not None else jac
+    rhs = scale @ -fun_val if scale is not None else -fun_val
+    try:
+        cand = guess + splu(csc_matrix(lhs)).solve(rhs)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error")
+            fun_cand = feqs(cand, data)
+    except (RuntimeError, RuntimeWarning, FloatingPointError):
+        return guess
+    if np.all(np.isfinite(fun_cand)) and np.linalg.norm(fun_cand) < ftol:
+        return cand
+    return guess
 
 
 def solve_periods(
