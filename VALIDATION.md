@@ -194,15 +194,24 @@ All of the values in this table come from committed data with no solve
 `tests/test_site_numbers.py`). Two Board publications report the same
 experiment under VAR expectations:
 
-| response, 100bp funds-rate shock | ours | 2014 FEDS Note, Figure 1 notes | 2013 price–wage note, Figure 3 (Bayesian 85-12, read off the chart) |
-|---|---|---|---|
-| output gap (`xgap2`), trough | −0.50pp (2027Q3, quarter 7) | "maximum decline of 0.4 percentage point" | ≈ −0.53pp, about 6 quarters after the shock |
-| inflation, trough | −0.034pp (`picxfe`, 2027Q4); −0.034pp four-quarter core PCE (2028Q2) | "below baseline by as much as 0.08 percentage point" | ≈ −0.08pp four-quarter core PCE (ML 85-07: ≈ −0.13pp) |
-| funds rate | +1.00pp, then −0.26pp undershoot (2029Q3) | "initially rises 1 percentage point … gradually returns" | +1.0pp, undershoot ≈ −0.3pp |
-| output gap duration | below baseline through 2030Q4 | "below baseline for five or six years" | returns to zero after about 3½ years, then overshoots |
+| response, 100bp funds-rate shock | ours | **Laforte 2018 FEDS Note, Fig. 2, new (post-2018) model — like-for-like** | 2014 FEDS Note, Figure 1 notes (pre-2018 model) | 2013 price–wage note, Figure 3 (Bayesian 85-12, read off the chart; pre-2018 model) |
+|---|---|---|---|---|
+| output gap (`xgap2`), trough | −0.50pp (2027Q3, quarter 7) | −0.486pp (quarter 8) | "maximum decline of 0.4 percentage point" | ≈ −0.53pp, about 6 quarters after the shock |
+| inflation, trough | −0.034pp (`picxfe`, 2027Q4); −0.034pp four-quarter core PCE (2028Q2) | −0.0345pp core PCE (quarter 8); previous model −0.062pp | "below baseline by as much as 0.08 percentage point" | ≈ −0.08pp four-quarter core PCE (ML 85-07: ≈ −0.13pp) |
+| funds rate | +1.00pp, then −0.26pp undershoot (2029Q3) | +1.00pp, undershoot −0.27pp | "initially rises 1 percentage point … gradually returns" | +1.0pp, undershoot ≈ −0.3pp |
+| output gap duration | below baseline through 2030Q4 | turns positive in quarter 22 (2025Q2) | "below baseline for five or six years" | returns to zero after about 3½ years, then overshoots |
 
 Sources:
 
+* Laforte, "Overview of the changes to the FRB/US model (2018)", FEDS Notes,
+  7 Dec 2018, doi:10.17016/2380-7172.2306, Figure 2 (accessible data table,
+  checked against the raw HTML on 6 Nov 2026). This is the Board's own ping
+  of the current model generation and the like-for-like comparator. The
+  note attributes the smaller inflation response to "the re-estimation of
+  the wage-price block equations over a longer sample period that now
+  extends through 2017". Pinned in
+  `tests/test_inflation_transmission.py`; channel decomposition in
+  `docs/inflation-transmission.md`.
 * Brayton, Laubach and Reifschneider, "The FRB/US Model: A Tool for
   Macroeconomic Policy Analysis", FEDS Notes, 3 April 2014,
   <https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html>.
@@ -213,13 +222,17 @@ Sources:
   price–wage sector is the specification the model adopted. The values above
   are read off the chart, so they are approximate.
 
-Reading: the output-gap trough lies between the two publications (−0.4 and
-≈ −0.53). The inflation response is about 40% of the published −0.08pp on
-both inflation concepts. This is not a units artefact: the four-quarter core
-PCE trough is also −0.034pp. The published runs used 2013–14 model and
-database vintages and baselines. Inflation in this run responds less than in
-either publication, so a scenario whose conclusion depends on inflation should
-say so.
+Reading: against the Board's own ping of the current model generation
+(Laforte 2018), the core PCE trough agrees to 0.001pp and in the same
+quarter (8). The output-gap trough agrees to 0.02pp. Unemployment peaks
+0.04pp higher here. The 2014 and 2013 publications (−0.08pp) describe the
+pre-2018 model, whose wage–price block was re-estimated in 2018. The Board's
+"previous version" column (−0.062pp) shows the same direction. So −0.034pp is
+FRB/US as the Board now publishes it, not an implementation gap. It remains a
+small response, and a scenario whose conclusion depends on inflation should
+say so. Almost all of it comes through the VAR-expectations equations
+(`zpicxfe`, `zpieci`). Swapping the 2013 NKPC slopes in changes nothing
+(`docs/inflation-transmission.md`).
 
 ### Period stacking — a genuine trap in the add-factor interface
 
