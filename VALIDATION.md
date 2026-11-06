@@ -544,10 +544,10 @@ re-runs the Fig. 11 ping under mcap+wp:
 | run | core PCE trough | ratio to published | output gap trough | unemployment peak |
 |---|---|---|---|---|
 | Laforte 2018 | −0.0077 (q6) | 1.00 | −0.186 (q6) | +0.098 (q4) |
-| ours, from 2040Q1 | VC_base_2040 |
-| ours, 2018 coefficients restored (all seven) | VC_coef_2018 |
-| ours, from 2030Q1 | VC_start_2030 |
-| ours, from 2020Q1 (Laforte's dates) | VC_start_2020 |
+| ours, from 2040Q1 | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
+| ours, 2018 coefficients restored (all seven) | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
+| ours, from 2030Q1 | −0.0112 (q7) | 1.45 | −0.188 (q5) | +0.117 (q6) |
+| ours, from 2020Q1 (Laforte's dates) | −0.0086 (q6) | 1.11 | −0.173 (q6) | +0.090 (q4) |
 
 Restoring every 2018 coefficient leaves the core trough unchanged, so the
 coefficient vintage does not explain it. The shock date does matter: from
