@@ -1,0 +1,101 @@
+[
+  {
+    "mode": "var",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.7477779863142794,
+      "2": 0.7353312806236029
+    },
+    "drff_year1_pp": 0.2387030070389643,
+    "drg10_year1_pp": 0.08925966436772703
+  },
+  {
+    "mode": "mcap",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.7955305536752219,
+      "2": 0.789019920147966
+    },
+    "drff_year1_pp": 0.2514171563620323,
+    "drg10_year1_pp": 0.05970716282495059
+  },
+  {
+    "mode": "mcap+wp",
+    "monetary": "taylor",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.799740375574899,
+      "2": 0.7996057722253714
+    },
+    "drff_year1_pp": 0.25049931439396733,
+    "drg10_year1_pp": 0.0430368880435279
+  },
+  {
+    "mode": "var",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.7692354502733644,
+      "2": 0.9044759838618607
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": 0.007003717323111003
+  },
+  {
+    "mode": "mcap",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.8357028549075848,
+      "2": 0.8987587264107207
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": -0.07426740318404312
+  },
+  {
+    "mode": "mcap+wp",
+    "monetary": "peg",
+    "fiscal": "srp",
+    "multiplier": {
+      "1": 0.8345078793579335,
+      "2": 0.8908745126692156
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": -0.07893871120291229
+  },
+  {
+    "mode": "var",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.79239535512784,
+      "2": 1.005376865699641
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": 0.009069427570429722
+  },
+  {
+    "mode": "mcap",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.8818886692199662,
+      "2": 1.0738927891607823
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": -0.11079653514740073
+  },
+  {
+    "mode": "mcap+wp",
+    "monetary": "peg",
+    "fiscal": "exog",
+    "multiplier": {
+      "1": 0.8837428658394859,
+      "2": 1.0748850778105268
+    },
+    "drff_year1_pp": 0.0,
+    "drg10_year1_pp": -0.11483967135708872
+  }
+]
