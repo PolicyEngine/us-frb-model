@@ -263,10 +263,16 @@ VAR (GDP −3.3% at 2023Q4 vs −5.4% at 2023Q3), but its inflation effect is an
 order of magnitude smaller than either published estimate: −0.12pp on
 average over 2022–24 against ~3pp (FRBSF), and a core-PCE level effect of
 −0.15% at 2023Q4 against −7.1% for the CPI level (Chicago Fed; different
-index). This is the flat price-wage block under VAR expectations: the same
-property that gives −0.034pp of core PCE for the 100bp benchmark shock
-(VALIDATION.md). The model attributes almost all of the 2022–23 disinflation
-to residuals (supply-side unwinding), not to policy.
+index). Neither published estimate is an FRB/US run: FRBSF uses
+high-frequency-identified policy shocks (a 25bp surprise lowers core PCE by
+~0.5pp within 12 months), and Chicago uses a survey-augmented VAR. The
+Board's pyfrbus gives the identical counterfactual (5e-8 abs, gated), and
+the 100bp ping matches the Board's published post-2018 simulation (Laforte
+2018, core PCE trough −0.0345pp). Almost all of the inflation response runs
+through the VAR-expectations equations `zpicxfe`/`zpieci`, not the NKPC
+slopes. See `docs/inflation-transmission.md`. The model attributes almost all
+of the 2022–23 disinflation to residuals (supply-side unwinding), not to
+policy.
 
 **Domain warning.** Counterfactual A drives unemployment to 0.52% by 2024Q4
 and −0.61% by 2025Q4, which is impossible: the model has no floor on
