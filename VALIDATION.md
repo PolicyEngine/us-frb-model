@@ -487,5 +487,10 @@ additionally fails if `tests/data/` is modified in place).
   `rtol=5e-4`. The vendor decomposes each period into recursive/simultaneous
   blocks; both approaches solve the same F(x)=0, so solutions agree up to
   solver tolerance, as the tables show.
-- MCE (rational expectations) variants are not implemented
-  (`NotImplementedError`) and are excluded from validation.
+- MCE (opt-in, `Frbus(..., mce=...)`) is solved as one stacked-time system
+  over the window (`src/frbus/mce.py`); pyfrbus also stacks the window
+  (User Guide, "MCE Solver Algorithm") but duplicates the equation text per
+  period, while we compile each equation once in period-relative form and
+  place its Jacobian blocks for every period. Same equations, same unknowns,
+  same terminal condition (input data after `end`), so the same F(x)=0; see
+  "Test 5" for the agreement.

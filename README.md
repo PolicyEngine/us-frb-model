@@ -56,9 +56,13 @@ A runnable version is in `examples/monetary_policy_shock.py`.
   analytic sparse Jacobian (sympy differentiation, scipy sparse LU).
 - `Frbus(path)`, `.init_trac(start, end, data)`, `.solve(start, end, data)`,
   `.exogenize([...])` — mirroring the essentials of pyfrbus's `Frbus` class.
-- **Not implemented:** MCE (rational-expectations) equation variants —
-  `Frbus(path, mce=...)` raises `NotImplementedError`. `mcontrol` is also
-  out of scope.
+- Opt-in model-consistent expectations: `Frbus(path, mce="mcap")` (financial
+  markets), `"wp"` (wage-price), `"mcap+wp"` or `"all"`, as in pyfrbus. The
+  default stays VAR expectations. MCE solves stack the whole window in one
+  sparse Newton solve (`src/frbus/mce.py`), with terminal values for leads
+  past `end` read from the input data; `ConvergenceError` if Newton does not
+  reach `xtol`/`rtol`. Gated against the Board's pyfrbus in `mcap` and
+  `mcap+wp` (tests/test_mce.py). `mcontrol` is out of scope.
 - Stochastic simulation: `Frbus.stochsim()` and `.stochsim_bands()`
   (seeded residual bootstrap, `src/frbus/uncertainty.py`) give percentile
   bands around a deterministic solve.
