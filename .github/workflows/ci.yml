@@ -74,6 +74,12 @@ jobs:
       # fiscal-closure switch, and the 2022-23 tightening episode.
       - name: Gate - benchmarks and the 2022-23 episode
         run: uv run pytest -q --no-header -rA -m slow tests/test_benchmarks.py
+      # ~22 solves, under a minute: channel shut-offs and coefficient vintages
+      # against the committed JSON, the Board's published post-2018 ping
+      # (Laforte 2018), and the 2022-23 counterfactual against a committed
+      # pyfrbus solution (scripts/generate_vendor_episode_reference.sh).
+      - name: Gate - inflation transmission and the episode vs pyfrbus
+        run: uv run pytest -q --no-header -rA -m slow tests/test_inflation_transmission.py
 
   # Regenerates the cross-validation reference by actually running the Fed's
   # pyfrbus (vendor/pyfrbus_package, patched copy in a throwaway py3.11 venv)
