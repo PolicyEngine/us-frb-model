@@ -343,6 +343,19 @@ results in `correctness-gates`. The grid:
   quarters.
 * **Taxes:** `trp` cut by −2, 0, +1, +2 and +4pp for 8 quarters.
 
+**Gate bounds.** Each linearity and symmetry check has its own bound, the
+value measured on CI on 2026-11-06 plus about 20% (`MONETARY_BOUNDS` and
+`FISCAL_BOUNDS` in the script; the measured value sits next to each bound).
+These are regression bounds on this solve, not economic tolerances: before
+6 Nov a flat 5% let a check measured at 1% drift fivefold unnoticed. The two
+purchases checks are gated on a prediction instead (see below).
+`tests/test_scenario_sweep.py::test_committed_sweep_is_current` compares every
+committed deviation path quarter by quarter (all six variables, every run),
+the multipliers and every check value against a fresh solve to 1e-6.
+`tests/test_scenario_sweep_bounds.py` (fast suite, no solve) re-runs the checks
+on the committed paths and perturbs single paths by 1-6% to show each kind of
+check turns red.
+
 Results (2026-11-06):
 
 * **Zero shock = baseline** in every family, to under 1e-8.
@@ -359,7 +372,13 @@ Results (2026-11-06):
   logs, `y·log(egfe/egfe(-1))`, and 1% of GDP is about 22% of `egfe`, so
   log(1.22) = 0.20 against −log(0.78) = 0.25. The predicted cut/rise ratio is
   1.244 and the observed ratio is 1.241, which is gated. Linearity and
-  symmetry are gated on the ±0.1% runs instead. The small-shock multiplier is
+  symmetry are measured on the ±0.1% runs, and the same aggregation predicts
+  their gaps: with a = 0.1% of GDP / egfe share (0.0464), the ±0.1% symmetry
+  gap is (−log(1−a) − log(1+a)) / log(1+a) = 0.0218 (measured 0.0216) and the
+  0.1% → 0.5% linearity gap is 1 − log(1+5a) / (5 log(1+a)) = 0.0401
+  (measured 0.0398). Both are gated within 3% of the prediction, so a gap that
+  grows or shrinks is caught; the 0.0398 that sat just under the old flat 5%
+  bound is the aggregation, not a near-miss. The small-shock multiplier is
   about **0.80**. The published 0.72 belongs to the 1%-of-GDP design and
   should be quoted with it.
 * **Transfers** have a year-1 multiplier of 0.28 and a year-2 multiplier of

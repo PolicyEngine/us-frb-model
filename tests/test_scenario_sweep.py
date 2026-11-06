@@ -65,12 +65,29 @@ def test_transfers_multiplier_below_purchases(families):
         )
 
 
-def test_committed_sweep_is_current(families, tmp_path):
+def test_committed_sweep_is_current(families):
+    """Every committed deviation path, quarter by quarter, every variable, is
+    what the code produces now (not only the minimum), and so are the
+    multipliers and every check value."""
     committed = json.loads((REPO / "results" / "scenario_sweep.json").read_text())
+    assert set(committed["runs"]) == set(families)
     for fam, runs in families.items():
+        assert set(committed["runs"][fam]) == set(runs), fam
         for name, run in runs.items():
-            fresh = scenario_sweep.summarize(run["dev"])
-            for var, stats in fresh.items():
-                assert committed["runs"][fam][name]["summary"][var]["min"] == pytest.approx(
-                    stats["min"], abs=1e-6
-                ), f"{fam}/{name}/{var}"
+            stored = committed["runs"][fam][name]
+            fresh = scenario_sweep.paths(run["dev"])
+            assert stored["path"]["quarters"] == fresh["quarters"], f"{fam}/{name}"
+            for var in run["dev"].columns:
+                assert stored["path"][var] == pytest.approx(fresh[var], abs=1e-6), (
+                    f"{fam}/{name}/{var}"
+                )
+            for year, m in run.get("multiplier", {}).items():
+                assert stored["multiplier"][str(year)] == pytest.approx(m, abs=1e-6), (
+                    f"{fam}/{name} year {year}"
+                )
+    fresh_checks = scenario_sweep.checks(families)
+    assert [r["check"] for r in committed["checks"]] == [r["check"] for r in fresh_checks]
+    for old, new in zip(committed["checks"], fresh_checks, strict=True):
+        assert old["pass"] == new["pass"], old["check"]
+        if old["value"] is not None:
+            assert old["value"] == pytest.approx(new["value"], abs=1e-6), old["check"]

@@ -81,6 +81,35 @@ TAX_SIZES = [-0.02, 0.0, 0.01, 0.02, 0.04]
 
 REPORT_VARS = ["rff", "xgdp", "xgap2", "lur", "picxfe", "pcxfe"]
 
+# Gate bounds, one per check: the value measured on CI on 6 Nov 2026 plus
+# about 20% (rounded up to 0.001). A uniform 5% let a check measured at 1%
+# drift fivefold unnoticed. These are regression bounds on this solve, not
+# economic tolerances: if a deliberate model change moves a value, re-run
+# the sweep, re-measure and re-pin, and say so in the PR.
+#                   var: (200 vs 2x100, 4x25 vs 100, +100 vs -100)
+MONETARY_BOUNDS = {
+    "xgdp_pct": (0.017, 0.013, 0.034),  # measured 0.0138, 0.0105, 0.0282
+    "xgap2": (0.017, 0.013, 0.035),  # measured 0.0140, 0.0106, 0.0284
+    "lur": (0.023, 0.018, 0.047),  # measured 0.0187, 0.0143, 0.0387
+    "core_pce_4q": (0.013, 0.010, 0.027),  # measured 0.0105, 0.0080, 0.0217
+    "rff": (0.006, 0.005, 0.013),  # measured 0.0049, 0.0037, 0.0101
+}
+# family: (symmetry, linearity); purchases is gated on the log-aggregation
+# prediction instead (PURCHASES_PREDICTION_REL).
+FISCAL_BOUNDS = {
+    "transfers": (0.020, 0.010),  # measured 0.0160, 0.0077
+    "taxes": (0.012, 0.006),  # measured 0.0094, 0.0046
+}
+# Purchases enter GDP through log aggregation, y*log(egfe/egfe(-1)), so a
+# shock of a = x / egfe_share is not linear in x even in an otherwise linear
+# model. The +-0.1% symmetry gap and the 5x linearity gap are both predicted
+# by that formula (0.0218 and 0.0401 at egfe_share 0.0464; measured 0.0216
+# and 0.0398, 1% off). The gate is the measured gap within 3% of the
+# prediction: a gap that grows OR shrinks means something other than the
+# aggregation is moving the response.
+PURCHASES_PREDICTION_REL = 0.03
+PATH_DECIMALS = 10
+
 
 def deviations(sim: pd.DataFrame, base: pd.DataFrame) -> pd.DataFrame:
     """Deviation from baseline on the conventional units for each variable."""
@@ -114,6 +143,31 @@ def summarize(dev: pd.DataFrame) -> dict:
             "last": float(series.iloc[-1]),
         }
     return out
+
+
+def paths(dev: pd.DataFrame) -> dict:
+    """Every deviation path, quarter by quarter, for the committed results."""
+    out = {"quarters": [str(q) for q in dev.index]}
+    for col in dev.columns:
+        out[col] = [round(float(x), PATH_DECIMALS) for x in dev[col]]
+    return out
+
+
+def families_from_report(report: dict) -> dict:
+    """Rebuild the ``families`` argument of ``checks`` from committed results,
+    so the checks can be re-evaluated (and perturbed) without solving."""
+    fams = {}
+    for fam, runs in report["runs"].items():
+        fams[fam] = {}
+        for name, run in runs.items():
+            path = dict(run["path"])
+            index = pd.PeriodIndex(path.pop("quarters"), freq="Q")
+            r = {k: v for k, v in run.items() if k not in ("summary", "path")}
+            if "multiplier" in r:
+                r["multiplier"] = {int(k): v for k, v in r["multiplier"].items()}
+            r["dev"] = pd.DataFrame(path, index=index)
+            fams[fam][name] = r
+    return fams
 
 
 def year_mean(series: pd.Series, year: int) -> float:
@@ -240,7 +294,7 @@ def checks(families: dict) -> list[dict]:
         "xgdp, xgap2, picxfe, 4q core down; lur up",
     )
     # Linearity and symmetry, measured on the full path relative to the peak.
-    for var in ["xgdp_pct", "xgap2", "lur", "core_pce_4q", "rff"]:
+    for var, (b200, b25, bsym) in MONETARY_BOUNDS.items():
         peak = float(p100[var].abs().max())
         lin200 = float((p200[var] - 2 * p100[var]).abs().max()) / (2 * peak)
         lin25 = float((4 * p25[var] - p100[var]).abs().max()) / peak
@@ -248,20 +302,20 @@ def checks(families: dict) -> list[dict]:
         add(
             f"monetary linearity 200 vs 2x100: {var}",
             lin200,
-            lin200 < 0.05,
-            "max |d200 - 2 d100| / peak(2 d100) < 5%",
+            lin200 < b200,
+            f"max |d200 - 2 d100| / peak(2 d100) < {b200}",
         )
         add(
             f"monetary linearity 4x25 vs 100: {var}",
             lin25,
-            lin25 < 0.05,
-            "max |4 d25 - d100| / peak(d100) < 5%",
+            lin25 < b25,
+            f"max |4 d25 - d100| / peak(d100) < {b25}",
         )
         add(
             f"monetary symmetry +100 vs -100: {var}",
             sym,
-            sym < 0.05,
-            "max |d(+100) + d(-100)| / peak < 5%",
+            sym < bsym,
+            f"max |d(+100) + d(-100)| / peak < {bsym}",
         )
     # Reversion of the one-quarter impulse.
     for var in ["rff", "xgap2"]:
@@ -315,18 +369,29 @@ def checks(families: dict) -> list[dict]:
         )
         sym = float((pos + neg).abs().max()) / peak
         lin = float((dbl - factor * pos).abs().max()) / (factor * peak)
-        add(
-            f"{fam}: symmetry at +-{100 * runs[key_pos]['size']:g}% / pp",
-            sym,
-            sym < 0.05,
-            "max |d(+x) + d(-x)| / peak < 5%",
-        )
-        add(
-            f"{fam}: linearity {factor:g}x",
-            lin,
-            lin < 0.05,
-            "max |d(kx) - k d(x)| / peak(k d(x)) < 5%",
-        )
+        sym_name = f"{fam}: symmetry at +-{100 * runs[key_pos]['size']:g}% / pp"
+        lin_name = f"{fam}: linearity {factor:g}x"
+        if fam == "purchases":
+            a = runs[key_pos]["size"] / share
+            sym_pred = (-np.log(1 - a) - np.log(1 + a)) / np.log(1 + a)
+            lin_pred = 1 - np.log(1 + factor * a) / (factor * np.log(1 + a))
+            rel = PURCHASES_PREDICTION_REL
+            add(
+                sym_name,
+                [sym, float(sym_pred)],
+                abs(sym / sym_pred - 1) < rel,
+                f"gap within {rel:.0%} of log aggregation, (-log(1-a) - log(1+a)) / log(1+a)",
+            )
+            add(
+                lin_name,
+                [lin, float(lin_pred)],
+                abs(lin / lin_pred - 1) < rel,
+                f"gap within {rel:.0%} of log aggregation, 1 - log(1+ka) / (k log(1+a))",
+            )
+        else:
+            bsym, blin = FISCAL_BOUNDS[fam]
+            add(sym_name, sym, sym < bsym, f"max |d(+x) + d(-x)| / peak < {bsym}")
+            add(lin_name, lin, lin < blin, f"max |d(kx) - k d(x)| / peak(k d(x)) < {blin}")
         late = abs(float(pos.iloc[-4:].mean())) / peak
         add(
             f"{fam}: reversion after the shock ends",
@@ -359,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
         "runs": {
             fam: {
                 name: {k: v for k, v in run.items() if k != "dev"}
-                | {"summary": summarize(run["dev"])}
+                | {"summary": summarize(run["dev"]), "path": paths(run["dev"])}
                 for name, run in runs.items()
             }
             for fam, runs in families.items()
@@ -435,7 +500,7 @@ def render_markdown(report: dict) -> str:
         vs = (
             ""
             if v is None
-            else (", ".join(f"{x:.3f}" for x in v) if isinstance(v, list) else f"{v:.3g}")
+            else (", ".join(f"{x:.4g}" for x in v) if isinstance(v, list) else f"{v:.3g}")
         )
         lines.append(f"| {r['check']} | {vs} | {'pass' if r['pass'] else 'FAIL'} | {r['detail']} |")
     lines.append("")
