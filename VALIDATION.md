@@ -187,6 +187,40 @@ the price block is highly inertial and backward-looking — and not a defect of
 this implementation; but it does mean the implied sacrifice ratio is high, and
 scenarios whose conclusion turns on the inflation response should say so.
 
+### Against the Fed's published FRB/US simulations
+
+All of the values in this table come from committed data with no solve
+(`scripts/site_numbers.py` → `results/site_numbers.json`, pinned by
+`tests/test_site_numbers.py`). Two Board publications report the same
+experiment under VAR expectations:
+
+| response, 100bp funds-rate shock | ours | 2014 FEDS Note, Figure 1 notes | 2013 price–wage note, Figure 3 (Bayesian 85-12, read off the chart) |
+|---|---|---|---|
+| output gap (`xgap2`), trough | −0.50pp (2027Q3, quarter 7) | "maximum decline of 0.4 percentage point" | ≈ −0.53pp, about 6 quarters after the shock |
+| inflation, trough | −0.034pp (`picxfe`, 2027Q4); −0.034pp four-quarter core PCE (2028Q2) | "below baseline by as much as 0.08 percentage point" | ≈ −0.08pp four-quarter core PCE (ML 85-07: ≈ −0.13pp) |
+| funds rate | +1.00pp, then −0.26pp undershoot (2029Q3) | "initially rises 1 percentage point … gradually returns" | +1.0pp, undershoot ≈ −0.3pp |
+| output gap duration | below baseline through 2030Q4 | "below baseline for five or six years" | returns to zero after about 3½ years, then overshoots |
+
+Sources:
+
+* Brayton, Laubach and Reifschneider, "The FRB/US Model: A Tool for
+  Macroeconomic Policy Analysis", FEDS Notes, 3 April 2014,
+  <https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html>.
+  The −0.4 and −0.08 are stated in the text of the Figure 1 notes. They are
+  not read off the chart. The note is not vendored here.
+* `vendor/frbus_package/documentation/price_wage_sector_083013.pdf`, page 16
+  (Figure 3, "FRB/US Ping Simulations: VAR Expectations"). The Bayesian 85-12
+  price–wage sector is the specification the model adopted. The values above
+  are read off the chart, so they are approximate.
+
+Reading: the output-gap trough lies between the two publications (−0.4 and
+≈ −0.53). The inflation response is about 40% of the published −0.08pp on
+both inflation concepts. This is not a units artefact: the four-quarter core
+PCE trough is also −0.034pp. The published runs used 2013–14 model and
+database vintages and baselines. Inflation in this run responds less than in
+either publication, so a scenario whose conclusion depends on inflation should
+say so.
+
 ### Period stacking — a genuine trap in the add-factor interface
 
 `_aerr` shocks are add-factors on an equation, applied **per quarter**. Adding
@@ -295,6 +329,55 @@ already said 0.90.
 
 Reproduce with `pytest -m slow tests/test_multipliers.py`.
 
+## Scenario sweep: sizes, signs, linearity, reversion (slow gate)
+
+`scripts/scenario_sweep.py` runs about 30 solves (~6s) and writes
+`results/scenario_sweep.{json,md}`. `tests/test_scenario_sweep.py` gates the
+results in `correctness-gates`. The grid:
+
+* **Monetary:** a one-quarter `rffintay_aerr` impulse of −200, −100, −25, 0,
+  +25, +100 and +200bp, plus +100bp held for 4 and 8 quarters.
+* **Purchases:** `egfe` raised by −1, −0.1, 0, +0.1, +0.5, +1 and +2% of GDP
+  for 8 quarters.
+* **Transfers:** a `gtr` add-factor of −1, 0, +1 and +2% of GDP for 8
+  quarters.
+* **Taxes:** `trp` cut by −2, 0, +1, +2 and +4pp for 8 quarters.
+
+Results (2026-11-06):
+
+* **Zero shock = baseline** in every family, to under 1e-8.
+* **Monetary shocks are close to linear and symmetric.** Taking 200bp against
+  twice 100bp, and four times 25bp against 100bp, every response stays within
+  2% of its peak. The +100bp and −100bp paths mirror each other within 4% of
+  the peak. Holding the shock longer deepens the trough: −0.55% for 1
+  quarter, −2.08% for 4 and −3.82% for 8. The 1-quarter impulse reverts: at
+  2030Q4 the output gap is at 5% of its peak.
+* **Purchases are not linear at 1% of GDP.** The year-1 multiplier is 0.900
+  for a 1%-of-GDP cut, 0.809 at −0.1%, 0.792 at +0.1%, 0.760 at +0.5%,
+  0.725 at +1% (the gated value) and 0.666 at +2%. The cause is the model's
+  own aggregation. Final sales (`xfs`) and GDP (`xp`) add component growth in
+  logs, `y·log(egfe/egfe(-1))`, and 1% of GDP is about 22% of `egfe`, so
+  log(1.22) = 0.20 against −log(0.78) = 0.25. The predicted cut/rise ratio is
+  1.244 and the observed ratio is 1.241, which is gated. Linearity and
+  symmetry are gated on the ±0.1% runs instead. The small-shock multiplier is
+  about **0.80**. The published 0.72 belongs to the 1%-of-GDP design and
+  should be quoted with it.
+* **Transfers** have a year-1 multiplier of 0.28 and a year-2 multiplier of
+  0.30, linear and symmetric. This is below purchases in both years, which is
+  gated. It is also below the low end of CBO's range for transfers to persons
+  (about 0.4–2.1 in its ARRA reports). That range assumes targeted, high-MPC
+  recipients and accommodative monetary policy. FRB/US transfers feed
+  permanent-income consumption against an active Taylor rule. The CBO range is
+  not vendored and is cited for orientation only.
+* **Tax cuts** have a year-1 multiplier of 0.22 and a year-2 multiplier of
+  0.32 at every size from 1 to 4pp, linear and symmetric. These match Test 4.
+* **Fiscal reversion.** After an 8-quarter purchases or transfers shock ends,
+  output undershoots in 2030 by about 45% of the peak. The funds rate is still
+  above baseline, and it is the inertial rule's overshoot that comes back. The
+  tax-cut shock leaves 7% of its peak. The check only requires the 2030
+  deviation to stay under 50% of the peak, so this property is reported more
+  than gated.
+
 ## LONGBASE vs the 2026 outturns (report, not a gate)
 
 The pinned LONGBASE vintage (April 2026) carries the Fed staff's near-term
@@ -340,7 +423,7 @@ pass.
 
 | job | gate |
 |---|---|
-| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), and Test 3 as separate steps, so a failure names the broken invariant |
+| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), Test 3, the Test 4 fiscal multipliers and the scenario sweep (`-m slow`) as separate steps, so a failure names the broken invariant |
 | `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the 1.3e-8 build-to-build noise floor documented in Test 2b) |
 | `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.10/3.11/3.12, the Test 4 fiscal-multiplier gate (`-m slow`), plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
 | `longbase-backtest` | Weekly, **non-gating** (`continue-on-error`): re-runs `scripts/backtest_longbase.py --fetch` against fresh FRED data and prints the LONGBASE-vs-outturn report |
