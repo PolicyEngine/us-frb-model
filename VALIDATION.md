@@ -488,8 +488,11 @@ variables. Committed references come from
 `mce=...`, Newton at `xtol=1e-8`), and the `vendor-mce-reference` CI job
 regenerates them fresh on every PR, for all four modes. Under `wp` the
 vendor's Newton steps crawl at ~1.3e-8 and it raises at its default 50
-iterations, so the `wp` reference is generated with `maxiter=2000` (about 50
-seconds); stopping it at `xtol` 3e-8 or 1e-7 instead moves it by < 1e-8.
+iterations, so the committed `wp` reference is generated with
+`maxiter=2000`. Getting under 1e-8 depends on the hardware (about 50 seconds
+on one CI runner, over five minutes on another), and stopping at `xtol` 3e-8
+or 1e-7 moves the solution by < 1e-8, so the CI regeneration for `wp` stops
+the vendor at 3e-8. The gate on this implementation stays 1e-6.
 
 | mode | max abs diff | max rel diff | worst cell |
 |---|---|---|---|

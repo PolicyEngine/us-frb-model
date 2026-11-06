@@ -14,9 +14,11 @@
 #   MCE is one of mcap, wp, mcap+wp, all. XTOL (Newton step tolerance)
 #   defaults to 1e-8 and MAXITER to pyfrbus's 50. Under mce="wp" the vendor's
 #   Newton steps crawl at ~1.3e-8 and it raises after 50 iterations; with
-#   MAXITER=2000 it converges at xtol=1e-8 in ~50s (stacked residual 2.4e-10),
-#   so CI passes 2000 for wp. The committed wp reference uses 1e-8 / 2000;
-#   stopping it at 3e-8 or 1e-7 moves it by < 1e-8.
+#   MAXITER=2000 it converged at xtol=1e-8 in ~50s on one CI runner (stacked
+#   residual 2.4e-10) but took over 5 minutes on another, so getting under
+#   1e-8 depends on the hardware. The committed wp reference uses 1e-8 / 2000;
+#   stopping at 3e-8 (3s) or 1e-7 moves it by < 1e-8, so CI regenerates wp at
+#   3e-8.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$1"

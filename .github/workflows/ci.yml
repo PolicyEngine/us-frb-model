@@ -132,9 +132,12 @@ jobs:
       matrix:
         mce: [mcap, wp, "mcap+wp", all]
         include:
-          # pyfrbus's Newton step crawls at ~1.3e-8 under wp and needs ~50s
-          # and more than its default 50 iterations; see the script.
+          # pyfrbus's Newton steps crawl at ~1.3e-8 under wp; whether they get
+          # under 1e-8 depends on the runner (50s on one, >5 min on another),
+          # so the vendor stops at 3e-8 here (< 1e-8 from the 1e-8 solution;
+          # see the script). The gate on this implementation stays 1e-6.
           - mce: wp
+            xtol: "3e-8"
             maxiter: "2000"
     steps:
       - uses: actions/checkout@v4
@@ -146,7 +149,7 @@ jobs:
       - name: Regenerate MCE vendor reference from vendor/pyfrbus_package
         run: >-
           bash scripts/generate_vendor_mce_reference.sh
-          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" 1e-8 "${{ matrix.maxiter || '50' }}"
+          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" "${{ matrix.xtol || '1e-8' }}" "${{ matrix.maxiter || '50' }}"
       - name: Gate - ours (MCE) vs freshly generated vendor solution (< 1e-6)
         env:
           FRESH_VENDOR_MCE_CSV: ${{ runner.temp }}/fresh_vendor_mce.csv
