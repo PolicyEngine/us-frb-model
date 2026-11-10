@@ -90,14 +90,16 @@ actually tells you:
   0.22 in year 1. The rule × horizon grid is ordered as theory requires.
   **The 0.72 is for a 1%-of-GDP rise and is size-dependent:** the same model
   gives about 0.80 for small shocks and 0.90 for a 1%-of-GDP cut, because GDP
-  aggregates component growth in logs (issue #11). Transfers give 0.28 in year
-  1, below purchases and below the range usually quoted for transfers to
-  persons; that comparator is not vendored here.
+  aggregates component growth in logs (issue #11). Transfers give 0.28–0.32 in year
+  1: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with
+  the funds rate pegged and the fiscal rule off. Both are below purchases and
+  below every matched published benchmark (`docs/benchmarks.md`; issue #13).
 - **Monetary policy, against the Fed's own published runs.** For a 100bp
   funds-rate shock the output-gap trough (−0.50pp) sits between the 2014 FEDS
   Note (−0.4) and the 2013 price–wage note (≈ −0.53). Core inflation falls by
-  0.034pp at the trough, about 40% of the published −0.08pp, on both
-  inflation concepts. After a fiscal shock ends, output undershoots by about
+  0.034pp at the trough on both inflation concepts, matching the Board's
+  post-2018 model (Laforte 2018, −0.0345pp); the −0.08pp in the 2013–14
+  notes is the pre-2018 vintage (issue #14). After a fiscal shock ends, output undershoots by about
   45% of the peak as the funds rate comes back.
 - **Tracking invariant.** After `init_trac`, solving the baseline reproduces
   LONGBASE to 5.6e-17. **This is an identity, not a validation result** —
