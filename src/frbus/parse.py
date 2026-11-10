@@ -28,6 +28,23 @@ class ModelSpec:
     constants: dict[str, float]
     mce_vars: list[str] = field(default_factory=list)
     stoch_shocks: list[str] = field(default_factory=list)
+    #: variable -> (mce_group, python_equation) for every ``<mce_equation>``
+    mce_equations: dict[str, tuple[str, str]] = field(default_factory=dict)
+    #: mce_group -> coefficients of that group's MCE equations. Kept per group
+    #: because MCE coefficient names (e.g. ``y_zrff10_1``) collide with the
+    #: VAR equations' coefficients but carry different values.
+    mce_constants: dict[str, dict[str, float]] = field(default_factory=dict)
+
+
+#: ``mce=`` option -> ``<mce_group>`` values whose equations are swapped in.
+#: Mirrors pyfrbus constants.CONST_MCE_TYPES and xml_model.get_mce_xpath
+#: ("wp" selects the group named "mcwp"; "all" adds "mcother").
+MCE_TYPES: dict[str, tuple[str, ...]] = {
+    "mcap": ("mcap",),
+    "wp": ("mcwp",),
+    "mcap+wp": ("mcap", "mcwp"),
+    "all": ("mcap", "mcwp", "mcother"),
+}
 
 
 def _clean(eq: str) -> str:
@@ -72,6 +89,20 @@ def parse_model(filepath: str) -> ModelSpec:
         if n.text is not None
     ]
 
+    mce_equations: dict[str, tuple[str, str]] = {}
+    mce_constants: dict[str, dict[str, float]] = {}
+    for var in root.xpath("./variable[mce_equation]"):
+        name = var.findtext("name")
+        mce = var.find("mce_equation")
+        group = mce.findtext("mce_group")
+        eq = mce.findtext("python_equation")
+        if name is None or group is None or eq is None:
+            raise ValueError(f"Incomplete <mce_equation> for variable {name!r}")
+        mce_equations[name] = (group, _clean(eq))
+        consts = mce_constants.setdefault(group, {})
+        for cf in mce.findall("coeff"):
+            consts[_coeff_name(cf.findtext("cf_name"))] = float(cf.findtext("cf_value"))
+
     return ModelSpec(
         endo_names=endo_names,
         equations=equations,
@@ -79,4 +110,6 @@ def parse_model(filepath: str) -> ModelSpec:
         constants=constants,
         mce_vars=mce_vars,
         stoch_shocks=stoch_shocks,
+        mce_equations=mce_equations,
+        mce_constants=mce_constants,
     )

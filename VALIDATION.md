@@ -150,8 +150,11 @@ economics are closer to the Board's.
 The committed reference stays on 1.0.0 so the gate has a fixed anchor; this
 subsection records the 1.1.1 cross-check. Only the VAR-expectations path was
 exercised. The 1.1.1 release also fixes a lead-substitution guard in
-`jacobian.py` that affects the MCE path only, which this implementation does not
-yet support and which was therefore not tested.
+`jacobian.py` that affects the MCE path only. The MCE references (Test 5) are
+from 1.0.0; the guard changes the vendor's Jacobian, not its equations, and
+the 1.0.0 MCE solutions satisfy this implementation's stacked equations to a
+residual 2-norm of 2.4e-10 (wp) and 2.6e-10 (mcap+wp), so they are roots of
+the same system whatever the vendor's Jacobian did on the way.
 
 ## Test 3 — sanity: monetary tightening
 
@@ -182,10 +185,59 @@ Two internal-coherence cross-checks on the same run (recomputed 2026-08):
   is the expected closed-loop behaviour, not drift.
 
 The inflation response is small in absolute terms (−0.034pp at trough for a
-100bp shock). That is a known property of FRB/US under *VAR* expectations —
-the price block is highly inertial and backward-looking — and not a defect of
-this implementation; but it does mean the implied sacrifice ratio is high, and
+100bp shock). The Board publishes the same response for the current model
+(Laforte 2018, −0.0345pp; table below). Under *VAR* expectations nearly all of
+it comes through the reduced-form forecasts `zpicxfe`/`zpieci`, which
+carry 0.98 of the weight in the NKPCs (`docs/inflation-transmission.md`). It
+is not a defect of this implementation; but it does mean the implied sacrifice ratio is high, and
 scenarios whose conclusion turns on the inflation response should say so.
+
+### Against the Fed's published FRB/US simulations
+
+All of the values in this table come from committed data with no solve
+(`scripts/site_numbers.py` → `results/site_numbers.json`, pinned by
+`tests/test_site_numbers.py`). Two Board publications report the same
+experiment under VAR expectations:
+
+| response, 100bp funds-rate shock | ours | **Laforte 2018 FEDS Note, Fig. 2, new (post-2018) model — like-for-like** | 2014 FEDS Note, Figure 1 notes (pre-2018 model) | 2013 price–wage note, Figure 3 (Bayesian 85-12, read off the chart; pre-2018 model) |
+|---|---|---|---|---|
+| output gap (`xgap2`), trough | −0.50pp (2027Q3, quarter 7) | −0.486pp (quarter 8) | "maximum decline of 0.4 percentage point" | ≈ −0.53pp, about 6 quarters after the shock |
+| inflation, trough | −0.034pp (`picxfe`, 2027Q4); −0.034pp four-quarter core PCE (2028Q2) | −0.0345pp core PCE (quarter 8); previous model −0.062pp | "below baseline by as much as 0.08 percentage point" | ≈ −0.08pp four-quarter core PCE (ML 85-07: ≈ −0.13pp) |
+| funds rate | +1.00pp, then −0.26pp undershoot (2029Q3) | +1.00pp, undershoot −0.27pp | "initially rises 1 percentage point … gradually returns" | +1.0pp, undershoot ≈ −0.3pp |
+| output gap duration | below baseline through 2030Q4 | turns positive in quarter 22 (2025Q2) | "below baseline for five or six years" | returns to zero after about 3½ years, then overshoots |
+
+Sources:
+
+* Laforte, "Overview of the changes to the FRB/US model (2018)", FEDS Notes,
+  7 Dec 2018, doi:10.17016/2380-7172.2306, Figure 2 (accessible data table,
+  checked against the raw HTML on 6 Nov 2026). This is the Board's own ping
+  of the current model generation and the like-for-like comparator. The
+  note attributes the smaller inflation response to "the re-estimation of
+  the wage-price block equations over a longer sample period that now
+  extends through 2017". Pinned in
+  `tests/test_inflation_transmission.py`; channel decomposition in
+  `docs/inflation-transmission.md`.
+* Brayton, Laubach and Reifschneider, "The FRB/US Model: A Tool for
+  Macroeconomic Policy Analysis", FEDS Notes, 3 April 2014,
+  <https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html>.
+  The −0.4 and −0.08 are stated in the text of the Figure 1 notes. They are
+  not read off the chart. The note is not vendored here.
+* `vendor/frbus_package/documentation/price_wage_sector_083013.pdf`, page 16
+  (Figure 3, "FRB/US Ping Simulations: VAR Expectations"). The Bayesian 85-12
+  price–wage sector is the specification the model adopted. The values above
+  are read off the chart, so they are approximate.
+
+Reading: against the Board's own ping of the current model generation
+(Laforte 2018), the core PCE trough agrees to 0.001pp and in the same
+quarter (8). The output-gap trough agrees to 0.02pp. Unemployment peaks
+0.04pp higher here. The 2014 and 2013 publications (−0.08pp) describe the
+pre-2018 model, whose wage–price block was re-estimated in 2018. The Board's
+"previous version" column (−0.062pp) shows the same direction. So −0.034pp is
+FRB/US as the Board now publishes it, not an implementation gap. It remains a
+small response, and a scenario whose conclusion depends on inflation should
+say so. Almost all of it comes through the VAR-expectations equations
+(`zpicxfe`, `zpieci`). Swapping the 2013 NKPC slopes in changes nothing
+(`docs/inflation-transmission.md`).
 
 ### Period stacking — a genuine trap in the add-factor interface
 
@@ -220,6 +272,15 @@ wrapper exposing a `periods` argument must document this on **every** lever it
 exposes, not only the monetary ones.
 
 ## Test 4 — fiscal multipliers gated against published ranges (slow gate)
+
+Sources, exact table/figure numbers and like-for-like conversions for every
+band below are in [docs/benchmarks.md](docs/benchmarks.md). Two band-source
+labels in the table were inaccurate and are corrected there: Whalen &
+Reichling give no "central" tax-cut multiplier of 0.3 (0.3 is the low end of
+the two-year lower- and middle-income row, in the Fed-not-tightening regime),
+and Coenen et al. publish their multipliers as charts, not a table.
+`tests/test_benchmarks.py` adds gates on CBO-table-derived bands, the fiscal
+closure switch, and the 2022–23 tightening episode (section 4 of that file).
 
 The fiscal-multiplier properties previously quoted for this implementation
 were computed once and never re-checked. `tests/test_multipliers.py` now
@@ -295,6 +356,78 @@ already said 0.90.
 
 Reproduce with `pytest -m slow tests/test_multipliers.py`.
 
+## Scenario sweep: sizes, signs, linearity, reversion (slow gate)
+
+`scripts/scenario_sweep.py` runs about 30 solves (~6s) and writes
+`results/scenario_sweep.{json,md}`. `tests/test_scenario_sweep.py` gates the
+results in `correctness-gates`. The grid:
+
+* **Monetary:** a one-quarter `rffintay_aerr` impulse of −200, −100, −25, 0,
+  +25, +100 and +200bp, plus +100bp held for 4 and 8 quarters.
+* **Purchases:** `egfe` raised by −1, −0.1, 0, +0.1, +0.5, +1 and +2% of GDP
+  for 8 quarters.
+* **Transfers:** a `gtr` add-factor of −1, 0, +1 and +2% of GDP for 8
+  quarters.
+* **Taxes:** `trp` cut by −2, 0, +1, +2 and +4pp for 8 quarters.
+
+**Gate bounds.** Each linearity and symmetry check has its own bound, the
+value measured on CI on 2026-11-06 plus about 20% (`MONETARY_BOUNDS` and
+`FISCAL_BOUNDS` in the script; the measured value sits next to each bound).
+These are regression bounds on this solve, not economic tolerances: before
+6 Nov a flat 5% let a check measured at 1% drift fivefold unnoticed. The two
+purchases checks are gated on a prediction instead (see below).
+`tests/test_scenario_sweep.py::test_committed_sweep_is_current` compares every
+committed deviation path quarter by quarter (all six variables, every run),
+the multipliers and every check value against a fresh solve to 1e-6.
+`tests/test_scenario_sweep_bounds.py` (fast suite, no solve) re-runs the checks
+on the committed paths and perturbs single paths by 1-6% to show each kind of
+check turns red.
+
+Results (2026-11-06):
+
+* **Zero shock = baseline** in every family, to under 1e-8.
+* **Monetary shocks are close to linear and symmetric.** Taking 200bp against
+  twice 100bp, and four times 25bp against 100bp, every response stays within
+  2% of its peak. The +100bp and −100bp paths mirror each other within 4% of
+  the peak. Holding the shock longer deepens the trough: −0.55% for 1
+  quarter, −2.08% for 4 and −3.82% for 8. The 1-quarter impulse reverts: at
+  2030Q4 the output gap is at 5% of its peak.
+* **Purchases are not linear at 1% of GDP.** The year-1 multiplier is 0.900
+  for a 1%-of-GDP cut, 0.809 at −0.1%, 0.792 at +0.1%, 0.760 at +0.5%,
+  0.725 at +1% (the gated value) and 0.666 at +2%. The cause is the model's
+  own aggregation. Final sales (`xfs`) and GDP (`xp`) add component growth in
+  logs, `y·log(egfe/egfe(-1))`, and 1% of GDP is about 22% of `egfe`, so
+  log(1.22) = 0.20 against −log(0.78) = 0.25. The predicted cut/rise ratio is
+  1.244 and the observed ratio is 1.241, which is gated. Linearity and
+  symmetry are measured on the ±0.1% runs, and the same aggregation predicts
+  their gaps: with a = 0.1% of GDP / egfe share (0.0464), the ±0.1% symmetry
+  gap is (−log(1−a) − log(1+a)) / log(1+a) = 0.0218 (measured 0.0216) and the
+  0.1% → 0.5% linearity gap is 1 − log(1+5a) / (5 log(1+a)) = 0.0401
+  (measured 0.0398). Both are gated within 3% of the prediction, so a gap that
+  grows or shrinks is caught; the 0.0398 that sat just under the old flat 5%
+  bound is the aggregation, not a near-miss. The small-shock multiplier is
+  about **0.80**. The published 0.72 belongs to the 1%-of-GDP design and
+  should be quoted with it.
+* **Transfers** have a year-1 multiplier of 0.28 and a year-2 multiplier of
+  0.30, linear and symmetric. This is below purchases in both years, which is
+  gated. CBO's 0.4–2.1 for transfers to individuals (Feb 2015, Table 3) is a
+  Fed-not-tightening range, so comparing it with this active-rule 0.28 mixes
+  regimes. On matched comparisons the model is still below: 0.315 with the
+  funds rate pegged and the fiscal rule off, against 0.4–2.1; and 0.28 against
+  0.36–1.52 derived from CBO's typical-Fed-response path. See
+  [docs/benchmarks.md](docs/benchmarks.md), which sources every benchmark to
+  a table and page, converts CBO's quarterly path to this repo's
+  sustained-shock definition, and shows the fiscal closure explains only
+  ~0.02 of the year-1 gap.
+* **Tax cuts** have a year-1 multiplier of 0.22 and a year-2 multiplier of
+  0.32 at every size from 1 to 4pp, linear and symmetric. These match Test 4.
+* **Fiscal reversion.** After an 8-quarter purchases or transfers shock ends,
+  output undershoots in 2030 by about 45% of the peak. The funds rate is still
+  above baseline, and it is the inertial rule's overshoot that comes back. The
+  tax-cut shock leaves 7% of its peak. The check only requires the 2030
+  deviation to stay under 50% of the peak, so this property is reported more
+  than gated.
+
 ## LONGBASE vs the 2026 outturns (report, not a gate)
 
 The pinned LONGBASE vintage (April 2026) carries the Fed staff's near-term
@@ -311,19 +444,133 @@ outturn:
 | 2026Q2 | real GDP growth, annualized (xgdp / GDPC1) | 2.41 | 1.50 | +0.91 |
 | 2026Q1 | unemployment rate (lur / UNRATE) | 4.46 | 4.33 | +0.12 |
 | 2026Q2 | unemployment rate (lur / UNRATE) | 4.44 | 4.27 | +0.17 |
-| 2026Q1 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 4.42 | −1.69 |
-| 2026Q2 | core PCE inflation, annualized (picxfe / PCEPILFE) | 2.73 | 3.42 | −0.69 |
+| 2026Q1 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.77 | 4.42 | −1.65 |
+| 2026Q2 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.76 | 3.42 | −0.65 |
 | 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
 | 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
 
+Both sides of every growth row are annualized compounded q/q rates. The core
+PCE rows were first published as −1.69/−0.69 by comparing `picxfe` itself,
+which model.xml defines as `400·dlog(pcxfe)` (a log rate), against the
+compounded FRED rate; the LONGBASE side now compounds the `pcxfe` level, as
+the GDP row always did (corrected 2026-11-05).
+
 Reading: activity and the funds rate were close (GDP growth overshot by
 0.3–0.9pp, unemployment by ~0.15pp), but the baseline substantially
-underprojected core PCE inflation, by 1.7pp in 2026Q1 and 0.7pp in 2026Q2.
+underprojected core PCE inflation, by 1.65pp in 2026Q1 and 0.65pp in 2026Q2.
 This is a property of the Fed's baseline data, not of this implementation, so
 it is **deliberately not gated**: the scheduled `longbase-backtest` CI job
 re-runs the comparison against fresh FRED data with `continue-on-error`, and
 only the report machinery itself is gated (hermetically, on the committed
 snapshot). The generated report is committed under `backtests/`.
+
+## Test 5 — model-consistent expectations (opt-in) against pyfrbus and Laforte (2018)
+
+`Frbus(path, mce=...)` swaps in the `<mce_equation>` variants of the selected
+groups (`mcap`: 12 financial-market expectations; `wp`: `zpicxfe`, `zpieci`;
+`all` adds the 11 `mcother` ones) and solves the window as one stacked
+system. Leads past `end` read the input data (pyfrbus's terminal condition).
+Newton stops on the step 2-norm (`xtol`) or, for MCE only, on the stacked
+residual 2-norm (`ftol`, default 1e-8). The second rule is needed because on
+80- and 160-quarter windows the residual reaches ~1.2e-9 by the third
+iteration while the step norm stalls at a round-off floor above `xtol=1e-8`.
+When the residual rule fires, the solver takes one more full Newton step and
+keeps it if it evaluates cleanly and still meets `ftol`. Without that step the
+residual rule can fire straight after a large step: under `wp` the 20-quarter
+gate stopped at residual 3.6e-9 with `wpsn` 1.3e-4 away from pyfrbus (failing
+the 1e-6 gate); with it, `wp` matches like the other modes. VAR solves never
+use `ftol` (`tests/test_mce.py::test_var_solver_defaults_unchanged`).
+
+**Against the Board's pyfrbus (hard gate).** 100bp shock (`rffintay_aerr` +1
+in 2026Q1, demo fiscal configuration), 2026Q1–2030Q4, all 284 endogenous
+variables. Committed references come from
+`scripts/generate_vendor_mce_reference.sh` (the Board's pyfrbus with
+`mce=...`, Newton at `xtol=1e-8`), and the `vendor-mce-reference` CI job
+regenerates them fresh on every PR, for all four modes. Under `wp` the
+vendor's Newton steps crawl at ~1.3e-8 and it raises at its default 50
+iterations, so the committed `wp` reference is generated with
+`maxiter=2000`. Getting under 1e-8 depends on the hardware (about 50 seconds
+on one CI runner, over five minutes on another), and stopping at `xtol` 3e-8
+or 1e-7 moves the solution by < 1e-8, so the CI regeneration for `wp` stops
+the vendor at 3e-8. The gate on this implementation stays 1e-6.
+
+| mode | max abs diff | max rel diff | worst cell |
+|---|---|---|---|
+| mcap | 2.3e-9 | 3.7e-10 | wpsn 2030Q2 |
+| wp | 1.5e-8 | 4.8e-10 | wpsn 2028Q2 |
+| mcap+wp | 1.7e-9 | 2.6e-10 | wpsn 2030Q3 |
+| all | 1.2e-9 | 1.3e-10 | wpsn 2030Q4 |
+
+(Before the extra Newton step, mcap was 9.9e-10 and wp failed at 1.3e-4.)
+
+Gate tolerance 1e-6 abs and rel, the same as Test 2.
+
+**Against the Board's published MCE ping (slow gate).** Laforte (2018), FEDS
+Notes, Figure 11, "New Version" (MCE for the financial and wage-price
+sectors, footnote 3, so `mcap+wp`); values in
+`docs/data/laforte2018_fig11_mce_ping.json`. Ours: same shock from 2040Q1 with
+the `programs/pings.prg` settings over 160 quarters.
+
+| | 10y impact | output gap trough | unemployment peak | core PCE trough | rff q2 | rff q4 |
+|---|---|---|---|---|---|---|
+| Laforte 2018 | +0.156 | −0.186 (q6) | +0.098 (q4) | −0.0077 (q6) | 0.837 | 0.561 |
+| ours, mcap+wp | +0.154 | −0.180 (q5) | +0.117 (q6) | −0.0112 (q7) | 0.837 | 0.560 |
+| ours, VAR | +0.332 | −0.451 (q7) | +0.272 (q8) | −0.0343 (q8) | 0.825 | 0.503 |
+
+The financial block and the output gap match closely. Unemployment (1.2×)
+and core inflation (1.45×) are larger than published. The pyfrbus match above
+is the test of the implementation; the gap is not tuned away. Gate bands: rff
+q1–q8 and 10y impact within 0.01pp, output gap trough within 10%,
+unemployment peak within 25%, core PCE trough within a factor of 2.
+
+**Is the gap the model vintage? No, not the coefficients.** Laforte ran the
+November 2018 model; the vendored model.xml is the January 2021 release
+(byte-identical to the frbus_package.zip the Board served in April 2022). The
+November 2018 package is not vendored, but the Internet Archive holds the copy
+served on 24 Jan 2019
+(<https://web.archive.org/web/20190124190801id_/https://www.federalreserve.gov/econres/files/frbus_package.zip>,
+zip sha1 e743dbe4382a155ddf02cece05a2134922f02824). Diffing its
+`mods/model.xml` against ours, every standard and MCE equation, text and
+coefficients:
+
+- The wage-price block is identical: `picxfe`, `pieci`, `ptr`, and the VAR and
+  MCE equations for `zpicxfe` and `zpieci`, every coefficient. The only
+  wage-price differences are `y_pmo(1)` (0.000267 → 0) and an add-factor on
+  the `pgfl`/`pgsl` identities.
+- Elsewhere: `rbbbp` and `reqp` re-estimated; the January 2021 fiscal changes
+  (`gfdbtn`, `gfdbtnp`, `gfsrpn`, `trpt`); longer trend-growth averages in
+  `qecd`/`qeh`; the `rffrule` floor moved into `rff`; seven variables dropped.
+
+`scripts/laforte_vintage_check.py` (`results/laforte_vintage_check.json`)
+re-runs the Fig. 11 ping under mcap+wp:
+
+| run | core PCE trough | ratio to published | output gap trough | unemployment peak |
+|---|---|---|---|---|
+| Laforte 2018 | −0.0077 (q6) | 1.00 | −0.186 (q6) | +0.098 (q4) |
+| ours, from 2040Q1 | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
+| ours, 2018 coefficients restored (all seven) | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
+| ours, from 2030Q1 | −0.0112 (q7) | 1.45 | −0.188 (q5) | +0.117 (q6) |
+| ours, from 2020Q1 (Laforte's dates) | −0.0086 (q6) | 1.11 | −0.173 (q6) | +0.090 (q4) |
+
+Restoring every 2018 coefficient leaves the core trough unchanged, so the
+coefficient vintage does not explain it. The shock date does matter: from
+2020Q1 the trough is −0.0086 (1.11×) and the timing matches the note (core
+and gap troughs in q6, unemployment peak in q4). That is evidence of
+state dependence on the baseline, not a reproduction: our 2020Q1 baseline is
+realised COVID-era history in the April 2026 LONGBASE, whereas Laforte shocked
+the 2018 LONGBASE projection. That baseline is archived (the
+`data_only_package.zip` captured on 21 Dec 2018, files dated 28 Nov 2018, zip
+sha1 2283053f53a8b85a4d58ba99919df52dc4c06405) but only as an EViews database
+(`longbase.edb`); its `HISTDATA.TXT` stops at 2018Q2, so the projection
+cannot be read without EViews. The equation changes that are not coefficient
+swaps (fiscal, `qecd`/`qeh`, `rffrule`) were not reversed. Reading: the
+remaining gap is most likely the baseline data vintage, which this repo
+cannot check.
+
+VAR versus MCE on the headline experiments: `results/expectations_comparison.md`,
+`results/expectations_matched_closures.md` (purchases multiplier on the
+matched closures) and `results/episode_2022_tightening_mce_*.md` (the 2022–23
+tightening); docs/benchmarks.md section 5 summarises them.
 
 ## How this is enforced in CI
 
@@ -334,7 +581,7 @@ pass.
 
 | job | gate |
 |---|---|
-| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), and Test 3 as separate steps, so a failure names the broken invariant |
+| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), Test 3, the Test 4 fiscal multipliers and the scenario sweep (`-m slow`) as separate steps, so a failure names the broken invariant |
 | `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the 1.3e-8 build-to-build noise floor documented in Test 2b) |
 | `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.10/3.11/3.12, the Test 4 fiscal-multiplier gate (`-m slow`), plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
 | `longbase-backtest` | Weekly, **non-gating** (`continue-on-error`): re-runs `scripts/backtest_longbase.py --fetch` against fresh FRED data and prints the LONGBASE-vs-outturn report |
@@ -351,5 +598,10 @@ additionally fails if `tests/data/` is modified in place).
   `rtol=5e-4`. The vendor decomposes each period into recursive/simultaneous
   blocks; both approaches solve the same F(x)=0, so solutions agree up to
   solver tolerance, as the tables show.
-- MCE (rational expectations) variants are not implemented
-  (`NotImplementedError`) and are excluded from validation.
+- MCE (opt-in, `Frbus(..., mce=...)`) is solved as one stacked-time system
+  over the window (`src/frbus/mce.py`); pyfrbus also stacks the window
+  (User Guide, "MCE Solver Algorithm") but duplicates the equation text per
+  period, while we compile each equation once in period-relative form and
+  place its Jacobian blocks for every period. Same equations, same unknowns,
+  same terminal condition (input data after `end`), so the same F(x)=0; see
+  "Test 5" for the agreement.

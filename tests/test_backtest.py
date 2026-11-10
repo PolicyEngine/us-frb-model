@@ -9,8 +9,8 @@ Deliberately NOT asserted: that LONGBASE was right. The baseline is the Fed's
 projection, not this implementation's output, so its accuracy is reported
 (VALIDATION.md, "LONGBASE vs the 2026 outturns") rather than gated. For the
 record, the first backtest's largest gap is core PCE inflation: LONGBASE
-projected 2.73% (annualized) for both quarters against outturns of 4.42%
-(2026Q1) and 3.42% (2026Q2) -- errors of -1.69pp and -0.69pp -- while GDP
+projected 2.77%/2.76% (annualized, compounded) against outturns of 4.42%
+(2026Q1) and 3.42% (2026Q2) -- errors of -1.65pp and -0.65pp -- while GDP
 growth, unemployment, and the funds rate were all within ~0.9pp/0.2pp/0.15pp.
 """
 
@@ -55,3 +55,16 @@ def test_backtest_report_from_committed_snapshot(longbase, tmp_path):
 def test_backtest_uses_pinned_longbase_vintage():
     # The report must describe the vintage this repo actually pins.
     assert bt.LONGBASE == LONGBASE
+
+
+def test_core_pce_baseline_is_on_the_outturn_concept(longbase):
+    """picxfe is 400*dlog(pcxfe) (model.xml), a log rate; the FRED outturn is
+    compounded. The baseline must be compounded too, or the core PCE error
+    carries a ~0.04pp concept gap at 2.7% that grows with inflation."""
+    import numpy as np
+
+    baseline = bt.baseline_paths(longbase)["PCEPILFE"]
+    compounded = np.expm1(longbase["picxfe"] / 100.0) * 100.0
+    for quarter in bt.QUARTERS:
+        assert abs(baseline[quarter] - compounded[quarter]) < 1e-6
+        assert baseline[quarter] > longbase["picxfe"][quarter]

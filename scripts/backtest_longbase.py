@@ -9,8 +9,9 @@ series and writes a small JSON + markdown report:
     --------  ---------  ------------------------------------------------
     xgdp      GDPC1      real GDP growth, annualized q/q % from levels
     lur       UNRATE     unemployment rate, quarterly average of months
-    picxfe    PCEPILFE   core PCE inflation, annualized q/q % of the
-                         quarterly-average index
+    pcxfe     PCEPILFE   core PCE inflation, annualized compounded q/q % of
+                         the quarterly-average index (LONGBASE side from the
+                         pcxfe level, not picxfe, which is a log rate)
     rff       FEDFUNDS   federal funds rate, quarterly average of months
 
 By default the realized values come from the committed snapshot
@@ -52,7 +53,10 @@ QUARTERS = [pd.Period("2026Q1"), pd.Period("2026Q2")]
 SERIES = {
     "GDPC1": {"variable": "xgdp", "concept": "real GDP growth (annualized q/q %)"},
     "UNRATE": {"variable": "lur", "concept": "unemployment rate (%, quarterly avg)"},
-    "PCEPILFE": {"variable": "picxfe", "concept": "core PCE inflation (annualized q/q %)"},
+    "PCEPILFE": {
+        "variable": "pcxfe",
+        "concept": "core PCE inflation (annualized compounded q/q % of pcxfe)",
+    },
     "FEDFUNDS": {"variable": "rff", "concept": "federal funds rate (%, quarterly avg)"},
 }
 
@@ -98,10 +102,15 @@ def to_quarterly(series_id: str, series: pd.Series) -> pd.Series:
 def baseline_paths(longbase: pd.DataFrame) -> dict[str, pd.Series]:
     """The LONGBASE near-term path for each concept, on QUARTERS."""
     growth = (longbase["xgdp"] / longbase["xgdp"].shift(1)) ** 4 * 100 - 100
+    # picxfe is NOT on the outturn's concept: model.xml defines it as
+    # 400 * dlog(pcxfe), an annualized LOG rate, while to_quarterly()
+    # compounds the FRED index. Compound the LONGBASE price level the same
+    # way (identical to 100 * expm1(picxfe / 100) when pcxfe_aerr = 0).
+    core_pce = (longbase["pcxfe"] / longbase["pcxfe"].shift(1)) ** 4 * 100 - 100
     return {
         "GDPC1": growth,
         "UNRATE": longbase["lur"],
-        "PCEPILFE": longbase["picxfe"],
+        "PCEPILFE": core_pce,
         "FEDFUNDS": longbase["rff"],
     }
 

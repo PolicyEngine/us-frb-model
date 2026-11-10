@@ -64,6 +64,26 @@ jobs:
       # weekly job.
       - name: Gate - fiscal multipliers inside published ranges
         run: uv run pytest -q --no-header -rA -m slow tests/test_multipliers.py
+      # About 30 solves, ~6s: zero shock = baseline, linearity, symmetry,
+      # reversion and persistence over monetary and fiscal shock grids.
+      - name: Gate - scenario sweep properties
+        run: uv run pytest -q --no-header -rA -m slow tests/test_scenario_sweep.py
+      - name: Gate - sweep checks re-run on the committed paths (and shown to fail)
+        run: uv run pytest -q --no-header -rA tests/test_scenario_sweep_bounds.py
+      # ~16 solves, a few seconds: CBO-table-derived multiplier bands, the
+      # fiscal-closure switch, and the 2022-23 tightening episode.
+      - name: Gate - benchmarks and the 2022-23 episode
+        run: uv run pytest -q --no-header -rA -m slow tests/test_benchmarks.py
+      # ~22 solves, under a minute: channel shut-offs and coefficient vintages
+      # against the committed JSON, the Board's published post-2018 ping
+      # (Laforte 2018), and the 2022-23 counterfactual against a committed
+      # pyfrbus solution (scripts/generate_vendor_episode_reference.sh).
+      - name: Gate - inflation transmission and the episode vs pyfrbus
+        run: uv run pytest -q --no-header -rA -m slow tests/test_inflation_transmission.py
+      # Opt-in MCE (stacked-time) solve: mcap, wp, mcap+wp and all 100bp shock against
+      # committed pyfrbus solutions (< 1e-6; observed 1e-9 to 1.5e-8). A few seconds.
+      - name: Gate - MCE solve vs committed pyfrbus reference
+        run: uv run pytest -q --no-header -rA tests/test_mce.py
 
   # Regenerates the cross-validation reference by actually running the Fed's
   # pyfrbus (vendor/pyfrbus_package, patched copy in a throwaway py3.11 venv)
@@ -97,6 +117,48 @@ jobs:
         env:
           FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor.csv
           VENDOR_SCENARIO: ${{ matrix.scenario }}
+        run: uv run python scripts/check_reference_drift.py
+      - name: Fail if the committed reference was modified in place
+        run: git diff --exit-code -- tests/data/
+
+  # Same as vendor-reference, for the opt-in MCE solve: run the Board's pyfrbus
+  # with Frbus(model.xml, mce=...) on the 100bp shock and gate this
+  # implementation's stacked-time solve against that fresh solution, then
+  # check the committed MCE anchors have not drifted. ~1 minute per mode.
+  vendor-mce-reference:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mce: [mcap, wp, "mcap+wp", all]
+        include:
+          # pyfrbus's Newton steps crawl at ~1.3e-8 under wp; whether they get
+          # under 1e-8 depends on the runner (50s on one, >5 min on another),
+          # so the vendor stops at 3e-8 here (< 1e-8 from the 1e-8 solution;
+          # see the script). The gate on this implementation stays 1e-6.
+          - mce: wp
+            xtol: "3e-8"
+            maxiter: "2000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          uv pip install -e ".[dev]"
+      - name: Regenerate MCE vendor reference from vendor/pyfrbus_package
+        run: >-
+          bash scripts/generate_vendor_mce_reference.sh
+          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" "${{ matrix.xtol || '1e-8' }}" "${{ matrix.maxiter || '50' }}"
+      - name: Gate - ours (MCE) vs freshly generated vendor solution (< 1e-6)
+        env:
+          FRESH_VENDOR_MCE_CSV: ${{ runner.temp }}/fresh_vendor_mce.csv
+          VENDOR_MCE: ${{ matrix.mce }}
+        run: uv run pytest -q --no-header -rA -m slow tests/test_mce.py -k vendor
+      - name: Gate - committed MCE reference has not drifted from vendor
+        env:
+          FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor_mce.csv
+          VENDOR_MCE: ${{ matrix.mce }}
         run: uv run python scripts/check_reference_drift.py
       - name: Fail if the committed reference was modified in place
         run: git diff --exit-code -- tests/data/

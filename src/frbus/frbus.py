@@ -7,38 +7,56 @@ import re
 import numpy as np
 import pandas as pd
 
-from frbus import equations, lexing, runtime, solver, symbolic, uncertainty
+from frbus import equations, lexing, mce, runtime, solver, symbolic, uncertainty
 from frbus.exceptions import FrbusError, MissingDataError
-from frbus.parse import ModelSpec, parse_model
+from frbus.parse import MCE_TYPES, ModelSpec, parse_model
+
+#: Default residual tolerance (2-norm over the stacked system) for MCE solves.
+MCE_FTOL = 1e-8
 
 
 class Frbus:
-    """FRB/US model with VAR (backward-looking) expectations.
+    """FRB/US model with VAR (default) or model-consistent expectations.
 
     Parameters
     ----------
     filepath:
         Path to a FRB/US ``model.xml`` file.
     mce:
-        MCE (rational expectations) variant selector. Not implemented; must
-        be None.
+        ``None`` (default): VAR (backward-looking) expectations, solved period
+        by period. Otherwise one of ``"mcap"`` (financial-market expectations),
+        ``"wp"`` (wage-price expectations), ``"mcap+wp"`` or ``"all"``, as in
+        pyfrbus: the selected groups' ``<mce_equation>`` variants (which carry
+        leads) replace the VAR equations, and ``solve`` runs a stacked-time
+        Newton solve over the whole window with terminal values taken from the
+        input data after ``end`` (see :mod:`frbus.mce`).
     """
 
     def __init__(self, filepath: str, mce: str | None = None):
-        if mce is not None:
-            raise NotImplementedError(
-                "MCE (model-consistent expectations) equations are not implemented; "
-                "only VAR (backward-looking) expectations are supported"
-            )
+        if mce is not None and mce not in MCE_TYPES:
+            raise ValueError(f"mce must be None or one of {sorted(MCE_TYPES)}; got {mce!r}")
         spec: ModelSpec = parse_model(filepath)
         self.spec = spec
+        self.mce = mce
         self.endo_names: list[str] = list(spec.endo_names)
         self.stoch_shocks: list[str] = list(spec.stoch_shocks)
+
+        model_eqs = list(spec.equations)
+        constants = dict(spec.constants)
+        self.mce_vars: list[str] = []
+        if mce is not None:
+            groups = MCE_TYPES[mce]
+            for name, (group, eq) in spec.mce_equations.items():
+                if group in groups:
+                    model_eqs[self.endo_names.index(name)] = eq
+                    self.mce_vars.append(name)
+            for group in groups:
+                constants.update(spec.mce_constants.get(group, {}))
 
         # Append tracking residual (add-factor) to every equation: lhs = rhs + <endo>_trac
         eqs = [
             eq + f"+{endo}_trac"
-            for eq, endo in zip(spec.equations, self.endo_names, strict=True)
+            for eq, endo in zip(model_eqs, self.endo_names, strict=True)
         ]
 
         # Exogenous variables: those used in equations, plus _aerr and _trac terms.
@@ -56,7 +74,7 @@ class Frbus:
 
         # Flip to residual form and substitute coefficient values
         flipped = [equations.flip_equals(eq) for eq in eqs]
-        filled = equations.fill_constants(flipped, spec.constants)
+        filled = equations.fill_constants(flipped, constants)
         self._lexed_eqs = lexing.lex_eqs(filled)
         self._orig_lexed_eqs = list(self._lexed_eqs)
         self._orig_endo_names = list(self.endo_names)
@@ -125,6 +143,16 @@ class Frbus:
 
         self._data_varnames = list(data.columns)
         data_col = {name: i for i, name in enumerate(data.columns)}
+        if self.mce is not None:
+            try:
+                self._trac_idxs = [data_col[f"{endo}_trac"] for endo in self.endo_names]
+                self._stacked = mce.StackedSystem(
+                    self._lexed_eqs, self.endo_names, list(data.columns)
+                )
+            except KeyError as err:
+                raise MissingDataError(err.args[0]) from None
+            self._stale = False
+            return data
         endo_idx = {name: i for i, name in enumerate(self.endo_names)}
         is_exo = {name: False for name in self.endo_names}
         is_exo.update({name: True for name in self.exo_names})
@@ -173,17 +201,35 @@ class Frbus:
         data = self._setup(input_data)
         idxs = self._period_idxs(start, end, data)
         vals = data.to_numpy(copy=True)
+        if self.mce is not None:
+            vals = self._stacked.compute_tracs(vals, np.array(idxs), np.array(self._trac_idxs))
+            return pd.DataFrame(vals, index=data.index, columns=data.columns)
         vals = solver.compute_tracs(idxs, vals, self._endo_idxs, self._trac_idxs, self._feqs)
         return pd.DataFrame(vals, index=data.index, columns=data.columns)
 
     def solve(
         self, start, end, input_data: pd.DataFrame, options: dict | None = None
     ) -> pd.DataFrame:
-        """Solve the model per-period over ``start``..``end`` (inclusive)."""
+        """Solve the model over ``start``..``end`` (inclusive).
+
+        VAR mode solves period by period. MCE mode solves all periods at once
+        (stacked time); Newton stops when the step 2-norm is below ``xtol``
+        and raises :class:`~frbus.exceptions.ConvergenceError` if the residual
+        2-norm is then above ``rtol`` or ``maxiter`` is exceeded. MCE solves
+        also stop once the stacked residual 2-norm is below ``ftol``
+        (default ``MCE_FTOL`` = 1e-8): on long windows the step norm stalls at
+        a round-off floor above ``xtol`` (observed ~1e-6 at 160 quarters)
+        while the residual is already ~1e-9.
+        """
         opts = solver.solver_defaults(options)
         data = self._setup(input_data)
         idxs = self._period_idxs(start, end, data)
         vals = data.to_numpy(copy=True)
+        if self.mce is not None:
+            if opts["ftol"] is None:
+                opts["ftol"] = MCE_FTOL
+            vals = self._stacked.solve(vals, np.array(idxs), solver.newton, opts)
+            return pd.DataFrame(vals, index=data.index, columns=data.columns)
         vals = solver.solve_periods(idxs, vals, self._endo_idxs, self._feqs, self._fjac, opts)
         return pd.DataFrame(vals, index=data.index, columns=data.columns)
 
