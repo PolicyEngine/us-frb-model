@@ -10,12 +10,21 @@
 # when the stacked system is first set up; a fresh Frbus is built per run, so
 # the terminals are LONGBASE after END, which is what this implementation reads.
 #
-# Usage: generate_vendor_mce_reference.sh OUTPUT_CSV MCE
-#   MCE is one of mcap, wp, mcap+wp, all.
+# Usage: generate_vendor_mce_reference.sh OUTPUT_CSV MCE [XTOL] [MAXITER]
+#   MCE is one of mcap, wp, mcap+wp, all. XTOL (Newton step tolerance)
+#   defaults to 1e-8 and MAXITER to pyfrbus's 50. Under mce="wp" the vendor's
+#   Newton steps crawl at ~1.3e-8 and it raises after 50 iterations; with
+#   MAXITER=2000 it converged at xtol=1e-8 in ~50s on one CI runner (stacked
+#   residual 2.4e-10) but took over 5 minutes on another, so getting under
+#   1e-8 depends on the hardware. The committed wp reference uses 1e-8 / 2000;
+#   stopping at 3e-8 (3s) or 1e-7 moves it by < 1e-8, so CI regenerates wp at
+#   3e-8.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$1"
 MCE="$2"
+XTOL="${3:-1e-8}"
+MAXITER="${4:-50}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -61,7 +70,7 @@ uv venv "$WORK/venv" -p 3.11
 uv pip install -p "$WORK/venv/bin/python" "$WORK/pyfrbus_ref" "pandas==1.5.3" "numpy<2"
 
 cd "$REPO"
-OUT="$OUT" MCE="$MCE" "$WORK/venv/bin/python" - <<'EOF'
+OUT="$OUT" MCE="$MCE" XTOL="$XTOL" MAXITER="$MAXITER" "$WORK/venv/bin/python" - <<'EOF'
 import os
 import sys
 import time
@@ -81,8 +90,17 @@ set_policy("monetary", data, start, end)
 t0 = time.time()
 with_adds = model.init_trac(start, end, data)
 apply_shock("monetary", with_adds, start, end)
-sim = model.solve(start, end, with_adds, options={"newton": "newton", "xtol": 1e-8})
+sim = model.solve(
+    start,
+    end,
+    with_adds,
+    options={
+        "newton": "newton",
+        "xtol": float(os.environ["XTOL"]),
+        "maxiter": int(os.environ["MAXITER"]),
+    },
+)
 out = os.environ["OUT"]
 sim.loc[start:end, model.orig_endo_names].to_csv(out)
-print(f"wrote {out} (mce={mce}, {time.time() - t0:.0f}s)")
+print(f"wrote {out} (mce={mce}, xtol={os.environ['XTOL']}, maxiter={os.environ['MAXITER']}, {time.time() - t0:.0f}s)")
 EOF

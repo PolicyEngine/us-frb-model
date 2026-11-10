@@ -80,8 +80,8 @@ jobs:
       # pyfrbus solution (scripts/generate_vendor_episode_reference.sh).
       - name: Gate - inflation transmission and the episode vs pyfrbus
         run: uv run pytest -q --no-header -rA -m slow tests/test_inflation_transmission.py
-      # Opt-in MCE (stacked-time) solve: mcap and mcap+wp 100bp shock against
-      # committed pyfrbus solutions (< 1e-6; observed ~2e-9). A few seconds.
+      # Opt-in MCE (stacked-time) solve: mcap, wp, mcap+wp and all 100bp shock against
+      # committed pyfrbus solutions (< 1e-6; observed 1e-9 to 1.5e-8). A few seconds.
       - name: Gate - MCE solve vs committed pyfrbus reference
         run: uv run pytest -q --no-header -rA tests/test_mce.py
 
@@ -130,7 +130,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mce: [mcap, "mcap+wp"]
+        mce: [mcap, wp, "mcap+wp", all]
+        include:
+          # pyfrbus's Newton steps crawl at ~1.3e-8 under wp; whether they get
+          # under 1e-8 depends on the runner (50s on one, >5 min on another),
+          # so the vendor stops at 3e-8 here (< 1e-8 from the 1e-8 solution;
+          # see the script). The gate on this implementation stays 1e-6.
+          - mce: wp
+            xtol: "3e-8"
+            maxiter: "2000"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -141,7 +149,7 @@ jobs:
       - name: Regenerate MCE vendor reference from vendor/pyfrbus_package
         run: >-
           bash scripts/generate_vendor_mce_reference.sh
-          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}"
+          "$RUNNER_TEMP/fresh_vendor_mce.csv" "${{ matrix.mce }}" "${{ matrix.xtol || '1e-8' }}" "${{ matrix.maxiter || '50' }}"
       - name: Gate - ours (MCE) vs freshly generated vendor solution (< 1e-6)
         env:
           FRESH_VENDOR_MCE_CSV: ${{ runner.temp }}/fresh_vendor_mce.csv
