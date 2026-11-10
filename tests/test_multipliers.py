@@ -143,15 +143,17 @@ def tax_multipliers(longbase):
 def test_purchases_multiplier_year1_taylor_rule(purchases_multipliers):
     """Year-1 purchases multiplier under the inertial Taylor rule.
 
-    Published value for this implementation: 0.72. Band 0.7-1.0 from:
-      * Coenen et al., "Effects of Fiscal Stimulus in Structural Models",
-        AEJ: Macro 2012 -- US policy models put the first-year government
-        purchases multiplier at roughly 0.7-1.0 when monetary policy responds
-        (Table: two-year stimulus, no accommodation).
-      * Whalen & Reichling, "The Fiscal Multiplier and Economic Policy
-        Analysis in the United States", CBO WP 2015-02 -- CBO's central range
-        for purchases spans 0.5-2.5 with a central estimate near 1; a model
-        with an active Taylor rule is expected in the lower half.
+    Published value for this implementation: 0.72. Band 0.7-1.0; sources
+    and exact page references in docs/benchmarks.md:
+      * Coenen et al. (IMF WP/10/73; AEJ: Macro 2012), Fig. 25 (WP p. 53),
+        two years of government consumption, no monetary accommodation: the
+        six US models' year-1 responses run from approx. 0.7 (QUEST) to 1.1
+        (BoC-GEM), FRB-US approx. 0.95. These are chart readings (+-0.1);
+        the paper has no multiplier table.
+      * Whalen & Reichling (CBO WP 2015-02), Table 2, "Fed responds
+        typically" columns, converted to a sustained shock: year 1 0.45-1.82.
+        CBO's 0.5-2.5 purchases range (CBO Feb 2015 Table 3) assumes the Fed
+        did NOT tighten, so it is not the comparator for an active rule.
     """
     m1 = purchases_multipliers["taylor"][1]
     assert 0.7 < m1 < 1.0, f"year-1 purchases multiplier {m1:.3f} outside 0.7-1.0"
@@ -162,11 +164,13 @@ def test_purchases_multiplier_year2_pegged_rates(purchases_multipliers):
 
     Recomputed value for this implementation: 0.90 (the 0.99 previously
     quoted in this file was stale -- it is close to the year-*3* value, 1.01).
-    Band 0.8-1.2 from Coenen et al. (AEJ: Macro 2012): with two years of
-    monetary accommodation the US models' purchases multiplier rises to
-    roughly 1 (their Figure 4 range is about 0.9-1.3 across models); the
-    FRB/US documentation likewise reports multipliers near or slightly above 1
-    when the funds rate does not lean against the stimulus.
+    Band 0.8-1.2. Coenen et al. Fig. 25 (WP p. 53), two years of government
+    consumption with two years of accommodation: FRB-US year 2 approx. 1.25
+    (chart reading), so 0.90 sits below the paper's own FRB-US line; the
+    "0.9-1.3" in the paper's text (WP p. 14) is for one year of government
+    INVESTMENT with no accommodation, not this cell. CBO's limited-Fed-response
+    path (Whalen & Reichling Table 2) converted to a sustained shock gives
+    0.50-2.50 in year 2. See docs/benchmarks.md.
     """
     m2 = purchases_multipliers["pegged"][2]
     assert 0.8 < m2 < 1.2, f"year-2 pegged purchases multiplier {m2:.3f} outside 0.8-1.2"
@@ -216,11 +220,13 @@ def test_tax_cut_multiplier_years_1_and_2(tax_multipliers):
     """Personal tax-cut multiplier, years 1 and 2.
 
     Published values for this implementation: 0.22 (year 1) and 0.32
-    (year 2). Band 0.15-0.45 from Whalen & Reichling (CBO WP 2015-02): CBO
-    puts the two-year multiplier on broad-based tax cuts at roughly 0.3
-    (range 0.1-0.6 across instruments); backward-looking-expectations models
-    sit near the center for a temporary rate cut, so 0.15-0.45 gates on
-    economics without pinning the exact decimal.
+    (year 2). Band 0.15-0.45. Whalen & Reichling (CBO WP 2015-02) Table 1
+    does NOT give a central tax multiplier of 0.3: its rows are two-year tax
+    cuts for lower- and middle-income people 0.3-1.5 and a one-year tax cut
+    for higher-income people 0.1-0.6, both in the Fed-not-tightening regime
+    (CBO Feb 2015 Table 3 note a). trp is an across-the-board average rate,
+    so the economically relevant range lies between those rows; the band
+    gates on economics, not on a published point. See docs/benchmarks.md.
     """
     m1, m2 = tax_multipliers[1], tax_multipliers[2]
     assert 0.15 < m1 < 0.45, f"year-1 tax-cut multiplier {m1:.3f} outside 0.15-0.45"
