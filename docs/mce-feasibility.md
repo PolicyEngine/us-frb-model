@@ -1,9 +1,12 @@
 # Model-consistent expectations (MCE): feasibility assessment
 
-Status: **assessment only** — nothing here is implemented. `Frbus(..., mce=...)`
-currently raises `NotImplementedError` (src/frbus/frbus.py) and the parser
-already collects the names of variables carrying an `<mce_equation>`
-(`ModelSpec.mce_vars`, src/frbus/parse.py).
+Status (6 Nov 2026): **implemented, opt-in**. `Frbus(..., mce=...)` accepts
+the four pyfrbus variants and solves stacked time (src/frbus/mce.py); VAR
+stays the default. All four (`mcap`, `wp`, `mcap+wp`, `all`) are gated
+against the Board's pyfrbus (VALIDATION.md, Test 5). This page is kept as the pre-build assessment; the
+build differs from the plan below in one place: instead of duplicating the
+equation text per period, each equation is compiled once in period-relative
+form, so the symbolic compile cost does not grow with the horizon.
 
 ## What MCE is in FRB/US terms
 

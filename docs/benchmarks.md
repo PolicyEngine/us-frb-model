@@ -187,13 +187,15 @@ site's numbers use; "exog" switches it off for the whole window.
    approx. 0.44, gaps of ~0.05–0.07 that sit inside the reading error. **The
    year-1 shortfall is the finding; the year-2 one mostly dissolves once the
    closure is matched.**
-3. **Expectations mode and model vintage.** This repo implements VAR
-   expectations only (`Frbus(mce=...)` raises `NotImplementedError`; see
-   `docs/mce-feasibility.md`). The Coenen et al. runs used the 2009-10
+3. **Expectations mode and model vintage.** The gated numbers use VAR
+   expectations; MCE is opt-in (section 5 has the cross-mode numbers). The Coenen et al. runs used the 2009-10
    FRB-US, whose expectations mode the WP does not state, with a 40%
    hand-to-mouth share (their Table 1); the 2026 model's consumption block and
-   coefficients are different. Either can account for a ~0.2 gap; neither can
-   be tested here until MCE exists. The FRB-US lines are chart readings
+   coefficients are different. MCE raises the year-1 purchases multiplier
+   by ~0.05 on the matched no-accommodation closure (Taylor/exog: 0.748 to
+   0.800 under mcap+wp) and by ~0.09 under the peg (peg/exog: 0.792 to
+   0.884), section 5. That closes about a quarter of the ~0.2 gap, so the
+   expectations mode is not the main source; the vintage remains untested. The FRB-US lines are chart readings
    (±0.1), so a gap below ~0.1 would not be meaningful.
 4. **Horizon definition.** CBO's multipliers are cumulative over "several
    quarters" per dollar of a one-time outlay; ours are calendar-year ratios
@@ -263,10 +265,16 @@ VAR (GDP −3.3% at 2023Q4 vs −5.4% at 2023Q3), but its inflation effect is an
 order of magnitude smaller than either published estimate: −0.12pp on
 average over 2022–24 against ~3pp (FRBSF), and a core-PCE level effect of
 −0.15% at 2023Q4 against −7.1% for the CPI level (Chicago Fed; different
-index). This is the flat price-wage block under VAR expectations: the same
-property that gives −0.034pp of core PCE for the 100bp benchmark shock
-(VALIDATION.md). The model attributes almost all of the 2022–23 disinflation
-to residuals (supply-side unwinding), not to policy.
+index). Neither published estimate is an FRB/US run: FRBSF uses
+high-frequency-identified policy shocks (a 25bp surprise lowers core PCE by
+~0.5pp within 12 months), and Chicago uses a survey-augmented VAR. The
+Board's pyfrbus gives the identical counterfactual (5e-8 abs, gated), and
+the 100bp ping matches the Board's published post-2018 simulation (Laforte
+2018, core PCE trough −0.0345pp). Almost all of the inflation response runs
+through the VAR-expectations equations `zpicxfe`/`zpieci`, not the NKPC
+slopes. See `docs/inflation-transmission.md`. The model attributes almost all
+of the 2022–23 disinflation to residuals (supply-side unwinding), not to
+policy.
 
 **Domain warning.** Counterfactual A drives unemployment to 0.52% by 2024Q4
 and −0.61% by 2025Q4, which is impossible: the model has no floor on
@@ -282,11 +290,46 @@ balance-sheet runoff is not modelled.
 
 ## 5. Expectations mode
 
-The repo, and every number the macro site quotes from it, uses VAR
-expectations only. MCE is not implemented (`src/frbus/frbus.py` raises
-`NotImplementedError`; `docs/mce-feasibility.md` sets out the build). So a
-100bp shock cannot be compared across modes here. The macro site says so: the
-FRB/US landing, methodology and validation pages all state "VAR expectations"
-and that MCE and forward guidance are out of scope (PolicyEngine/macro
+Every number the macro site quotes from this repo uses VAR expectations. MCE
+is now available as an opt-in (`Frbus(path, mce=...)`, VALIDATION.md Test 5),
+and `results/expectations_comparison.md` compares the modes. 100bp shock:
+output gap trough −0.50 (VAR), −0.19 (mcap), −0.19 (mcap+wp); core PCE trough
+−0.034, −0.018, −0.009. Purchases multiplier (Taylor rule, `dfpsrp=1`), year 1/year 2: 0.725/0.643 (VAR),
+0.774/0.696 (mcap), 0.778/0.707 (mcap+wp). On this closure MCE adds ~0.05 in year 1, a fraction of
+the gap to the Coenen FRB-US line in section 4 (≈0.95).
+
+Matched closures (`scripts/expectations_comparison.py --matched`,
+`results/expectations_matched_closures.md`; closures over 2026Q1–2030Q4,
+LONGBASE settings after, 40-year window). Year 1 / year 2:
+
+| closure | VAR | mcap | mcap+wp | Coenen Fig. 25, FRB-US |
+|---|---|---|---|---|
+| Taylor, taxes exogenous | 0.748 / 0.735 | 0.796 / 0.789 | 0.800 / 0.800 | approx. 0.95 / 0.8 (no accommodation) |
+| peg, surplus rule | 0.769 / 0.904 | 0.836 / 0.899 | 0.835 / 0.891 | approx. 1.05 / 1.25 (2-year accommodation) |
+| peg, taxes exogenous | 0.792 / 1.005 | 0.882 / 1.074 | 0.884 / 1.075 | same |
+
+The VAR rows equal the section 4 rows (a check that the 40-year window does
+not change VAR answers). The peg here lasts five years, against Coenen's two,
+so the remaining peg shortfall is if anything understated. Under MCE the long
+rate falls in year 1 under the peg (−0.08 to −0.12pp) because agents know the
+funds rate is held while the stimulus raises inflation.
+
+2022–23 tightening under MCE (`scripts/episode_2022_tightening.py --mce`,
+`results/episode_2022_tightening_mce_*.md`). The window runs to 2065Q4 so the
+terminal condition does not bind on 2022–25; from 2026Q1 both runs use
+LONGBASE's own rule. Under MCE the counterfactual's agents know the whole
+funds-rate path: in A that rates stay at the floor through 2025, in B that
+the rule takes over in 2024. Mean four-quarter core PCE effect 2022–2024,
+A / B: −0.12 / −0.11pp (VAR), −0.17 / −0.10pp (mcap), −0.61 / −0.19pp
+(mcap+wp). Largest unemployment effect, A: +5.08pp (VAR, 2025Q4), +2.90pp
+(mcap+wp, 2024Q4). So MCE makes the 100bp-ping inflation response smaller
+(core trough −0.034 to −0.009) but makes this episode's inflation effect
+larger in A, because a known four-year peg is a large anticipated
+easing that the forward-looking wage-price block prices in at once. Both are
+far below Najjar and Shapiro's ~3pp. Running the episode on the 40-year
+window under VAR gives the 16-quarter numbers to < 1e-12
+(`--long-window`). The macro site states the mode: the FRB/US landing,
+methodology and validation pages all say "VAR expectations" and that MCE and
+forward guidance are out of scope; the second half is now out of date for MCE (PolicyEngine/macro
 `frb-us/index.html`, `frb-us/methodology/index.html` line 295,
 `frb-us/validation/index.html` lines 268–269, at commit 153cf41).
