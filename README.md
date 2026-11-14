@@ -1,6 +1,6 @@
 # frbus — a modern Python implementation of FRB/US
 
-A from-scratch, modern (numpy/scipy/sympy, Python 3.10+) implementation of the
+A from-scratch, modern (numpy/scipy/sympy, Python 3.11+) implementation of the
 Federal Reserve Board's **FRB/US** macroeconomic model, with VAR
 (backward-looking) expectations.
 
