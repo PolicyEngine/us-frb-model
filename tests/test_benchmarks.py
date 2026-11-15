@@ -121,6 +121,11 @@ def test_committed_episode_is_current(episode):
         for r in json.loads((REPO / "results" / "episode_2022_tightening.json").read_text())
     }
     for v, fresh in episode.items():
+        # The record's shape and metadata, not just the quarterly numbers: a
+        # committed file that predates a schema change must fail here.
+        assert committed[v].keys() == fresh.keys(), v
+        for k in ("expectations", "window"):
+            assert committed[v][k] == json.loads(json.dumps(fresh[k])), (v, k)
         for q, row in fresh["quarterly"].items():
             for k, val in row.items():
                 assert committed[v]["quarterly"][q][k] == pytest.approx(val, abs=1e-6), (v, q, k)
