@@ -2,7 +2,8 @@
 
 A from-scratch, modern (numpy/scipy/sympy, Python 3.10+) implementation of the
 Federal Reserve Board's **FRB/US** macroeconomic model, with VAR
-(backward-looking) expectations.
+(backward-looking) expectations by default and opt-in model-consistent
+expectations (see below).
 
 ## Provenance
 
@@ -81,9 +82,13 @@ actually tells you:
 - **Cross-validation (the real evidence).** Four shock scenarios — monetary,
   fiscal `egfe`, tax `trp`, and a non-inertial Taylor variant — agree with the
   Fed's own pyfrbus across all 284 endogenous variables and 20 quarters to
-  6.0e-9 abs / 4.9e-8 rel. For scale, the Board's own pyfrbus 1.0.0 and 1.1.1
-  releases differ from *each other* by 1.3e-8, so this sits at the reference
-  implementation's own noise floor.
+  2.1e-8 abs / 4.9e-8 rel at worst (monetary 6.0e-9 abs; fiscal 1.8e-8,
+  tax 1.7e-8, Taylor variant 2.1e-8; `VALIDATION.md` Tests 2 and 2a). The
+  exact values vary between machines and dependency versions at this scale
+  (one macOS run: monetary 8.3e-9 abs / 9.4e-8 rel), all far inside the 1e-6
+  gate. For scale, the Board's own pyfrbus 1.0.0 and 1.1.1 releases differ from *each
+  other* by 1.3e-8 on the monetary shock, so this is the same order as the
+  reference implementation's own noise floor.
 - **Fiscal multipliers.** Purchases and tax cuts lie inside the published
   ranges in `VALIDATION.md` Test 4: purchases 0.72 in year 1 under the
   inertial Taylor rule and 0.90 in year 2 with the funds rate pegged; tax cuts
