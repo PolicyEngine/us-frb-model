@@ -1,6 +1,11 @@
 [
   {
     "variant": "A_never_tighten",
+    "expectations": "var",
+    "window": [
+      "2022Q1",
+      "2025Q4"
+    ],
     "path": {
       "2022Q4": {
         "rff_hist": 3.649672131147545,
@@ -247,6 +252,11 @@
   },
   {
     "variant": "B_rule_from_2024",
+    "expectations": "var",
+    "window": [
+      "2022Q1",
+      "2025Q4"
+    ],
     "path": {
       "2022Q4": {
         "rff_hist": 3.649672131147545,
