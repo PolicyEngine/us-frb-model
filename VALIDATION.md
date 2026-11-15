@@ -1,10 +1,11 @@
 # Validation
 
-This implementation is validated three ways against the Federal Reserve's own
-`pyfrbus` (vendor/pyfrbus_package) and the April 2026 LONGBASE data vintage.
-All experiments use the VAR (backward-looking expectations) model over
+This implementation is validated against the Federal Reserve's own `pyfrbus`
+(vendor/pyfrbus_package) and the April 2026 LONGBASE data vintage. Tests 1–4
+and the scenario sweep use the VAR (backward-looking expectations) model over
 **2026Q1–2030Q4** with the standard demo fiscal configuration
-(`dfpdbt = 0`, `dfpsrp = 1` where shocked).
+(`dfpdbt = 0`, `dfpsrp = 1` where shocked). Test 5 covers the opt-in
+model-consistent expectations solve.
 
 Tests 1–3 run as pytest gates (`tests/test_tracking.py`, `tests/test_shock.py`).
 
