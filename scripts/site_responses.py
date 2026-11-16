@@ -142,23 +142,33 @@ def _row(name, ours, low, high, source, note=""):
 def scorecard(experiments: dict, peg: dict) -> list[dict]:
     m = experiments["monetary"]["summary"]
     rows = []
-    for var, key, rel in (
-        ("xgap2", "xgap2_peak", 0.10),
-        ("picxfe", "picxfe_peak", 0.10),
-        ("lur", "lur_peak", 0.30),
-    ):
+    for var, key in (("xgap2", "xgap2_peak"), ("picxfe", "picxfe_peak")):
         pub = LAFORTE_2018[var]
-        lo, hi = sorted((pub * (1 - rel), pub * (1 + rel)))
+        lo, hi = sorted((pub * 0.9, pub * 1.1))
         rows.append(
             _row(
-                f"100bp: {var} {'peak' if var == 'lur' else 'trough'}",
+                f"100bp: {var} trough",
                 m[key]["value"],
                 round(lo, 4),
                 round(hi, 4),
-                f"Laforte (2018) Fig. 2: {pub} (band +-{int(rel * 100)}%)",
-                "30% band: VALIDATION.md, Laforte unemployment band" if var == "lur" else "",
+                f"Laforte (2018) Fig. 2: {pub} (band +-10%)",
             )
         )
+    # The unemployment peak depends on the start date (1.04x Laforte on
+    # Laforte's own 2020Q1 design, 1.26x from 2026Q1, up to 1.38x from 2035Q1;
+    # VALIDATION.md). It is compared with Laforte only on Laforte's design, so
+    # this 2026Q1 row carries the start-date sanity range, not a published band.
+    pub = LAFORTE_2018["lur"]
+    rows.append(
+        _row(
+            "100bp: lur peak (start-date sanity range, not a published band)",
+            m["lur_peak"]["value"],
+            round(pub * 1.00, 4),
+            round(pub * 1.45, 4),
+            f"1.00-1.45x Laforte (2018) {pub}",
+            "Laforte's own 2020Q1 design gives 1.04x: VALIDATION.md, Laforte by start date",
+        )
+    )
     mult = {k: experiments[k]["multiplier"] for k in ("purchases", "transfers", "taxes")}
     rows.append(_row("purchases multiplier, yr 1", mult["purchases"][1], *BANDS["purchases_y1"]))
     rows.append(
@@ -235,7 +245,7 @@ def render(r: dict) -> str:
         "",
         "## Benchmark scorecard",
         "",
-        "| check | ours | published band | inside | source |",
+        "| check | ours | band | inside | source |",
         "|---|---|---|---|---|",
     ]
     for row in r["scorecard"]:

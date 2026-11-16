@@ -765,15 +765,15 @@
       "note": ""
     },
     {
-      "check": "100bp: lur peak",
+      "check": "100bp: lur peak (start-date sanity range, not a published band)",
       "ours": 0.2758,
       "band": [
-        0.1532,
-        0.2846
+        0.2189,
+        0.3174
       ],
       "inside": true,
-      "source": "Laforte (2018) Fig. 2: 0.2189 (band +-30%)",
-      "note": "30% band: VALIDATION.md, Laforte unemployment band"
+      "source": "1.00-1.45x Laforte (2018) 0.2189",
+      "note": "Laforte's own 2020Q1 design gives 1.04x: VALIDATION.md, Laforte by start date"
     },
     {
       "check": "purchases multiplier, yr 1",
