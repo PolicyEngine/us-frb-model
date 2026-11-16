@@ -1,26 +1,40 @@
 # Validation
 
 This implementation is validated against the Federal Reserve's own `pyfrbus`
-(vendor/pyfrbus_package) and the April 2026 LONGBASE data vintage. Tests 1–4
+(vendor/pyfrbus_package) and the October 2026 LONGBASE data vintage (the Board's
+data package of 13 October 2026; `vendor/README.md`). Tests 1–4
 and the scenario sweep use the VAR (backward-looking expectations) model over
 **2026Q1–2030Q4** with the standard demo fiscal configuration
 (`dfpdbt = 0`, `dfpsrp = 1` where shocked). Test 5 covers the opt-in
 model-consistent expectations solve.
+
+**Data vintage and the window.** The October 2026 vintage's history runs
+through 2026Q2 (`HISTDATA.TXT`), so 2026Q1 and 2026Q2 are realised data, not
+projection, and every 2026Q1 shock starts two quarters before the data edge.
+That is mechanically valid (a shock perturbs the tracked baseline, whatever it
+is), and the window is kept so that results stay comparable with the April 2026
+vintage, which every number here used until 16 November 2026. Moving the window
+to the first projected quarter (2026Q3) is a separate follow-up. The model
+(`model.xml`) did not change; the change of vintage moved the purchases
+multiplier from 0.725 to 0.747 and the 100bp unemployment peak from 0.258 to
+0.276pp, and left the core PCE response at −0.034pp. Where a figure below is
+still from the April 2026 vintage, it says so.
 
 Tests 1–3 run as pytest gates (`tests/test_tracking.py`, `tests/test_shock.py`).
 
 ## Test 1 — tracking invariant (hard gate, but see the caveat)
 
 After `init_trac`, solving the baseline reproduces LONGBASE for all 284
-endogenous variables to **5.6e-17**.
+endogenous variables to **7.3e-12** (1.2e-15 relative).
 
 | metric | value | gate |
 |---|---|---|
-| max abs error, all endos × 20 quarters | 5.6e-17 | < 1e-8 |
-| max relative error | 5.6e-17 | < 1e-10 |
+| max abs error, all endos × 20 quarters | 7.3e-12 | < 1e-8 |
+| max relative error | 1.2e-15 | < 1e-10 |
 
-Worst variables (max abs error): frs10 5.6e-17, fpi10 5.6e-17, dpadj 5.4e-20,
-dpgap 5.4e-20, delrff 1.4e-20.
+Worst variables (max abs error): wps 7.3e-12 (a level of order 1e4, so this is
+one ulp), yhpntn 2.3e-13, yhpgap 1.8e-15. (April 2026 vintage: 5.6e-17, in
+frs10 and fpi10.)
 
 ### What this number does and does not mean
 
@@ -34,10 +48,11 @@ not be quoted as if it were.** The agreement is true by construction:
    data, i.e. with the answer. At the tracked baseline 282 of 284 equations
    have a **bit-exactly zero** residual before the solver runs at all, and the
    largest is 8.7e-19. Newton converges without moving.
-3. The residual 5.6e-17 is therefore floating-point non-associativity of
+3. The residual is therefore floating-point non-associativity of
    `A - (A - B) - B` in re-evaluating the equations, not solver accuracy and
-   not economics. 5,645 of the 5,680 compared cells are bit-identical; only 35
-   differ at all.
+   not economics. 5,425 of the 5,680 compared cells are bit-identical; only 255
+   differ at all. (The 282-of-284 count in point 2 is from the April 2026
+   vintage.)
 
 The decisive demonstration is gated in
 `tests/test_tracking.py::test_tracking_invariant_holds_for_arbitrary_data`:
@@ -47,9 +62,9 @@ and every estimated relation in the model — still passes the identical gate:
 
 | baseline handed to `init_trac` | max abs | max rel | passes the gate? |
 |---|---|---|---|
-| LONGBASE | 5.6e-17 | 5.6e-17 | yes |
-| LONGBASE + 5% iid noise on every endogenous cell | 4.4e-11 | 1.8e-13 | yes |
-| every endogenous series × U[0.5, 1.5] (identities destroyed) | 6.7e-9 | 9.1e-12 | yes |
+| LONGBASE | 7.3e-12 | 1.2e-15 | yes |
+| LONGBASE + 5% iid noise on every endogenous cell | 5.8e-11 | 1.8e-13 | yes |
+| every endogenous series × U[0.5, 1.5] (identities destroyed) | 9.0e-9 | 6.5e-12 | yes |
 
 So the test is worth keeping — it pins that `init_trac` and `solve` remain
 exact inverses, which would catch a real regression in the add-factor
@@ -76,23 +91,24 @@ and pin `pandas<2`.
 
 | metric | value | gate |
 |---|---|---|
-| max abs difference, all 284 endos × 20 quarters | 6.0e-9 | < 1e-6 |
-| max relative difference (denominator clipped at 1e-8) | 4.9e-8 | < 1e-6 |
+| max abs difference, all 284 endos × 20 quarters | 1.4e-8 | < 1e-6 |
+| max relative difference (denominator clipped at 1e-8) | 9.5e-9 | < 1e-6 |
 
 Key outputs:
 
 | variable | max abs diff | max rel diff |
 |---|---|---|
-| xgdp | 1.5e-10 | 5.6e-15 |
-| pcpi | 8.5e-13 | 2.5e-15 |
-| picxfe | 2.3e-13 | 1.2e-13 |
-| lur | 4.0e-13 | 9.2e-14 |
-| rff | 3.0e-13 | 1.1e-13 |
+| xgdp | 7.7e-10 | 2.9e-14 |
+| pcpi | 2.8e-12 | 7.5e-15 |
+| picxfe | 1.6e-13 | 7.2e-14 |
+| lur | 1.6e-12 | 3.8e-13 |
+| rff | 1.7e-12 | 5.3e-13 |
 
-Worst variables are the near-zero expectational gap terms (zgap05 4.9e-8
-relative, zgapc2 4.6e-10, zgap10 3.6e-10); these reflect the two solvers'
-respective step tolerances on values of order 1e-4, not a semantic difference.
-(With the vendor at its default looser tolerances (`scipy.optimize.root`,
+Worst variables: in absolute terms the wage-level series (wpsn 1.4e-8, wps
+9.8e-9, levels of order 1e2–1e4); in relative terms near-zero gap terms (dpadj
+9.5e-9, xgap 2.4e-10, zgapc2 1.1e-10). These reflect the two solvers'
+respective step tolerances, not a semantic difference. (On the April 2026
+vintage the monetary case gave 6.0e-9 abs / 4.9e-8 rel, worst zgap05. With the vendor at its default looser tolerances (`scipy.optimize.root`,
 xtol 1e-6), the max abs difference is ~1.7e-5, again concentrated in zgap05.)
 
 ### Test 2a — additional like-for-like scenario gates
@@ -105,9 +121,9 @@ all 20 quarters, gates < 1e-6 abs and rel (`tests/test_shock.py`):
 
 | scenario | shock | max abs diff | max rel diff |
 |---|---|---|---|
-| `fiscal_egfe` | +1% `egfe_aerr` (federal expenditures) | 1.8e-8 | 3.4e-10 |
-| `tax_trp` | +2pp `trp_aerr` (personal tax rate) | 1.7e-8 | 7.1e-10 |
-| `taylor_noninertial` | +100bp `rfftay_aerr` under `dmptay=1, dmpintay=0` | 2.1e-8 | 4.3e-9 |
+| `fiscal_egfe` | +1% `egfe_aerr` (federal expenditures) | 9.5e-9 | 1.1e-9 |
+| `tax_trp` | +2pp `trp_aerr` (personal tax rate) | 2.0e-8 | 1.5e-8 |
+| `taylor_noninertial` | +100bp `rfftay_aerr` under `dmptay=1, dmpintay=0` | 1.9e-8 | 1.7e-9 |
 
 Regenerate any reference with
 `scripts/generate_vendor_reference.sh <out.csv> <scenario>`; the
@@ -119,28 +135,33 @@ from `vendor/pyfrbus_package` on every PR.
 The vendored reference is pyfrbus 1.0.0 (files dated 2022-04-06). The Board now
 ships pyfrbus 1.1.1 (2026-02-05), so the check above was repeated against that
 release to confirm the agreement is not an artifact of one old version. The
-model definition is unchanged between the two — `models/model.xml` and the
-LONGBASE data are byte-identical — so this isolates solver differences. The
+model definition is unchanged between the two — `models/model.xml` is
+byte-identical, and both runs use the same LONGBASE — so this isolates solver
+differences. Rerun on the October 2026 vintage on 16 November 2026. The
 1.1.1 release needs none of the patches listed above: `scikit-umfpack` is now an
 optional import with a `splu` fallback, pandas is pinned `>=2.1,<3`, and the
 symengine Max/Min issue no longer bites.
 
 | comparison (284 endos × 20 quarters) | max abs | max rel |
 |---|---|---|
-| ours vs pyfrbus 1.0.0 (the committed reference) | 6.0e-9 | 4.9e-8 |
-| ours vs pyfrbus 1.1.1 | 1.4e-8 | 1.8e-7 |
-| pyfrbus 1.1.1 vs pyfrbus 1.0.0 | 1.3e-8 | 1.3e-7 |
+| ours vs pyfrbus 1.0.0 (the committed reference) | 1.4e-8 | 9.5e-9 |
+| ours vs pyfrbus 1.1.1 | 1.8e-8 | 3.6e-8 |
+| pyfrbus 1.1.1 vs pyfrbus 1.0.0 | 1.4e-8 | 2.6e-8 |
+
+(April 2026 vintage: 6.0e-9 / 4.9e-8, 1.4e-8 / 1.8e-7 and 1.3e-8 / 1.3e-7.)
 
 The third row is the informative one: **the Fed's own two releases differ from
 each other by as much as this implementation differs from either.** All three
 residuals sit at the same solver-tolerance scale and are concentrated in the
-same near-zero series (`wpsn`, `zgap05`). The 1.1.1 solver reuses its LU
+same series (`wpsn` in absolute terms; `dpadj`, and `zgap05` on the April
+vintage, in relative terms). The 1.1.1 solver reuses its LU
 factorization across Newton iterations, recomputing only when the residual fails
 to halve; that changes the iterate path, not the fixed point, which is why the
 differences stay at tolerance scale.
 
 For the tracking invariant (Test 1), pyfrbus 1.1.1 reproduces LONGBASE to
-1.1e-8 max abs against this implementation's 5.6e-17. **This is not a quality
+1.9e-8 max abs against this implementation's 7.3e-12 (April 2026 vintage:
+1.1e-8 against 5.6e-17). **This is not a quality
 ranking and must not be presented as one.** Both are add-factor identities
 (see the caveat under Test 1); the gap is that this implementation seeds Newton
 with the data row it is about to reproduce and therefore returns it unchanged,
@@ -154,7 +175,7 @@ exercised. The 1.1.1 release also fixes a lead-substitution guard in
 `jacobian.py` that affects the MCE path only. The MCE references (Test 5) are
 from 1.0.0; the guard changes the vendor's Jacobian, not its equations, and
 the 1.0.0 MCE solutions satisfy this implementation's stacked equations to a
-residual 2-norm of 2.4e-10 (wp) and 2.6e-10 (mcap+wp), so they are roots of
+residual 2-norm of 2.4e-10 (wp) and 2.6e-10 (mcap+wp) on the April 2026 vintage, so they are roots of
 the same system whatever the vendor's Jacobian did on the way.
 
 ## Test 3 — sanity: monetary tightening
@@ -164,23 +185,25 @@ the same system whatever the vendor's Jacobian did on the way.
 | property | value | published FRB/US VAR properties |
 |---|---|---|
 | rff impact response | +1.000 pp | ~+1 pp |
-| xgdp trough | −0.55% (2027Q4) | output falls a few tenths to ~1% after ~2 yrs |
-| lur peak | +0.26 pp | rises ~0.1–0.3 pp |
+| xgdp trough | −0.56% (2027Q4) | output falls a few tenths to ~1% after ~2 yrs |
+| lur peak | +0.28 pp (2028Q1) | rises ~0.1–0.3 pp |
 | picxfe trough | −0.034 pp | core inflation falls modestly |
 
 Signs and magnitudes are consistent with the simulation properties described
 in the FRB/US documentation (`vendor/frbus_package/documentation/`).
 
-Two internal-coherence cross-checks on the same run (recomputed 2026-08):
+Two internal-coherence cross-checks on the same run (recomputed 2026-11-16 on
+the October 2026 vintage):
 
-* **Okun's law.** The output trough (−0.551%) and the unemployment peak
-  (+0.258pp) occur in the same quarter, 2027Q4, and their ratio is 2.13 —
-  right on the conventional Okun coefficient of ~2. The two blocks are
+* **Okun's law.** The output trough (−0.555%, 2027Q4) and the unemployment peak
+  (+0.276pp, 2028Q1) are one quarter apart, and their ratio is 2.01 —
+  right on the conventional Okun coefficient of ~2. (April 2026 vintage:
+  −0.551% and +0.258pp, both 2027Q4, ratio 2.13.) The two blocks are
   estimated separately, so this is a real consistency check.
 * **Inflation vs the price level.** Core inflation `picxfe` is an *annualized
   quarterly* rate (its equation is `400*log(...)`), so a sustained −0.03pp
   should cumulate to roughly −0.03 × 5 years ≈ −0.15% on the price level by
-  2030Q4. Observed `pcpi` deviation: −0.134%. Consistent.
+  2030Q4. Observed `pcpi` deviation: −0.135%. Consistent.
 * The funds rate crosses **below** baseline from 2028Q1 (−0.26pp trough in
   2029Q3): the rule reverses as the output gap and inflation undershoot. That
   is the expected closed-loop behaviour, not drift.
@@ -295,9 +318,9 @@ configuration; policy switches shared with `scripts/scenarios.py`.
 
 | multiplier (calendar-year) | value | gate | band source |
 |---|---|---|---|
-| purchases, yr 1, inertial Taylor rule | 0.72 | 0.7–1.0 | Coenen et al. (AEJ: Macro 2012); Whalen & Reichling (CBO WP 2015-02) |
-| purchases, yr 2, funds rate pegged | 0.90 | 0.8–1.2 | Coenen et al. 2012, two-year monetary accommodation |
-| tax cut, yr 1 | 0.22 | 0.15–0.45 | Whalen & Reichling: CBO tax-cut multiplier ≈ 0.3 |
+| purchases, yr 1, inertial Taylor rule | 0.75 | 0.7–1.0 | Coenen et al. (AEJ: Macro 2012); Whalen & Reichling (CBO WP 2015-02) |
+| purchases, yr 2, funds rate pegged | 0.93 | 0.8–1.2 | Coenen et al. 2012, two-year monetary accommodation |
+| tax cut, yr 1 | 0.23 | 0.15–0.45 | Whalen & Reichling: CBO tax-cut multiplier ≈ 0.3 |
 | tax cut, yr 2 | 0.32 | 0.15–0.45 | as above; also gated yr2 > yr1 |
 
 The bands gate on economics, not on reproducing the exact decimals (bit-level
@@ -305,15 +328,18 @@ reproduction is Tests 1–2).
 
 ### The full purchases grid
 
-Quoting 0.72 (year 1, active rule) next to 0.90 (year 2, pegged) compares two
-different experiments. The whole grid, recomputed 2026-08 on the same
-sustained +1%-of-GDP `egfe` experiment, is the informative object:
+Quoting 0.75 (year 1, active rule) next to 0.93 (year 2, pegged) compares two
+different experiments. The whole grid on the same sustained +1%-of-GDP `egfe`
+experiment is the informative object. The inertial-Taylor and pegged years 1–2
+were recomputed on the October 2026 vintage (16 November 2026; April 2026
+vintage in brackets); the non-inertial row and year 3 are from the April 2026
+vintage (2026-08) and were not rerun:
 
 | monetary rule | year 1 | year 2 | year 3 | rff dev, yr 1 |
 |---|---|---|---|---|
-| inertial Taylor (`dmpintay=1`) | 0.725 | 0.643 | 0.458 | +0.23 pp |
-| non-inertial Taylor (`dmptay=1`) | 0.596 | 0.417 | 0.306 | +0.59 pp |
-| funds rate pegged | 0.769 | 0.905 | 1.010 | 0.000 pp |
+| inertial Taylor (`dmpintay=1`) | 0.747 (0.725) | 0.663 (0.643) | (0.458) | +0.24 pp (+0.23) |
+| non-inertial Taylor (`dmptay=1`) | (0.596) | (0.417) | (0.306) | (+0.59 pp) |
+| funds rate pegged | 0.792 (0.769) | 0.934 (0.905) | (1.010) | 0.000 pp |
 
 Under an active rule the multiplier **decays** as policy leans against the
 stimulus, and decays faster under the non-inertial rule because that rule
@@ -333,7 +359,7 @@ was itself solved under the peg. Flipping `dmpintay`/`dmpex` on the *shocked*
 frame after `init_trac`, and then deviating against the Taylor-rule baseline,
 silently produces a run that is **not** pegged:
 
-| peg applied | max &#124;Δrff&#124;, quarters 1-8 | yr-1 mult | yr-2 mult |
+| peg applied (April 2026 vintage) | max &#124;Δrff&#124;, quarters 1-8 | yr-1 mult | yr-2 mult |
 |---|---|---|---|
 | before `init_trac` (correct) | **0.000e+00** | 0.769 | 0.904 |
 | after `init_trac`, shocked frame only | 1.23e-01 | 0.792 | **0.994** |
@@ -350,8 +376,8 @@ The tell is cheap and should be asserted in any pegged experiment:
 `(sim['rff'] - data['rfffix']).abs().max()`.
 
 The **0.99** figure previously quoted in `tests/test_multipliers.py` for the
-year-2 pegged multiplier was stale; the recomputed value is 0.90 (0.99 is
-close to the year-*3* value, 1.01). The gate itself was always 0.8–1.2 and
+year-2 pegged multiplier was stale; the recomputed value was 0.90 (0.99 is
+close to the year-*3* value, 1.01; April 2026 vintage). The gate itself was always 0.8–1.2 and
 always passed, so nothing was mis-gated — only mis-documented. This file
 already said 0.90.
 
@@ -384,71 +410,67 @@ the multipliers and every check value against a fresh solve to 1e-6.
 on the committed paths and perturbs single paths by 1-6% to show each kind of
 check turns red.
 
-Results (2026-11-06):
+Results (2026-11-16, October 2026 vintage):
 
 * **Zero shock = baseline** in every family, to under 1e-8.
 * **Monetary shocks are close to linear and symmetric.** Taking 200bp against
   twice 100bp, and four times 25bp against 100bp, every response stays within
   2% of its peak. The +100bp and −100bp paths mirror each other within 4% of
-  the peak. Holding the shock longer deepens the trough: −0.55% for 1
-  quarter, −2.08% for 4 and −3.82% for 8. The 1-quarter impulse reverts: at
+  the peak. Holding the shock longer deepens the trough: −0.56% for 1
+  quarter, −2.10% for 4 and −3.83% for 8. The 1-quarter impulse reverts: at
   2030Q4 the output gap is at 5% of its peak.
-* **Purchases are not linear at 1% of GDP.** The year-1 multiplier is 0.900
-  for a 1%-of-GDP cut, 0.809 at −0.1%, 0.792 at +0.1%, 0.760 at +0.5%,
-  0.725 at +1% (the gated value) and 0.666 at +2%. The cause is the model's
+* **Purchases are not linear at 1% of GDP.** The year-1 multiplier is 0.933
+  for a 1%-of-GDP cut, 0.835 at −0.1%, 0.817 at +0.1%, 0.784 at +0.5%,
+  0.747 at +1% (the gated value) and 0.684 at +2% (April 2026 vintage: 0.900,
+  0.809, 0.792, 0.760, 0.725 and 0.666). The cause is the model's
   own aggregation. Final sales (`xfs`) and GDP (`xp`) add component growth in
   logs, `y·log(egfe/egfe(-1))`, and 1% of GDP is about 22% of `egfe`, so
   log(1.22) = 0.20 against −log(0.78) = 0.25. The predicted cut/rise ratio is
-  1.244 and the observed ratio is 1.241, which is gated. Linearity and
+  1.252 and the observed ratio is 1.250, which is gated. Linearity and
   symmetry are measured on the ±0.1% runs, and the same aggregation predicts
-  their gaps: with a = 0.1% of GDP / egfe share (0.0464), the ±0.1% symmetry
-  gap is (−log(1−a) − log(1+a)) / log(1+a) = 0.0218 (measured 0.0216) and the
-  0.1% → 0.5% linearity gap is 1 − log(1+5a) / (5 log(1+a)) = 0.0401
-  (measured 0.0398). Both are gated within 3% of the prediction, so a gap that
-  grows or shrinks is caught; the 0.0398 that sat just under the old flat 5%
-  bound is the aggregation, not a near-miss. The small-shock multiplier is
-  about **0.80**. The published 0.72 belongs to the 1%-of-GDP design and
-  should be quoted with it.
+  their gaps: with a = 0.1% of GDP / egfe share (0.0450), the ±0.1% symmetry
+  gap is (−log(1−a) − log(1+a)) / log(1+a) = 0.0225 (measured 0.0222) and the
+  0.1% → 0.5% linearity gap is 1 − log(1+5a) / (5 log(1+a)) = 0.0412
+  (measured 0.0408). Both are gated within 3% of the prediction, so a gap that
+  grows or shrinks is caught; a gap near the old flat 5% bound is the
+  aggregation, not a near-miss. The small-shock multiplier is about **0.83**
+  (0.80 on the April 2026 vintage). The published 0.75 belongs to the
+  1%-of-GDP design and should be quoted with it.
 * **Transfers** have a year-1 multiplier of 0.28 and a year-2 multiplier of
-  0.30, linear and symmetric. This is below purchases in both years, which is
+  0.31, linear and symmetric. This is below purchases in both years, which is
   gated. CBO's 0.4–2.1 for transfers to individuals (Feb 2015, Table 3) is a
   Fed-not-tightening range, so comparing it with this active-rule 0.28 mixes
-  regimes. On matched comparisons the model is still below: 0.315 with the
+  regimes. On matched comparisons the model is still below: 0.321 with the
   funds rate pegged and the fiscal rule off, against 0.4–2.1; and 0.28 against
   0.36–1.52 derived from CBO's typical-Fed-response path. See
   [docs/benchmarks.md](docs/benchmarks.md), which sources every benchmark to
   a table and page, converts CBO's quarterly path to this repo's
   sustained-shock definition, and shows the fiscal closure explains only
   ~0.02 of the year-1 gap.
-* **Tax cuts** have a year-1 multiplier of 0.22 and a year-2 multiplier of
+* **Tax cuts** have a year-1 multiplier of 0.23 and a year-2 multiplier of
   0.32 at every size from 1 to 4pp, linear and symmetric. These match Test 4.
 * **Fiscal reversion.** After an 8-quarter purchases or transfers shock ends,
   output undershoots in 2030 by about 45% of the peak. The funds rate is still
   above baseline, and it is the inertial rule's overshoot that comes back. The
-  tax-cut shock leaves 7% of its peak. The check only requires the 2030
+  tax-cut shock leaves 7% of its peak (6.8%). The check only requires the 2030
   deviation to stay under 50% of the peak, so this property is reported more
   than gated.
 
 ## LONGBASE vs the 2026 outturns (report, not a gate)
 
-The pinned LONGBASE vintage (April 2026) carries the Fed staff's near-term
-projected path, and its first two quarters are now observable.
+The pinned LONGBASE vintage (October 2026) carries the Fed's near-term
+projected path from 2026Q3, and its first quarter is now observable.
 `scripts/backtest_longbase.py` compares that path against realized FRED data
-(fetched from the public CSV endpoints; a snapshot fetched **2026-08-04** is
+(fetched from the public CSV endpoints; a snapshot fetched **2026-11-16** is
 committed at `tests/data/fred_outturns_snapshot.csv` so the machinery test in
-`tests/test_backtest.py` is hermetic). First backtest, error = LONGBASE −
-outturn:
+`tests/test_backtest.py` is hermetic). Error = LONGBASE − outturn:
 
 | quarter | variable | LONGBASE | outturn | error |
 |---|---|---|---|---|
-| 2026Q1 | real GDP growth, annualized (xgdp / GDPC1) | 2.42 | 2.09 | +0.33 |
-| 2026Q2 | real GDP growth, annualized (xgdp / GDPC1) | 2.41 | 1.50 | +0.91 |
-| 2026Q1 | unemployment rate (lur / UNRATE) | 4.46 | 4.33 | +0.12 |
-| 2026Q2 | unemployment rate (lur / UNRATE) | 4.44 | 4.27 | +0.17 |
-| 2026Q1 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.77 | 4.42 | −1.65 |
-| 2026Q2 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 2.76 | 3.42 | −0.65 |
-| 2026Q1 | federal funds rate (rff / FEDFUNDS) | 3.79 | 3.64 | +0.14 |
-| 2026Q2 | federal funds rate (rff / FEDFUNDS) | 3.67 | 3.63 | +0.04 |
+| 2026Q3 | real GDP growth, annualized (xgdp / GDPC1) | 2.14 | 3.37 | −1.23 |
+| 2026Q3 | unemployment rate (lur / UNRATE) | 4.17 | 4.13 | +0.03 |
+| 2026Q3 | core PCE inflation, annualized (pcxfe / PCEPILFE) | 3.27 | 2.47 | +0.80 |
+| 2026Q3 | federal funds rate (rff / FEDFUNDS) | 3.84 | 3.67 | +0.17 |
 
 Both sides of every growth row are annualized compounded q/q rates. The core
 PCE rows were first published as −1.69/−0.69 by comparing `picxfe` itself,
@@ -456,14 +478,22 @@ which model.xml defines as `400·dlog(pcxfe)` (a log rate), against the
 compounded FRED rate; the LONGBASE side now compounds the `pcxfe` level, as
 the GDP row always did (corrected 2026-11-05).
 
-Reading: activity and the funds rate were close (GDP growth overshot by
-0.3–0.9pp, unemployment by ~0.15pp), but the baseline substantially
-underprojected core PCE inflation, by 1.65pp in 2026Q1 and 0.65pp in 2026Q2.
-This is a property of the Fed's baseline data, not of this implementation, so
-it is **deliberately not gated**: the scheduled `longbase-backtest` CI job
-re-runs the comparison against fresh FRED data with `continue-on-error`, and
-only the report machinery itself is gated (hermetically, on the committed
-snapshot). The generated report is committed under `backtests/`.
+Reading: unemployment and the funds rate were close, but the baseline
+underprojected GDP growth by 1.23pp and overprojected core PCE inflation by
+0.80pp in 2026Q3. This is a property of the Fed's baseline data, not of this
+implementation, so it is **deliberately not gated**: the scheduled
+`longbase-backtest` CI job re-runs the comparison against fresh FRED data with
+`continue-on-error`, and only the report machinery itself is gated
+(hermetically, on the committed snapshot). The generated report is committed
+under `backtests/`.
+
+**The April 2026 vintage's record.** Until 16 November 2026 the repo pinned the
+April 2026 vintage, whose 2026Q1–Q2 projections are scored in
+`backtests/longbase_2026-04_vs_outturns.md` (frozen; snapshot of 2026-08-04).
+That vintage tracked GDP growth within 0.3–0.9pp and unemployment and the funds
+rate within 0.2pp, but underprojected core PCE inflation by 1.65pp in 2026Q1
+and 0.65pp in 2026Q2. Under the October vintage those two quarters are
+history, so they are no longer a projection test.
 
 ## Test 5 — model-consistent expectations (opt-in) against pyfrbus and Laforte (2018)
 
@@ -497,12 +527,13 @@ the vendor at 3e-8. The gate on this implementation stays 1e-6.
 
 | mode | max abs diff | max rel diff | worst cell |
 |---|---|---|---|
-| mcap | 2.3e-9 | 3.7e-10 | wpsn 2030Q2 |
-| wp | 1.5e-8 | 4.8e-10 | wpsn 2028Q2 |
-| mcap+wp | 1.7e-9 | 2.6e-10 | wpsn 2030Q3 |
-| all | 1.2e-9 | 1.3e-10 | wpsn 2030Q4 |
+| mcap | 2.3e-9 | 1.6e-9 | wpsn 2030Q2 |
+| wp | 9.0e-9 | 3.5e-8 | wpsn 2029Q3 |
+| mcap+wp | 1.4e-9 | 3.2e-8 | wpon 2030Q4 |
+| all | 2.1e-9 | 8.6e-9 | wpsn 2030Q4 |
 
-(Before the extra Newton step, mcap was 9.9e-10 and wp failed at 1.3e-4.)
+(October 2026 vintage. On the April 2026 vintage: 2.3e-9, 1.5e-8, 1.7e-9 and
+1.2e-9 abs. Before the extra Newton step, mcap was 9.9e-10 and wp failed at 1.3e-4.)
 
 Gate tolerance 1e-6 abs and rel, the same as Test 2.
 
@@ -515,11 +546,12 @@ the `programs/pings.prg` settings over 160 quarters.
 | | 10y impact | output gap trough | unemployment peak | core PCE trough | rff q2 | rff q4 |
 |---|---|---|---|---|---|---|
 | Laforte 2018 | +0.156 | −0.186 (q6) | +0.098 (q4) | −0.0077 (q6) | 0.837 | 0.561 |
-| ours, mcap+wp | +0.154 | −0.180 (q5) | +0.117 (q6) | −0.0112 (q7) | 0.837 | 0.560 |
-| ours, VAR | +0.332 | −0.451 (q7) | +0.272 (q8) | −0.0343 (q8) | 0.825 | 0.503 |
+| ours, mcap+wp | +0.154 | −0.181 (q6) | +0.117 (q6) | −0.0102 (q6) | 0.837 | 0.560 |
+| ours, VAR | +0.332 | −0.453 (q7) | +0.261 (q7) | −0.0342 (q8) | 0.825 | 0.503 |
 
 The financial block and the output gap match closely. Unemployment (1.2×)
-and core inflation (1.45×) are larger than published. The pyfrbus match above
+and core inflation (1.33×; 1.45× on the April 2026 vintage) are larger than
+published. The pyfrbus match above
 is the test of the implementation; the gap is not tuned away. Gate bands: rff
 q1–q8 and 10y impact within 0.01pp, output gap trough within 10%,
 unemployment peak within 25%, core PCE trough within a factor of 2.
@@ -548,17 +580,22 @@ re-runs the Fig. 11 ping under mcap+wp:
 | run | core PCE trough | ratio to published | output gap trough | unemployment peak |
 |---|---|---|---|---|
 | Laforte 2018 | −0.0077 (q6) | 1.00 | −0.186 (q6) | +0.098 (q4) |
-| ours, from 2040Q1 | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
-| ours, 2018 coefficients restored (all seven) | −0.0112 (q7) | 1.45 | −0.180 (q5) | +0.117 (q6) |
-| ours, from 2030Q1 | −0.0112 (q7) | 1.45 | −0.188 (q5) | +0.117 (q6) |
-| ours, from 2020Q1 (Laforte's dates) | −0.0086 (q6) | 1.11 | −0.173 (q6) | +0.090 (q4) |
+| ours, from 2040Q1 | −0.0102 (q6) | 1.33 | −0.181 (q6) | +0.117 (q6) |
+| ours, 2018 coefficients restored (all seven) | −0.0102 (q6) | 1.33 | −0.181 (q6) | +0.118 (q6) |
+| ours, from 2030Q1 | −0.0121 (q7) | 1.57 | −0.187 (q5) | +0.121 (q6) |
+| ours, from 2020Q1 (Laforte's dates) | −0.0088 (q6) | 1.15 | −0.172 (q6) | +0.093 (q6) |
+
+(October 2026 vintage. On the April 2026 vintage the first three rows all gave
+−0.0112 (q7), 1.45×, and the 2020Q1 row −0.0086 (q6), 1.11×, unemployment
+peak in q4.)
 
 Restoring every 2018 coefficient leaves the core trough unchanged, so the
 coefficient vintage does not explain it. The shock date does matter: from
-2020Q1 the trough is −0.0086 (1.11×) and the timing matches the note (core
-and gap troughs in q6, unemployment peak in q4). That is evidence of
+2020Q1 the trough is −0.0088 (1.15×) and the core and gap troughs fall in q6,
+as in the note (the unemployment peak is q6 here against q4 in the note; on the
+April 2026 vintage it was q4). That is evidence of
 state dependence on the baseline, not a reproduction: our 2020Q1 baseline is
-realised COVID-era history in the April 2026 LONGBASE, whereas Laforte shocked
+realised COVID-era history in the October 2026 LONGBASE, whereas Laforte shocked
 the 2018 LONGBASE projection. That baseline is archived (the
 `data_only_package.zip` captured on 21 Dec 2018, files dated 28 Nov 2018, zip
 sha1 2283053f53a8b85a4d58ba99919df52dc4c06405) but only as an EViews database
@@ -583,7 +620,7 @@ pass.
 | job | gate |
 |---|---|
 | `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), Test 3, the Test 4 fiscal multipliers and the scenario sweep (`-m slow`) as separate steps, so a failure names the broken invariant |
-| `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the 1.3e-8 build-to-build noise floor documented in Test 2b) |
+| `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the ~1.4e-8 build-to-build noise floor documented in Test 2b) |
 | `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.11/3.12, the Test 4 fiscal-multiplier gate (`-m slow`), plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
 | `longbase-backtest` | Weekly, **non-gating** (`continue-on-error`): re-runs `scripts/backtest_longbase.py --fetch` against fresh FRED data and prints the LONGBASE-vs-outturn report |
 

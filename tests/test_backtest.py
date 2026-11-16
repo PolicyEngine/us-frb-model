@@ -1,17 +1,18 @@
 """Hermetic test of the LONGBASE-vs-outturn backtest machinery.
 
 Runs scripts/backtest_longbase.py's report pipeline on the committed FRED
-snapshot (tests/data/fred_outturns_snapshot.csv, fetched 2026-08-04), with no
+snapshot (tests/data/fred_outturns_snapshot.csv, fetched 2026-11-16), with no
 network access, and asserts the machinery works: every series/quarter pair is
 compared and the errors are finite and computed the documented way.
 
 Deliberately NOT asserted: that LONGBASE was right. The baseline is the Fed's
 projection, not this implementation's output, so its accuracy is reported
-(VALIDATION.md, "LONGBASE vs the 2026 outturns") rather than gated. For the
-record, the first backtest's largest gap is core PCE inflation: LONGBASE
-projected 2.77%/2.76% (annualized, compounded) against outturns of 4.42%
-(2026Q1) and 3.42% (2026Q2) -- errors of -1.65pp and -0.65pp -- while GDP
-growth, unemployment, and the funds rate were all within ~0.9pp/0.2pp/0.15pp.
+(VALIDATION.md, "LONGBASE vs outturns") rather than gated. For the record, the
+October 2026 vintage's first projected quarter (2026Q3) missed GDP growth by
+-1.23pp (2.14% vs 3.37%) and core PCE inflation by +0.80pp (3.27% vs 2.47%);
+unemployment and the funds rate were within 0.2pp. The April 2026 vintage's
+2026Q1-Q2 record (core PCE -1.65pp/-0.65pp) is frozen in
+backtests/longbase_2026-04_vs_outturns.md.
 """
 
 import json

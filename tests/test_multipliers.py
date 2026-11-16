@@ -8,7 +8,9 @@ calendar-year multipliers from the model's standard runs and assert they stay
 inside ranges drawn from the published literature, so a regression in the
 fiscal block can no longer pass CI silently.
 
-Recomputed 2026-08 on the full purchases grid (both rules x both horizons),
+Recomputed 2026-08 on the full purchases grid (both rules x both horizons;
+April 2026 LONGBASE -- on the October 2026 vintage Taylor is 0.747 -> 0.663
+and pegged 0.792 -> 0.934, VALIDATION.md Test 4),
 so the headline pair is no longer quoted without its context:
 
     rule                     year 1   year 2   year 3
@@ -193,7 +195,8 @@ def test_purchases_multiplier_grid_is_ordered_as_theory_requires(
       * Under a peg it must build (no offset, and the accelerator/stock
         adjustment channels take time).
 
-    Observed 2026-08: Taylor 0.725 -> 0.643, pegged 0.769 -> 0.905.
+    Observed 2026-08 (April 2026 LONGBASE): Taylor 0.725 -> 0.643, pegged
+    0.769 -> 0.905. October 2026 LONGBASE: 0.747 -> 0.663, 0.792 -> 0.934.
     """
     taylor, pegged = purchases_multipliers["taylor"], purchases_multipliers["pegged"]
 

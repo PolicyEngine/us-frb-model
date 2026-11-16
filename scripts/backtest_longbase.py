@@ -1,9 +1,10 @@
-"""Backtest the April 2026 LONGBASE baseline against realized FRED outturns.
+"""Backtest the pinned LONGBASE baseline against realized FRED outturns.
 
-The LONGBASE.TXT vintage this repo pins (April 2026) carries the Fed staff's
-near-term projected path. Some of those quarters are now observable, so this
-script compares the baseline against published outturns for the four headline
-series and writes a small JSON + markdown report:
+The LONGBASE.TXT vintage this repo pins (October 2026; history through 2026Q2
+in HISTDATA.TXT) carries a near-term projected path from 2026Q3. Some of those
+quarters are now observable, so this script compares the baseline against
+published outturns for the four headline series and writes a small JSON +
+markdown report:
 
     variable  FRED id    comparison
     --------  ---------  ------------------------------------------------
@@ -46,8 +47,11 @@ LONGBASE = REPO / "vendor" / "data_only_package" / "LONGBASE.TXT"
 SNAPSHOT = REPO / "tests" / "data" / "fred_outturns_snapshot.csv"
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={id}"
 
-#: quarters of the April 2026 vintage that are now observable
-QUARTERS = [pd.Period("2026Q1"), pd.Period("2026Q2")]
+#: projected quarters of the pinned vintage that are now observable. The
+#: October 2026 vintage's history ends at 2026Q2, so 2026Q1-Q2 would compare
+#: history with history. The April 2026 vintage's 2026Q1-Q2 backtest is kept
+#: as a frozen record in backtests/longbase_2026-04_vs_outturns.md.
+QUARTERS = [pd.Period("2026Q3")]
 
 #: FRED series ids and how each maps onto a LONGBASE variable
 SERIES = {
@@ -138,9 +142,9 @@ def build_report(observations: dict[str, pd.Series], longbase: pd.DataFrame) -> 
                 }
             )
     return {
-        "description": "April 2026 LONGBASE baseline vs realized FRED outturns "
+        "description": "October 2026 LONGBASE baseline vs realized FRED outturns "
         "(error = LONGBASE - outturn). Report only; not a gate.",
-        "vintage": "LONGBASE.TXT, April 2026",
+        "vintage": "LONGBASE.TXT, October 2026 (data package of 13 Oct 2026)",
         "quarters": [str(q) for q in QUARTERS],
         "rows": rows,
     }
@@ -187,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.fetch:
-        window = pd.Timestamp("2025-07-01")  # keep one prior quarter for growth rates
+        window = pd.Timestamp("2026-01-01")  # keep a prior quarter for growth rates
         observations = {
             sid: fetch_fred(sid).loc[lambda s: s.index >= window] for sid in SERIES
         }
