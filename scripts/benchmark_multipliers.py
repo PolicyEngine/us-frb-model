@@ -68,7 +68,9 @@ def year_mean(series: pd.Series, year: int) -> float:
     return float(series.iloc[4 * (year - 1) : 4 * year].mean())
 
 
-def run(longbase: pd.DataFrame, instrument: str, monetary: str, fiscal: str) -> dict:
+def run(
+    longbase: pd.DataFrame, instrument: str, monetary: str, fiscal: str, paths: bool = False
+) -> dict:
     model = Frbus(str(MODEL_XML))
     data = longbase.copy()
     w = slice(START, END)
@@ -111,7 +113,7 @@ def run(longbase: pd.DataFrame, instrument: str, monetary: str, fiscal: str) -> 
         dinst = pd.Series(0.0, index=dx.index)
         taxable = (b["ypn"] - b["gtn"]) / (b["pgdp"] / 100)
         dinst.loc[s] = (b.loc[s, "trp"] - x.loc[s, "trp"]) * taxable.loc[s]
-    return {
+    out = {
         "instrument": instrument,
         "monetary": monetary,
         "fiscal": fiscal,
@@ -121,6 +123,16 @@ def run(longbase: pd.DataFrame, instrument: str, monetary: str, fiscal: str) -> 
         "dtrp_year1_pp": 100 * year_mean(x["trp"] - b["trp"], 1),
         "dtrp_year2_pp": 100 * year_mean(x["trp"] - b["trp"], 2),
     }
+    if paths:  # quarterly deviations from the tracked baseline, for site exports
+        out["paths"] = {
+            "rff": drff,
+            "xgdp_pct": 100 * (x["xgdp"] / b["xgdp"] - 1),
+            "xgap2": x["xgap2"] - b["xgap2"],
+            "lur": x["lur"] - b["lur"],
+            "picxfe": x["picxfe"] - b["picxfe"],
+            "pcxfe_level": (x["pcxfe"], b["pcxfe"]),
+        }
+    return out
 
 
 def render(rows: list[dict]) -> str:
