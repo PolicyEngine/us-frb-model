@@ -30,50 +30,85 @@ FED_2018_NEW = {"core_pce_trough": -0.0345, "output_gap_trough": -0.4861, "lur_p
 FED_2018_PREVIOUS = {"core_pce_trough": -0.0617}
 
 
-# Unemployment-peak band: 30%, not the 10% used for core PCE and the output gap.
-# The peak overshoots Laforte's 0.2189 by a steady ~20%, with about +-4% of
-# baseline/vintage noise on top: 0.258 (2026Q1 shock, April 2026 LONGBASE),
-# 0.272 (2040Q1, Board pings settings, April), 0.276 (2026Q1, October 2026
-# LONGBASE) and 0.261 (2040Q1, October), i.e. 1.18-1.26x. The solver matches
-# the Board's pyfrbus at <= 2e-8 on both vintages, so this is a property of the
-# model and data, not an implementation gap. Widened from 25% when the repo
-# moved to the October 2026 vintage (decision logged in the PR).
-LUR_PEAK_REL = 0.30
-
-
-@pytest.mark.parametrize("run", ["2026q1", "2040q1_fed_pings_settings"])
-def test_ping_matches_board_published_post_2018_simulation(run):
-    p = (
-        COMMITTED["ping"]["base"]
-        if run == "2026q1"
-        else COMMITTED["ping_2040_fed_pings_settings"]
-    )
-    # core PCE (annualised q/q) trough
+def _laforte_checks(p):
     assert p["picxfe_trough"][0] == pytest.approx(FED_2018_NEW["core_pce_trough"], rel=0.10)
-    if run == "2026q1":
-        assert p["picxfe_trough"][1] == "2027Q4"  # quarter 8 after a 2026Q1 shock
     assert p["xgap2_trough"][0] == pytest.approx(FED_2018_NEW["output_gap_trough"], rel=0.10)
-    assert p["lur_peak"][0] == pytest.approx(FED_2018_NEW["lur_peak"], rel=LUR_PEAK_REL)
     # and well short of the pre-2018 model, so the old comparator is not like-for-like
     assert p["picxfe_trough"][0] > 0.7 * FED_2018_PREVIOUS["core_pce_trough"]
 
 
-def test_ping_core_pce_is_not_baseline_or_settings_dependent():
-    """The Board's pings.prg settings from 2040Q1 give the same core PCE trough.
+def test_like_for_like_run_matches_laforte_2018():
+    """Primary published-comparator gate: Laforte's own design.
 
-    Unemployment is more baseline-dependent (the labour block responds to the
-    starting state), so it gets a looser cross-run check below.
+    Shock in 2020Q1, the Board's programs/pings.prg settings (no ZLB, no
+    thresholds, rstar fixed), VAR expectations. All three responses within 10%
+    of the note (observed 0.96x, 0.97x and 1.04x on the October 2026 LONGBASE;
+    0.96x, 0.98x and 1.01x on the April 2026 LONGBASE).
+    Caveat: the 2020Q1 baseline here is realised history, not the 2018
+    LONGBASE projection Laforte shocked (readable only with EViews), so this is
+    close to, not exactly, a replication.
     """
+    p = COMMITTED["ping_sweep_fed_pings_settings"]["2020Q1"]
+    _laforte_checks(p)
+    assert p["lur_peak"][0] == pytest.approx(FED_2018_NEW["lur_peak"], rel=0.10)
+    # Timing: the note has all three in quarter 8 (2021Q4). The output-gap
+    # trough is exactly there; core PCE and unemployment land in quarters 8-10
+    # (October 2026 LONGBASE: q9 and q9; April 2026 LONGBASE: q9 and q10).
+    assert p["xgap2_trough"][1] == "2021Q4"
+    assert p["picxfe_trough"][1] in ("2021Q4", "2022Q1", "2022Q2")
+    assert p["lur_peak"][1] in ("2021Q4", "2022Q1", "2022Q2")
+
+
+@pytest.mark.parametrize("run", ["2026q1", "2040q1_fed_pings_settings"])
+def test_published_window_runs_match_laforte_core_and_gap(run):
+    """Core PCE and the output gap are not start-date dependent (see the sweep),
+    so the published 2026Q1 run and the 2040Q1 pings run are held to 10% too.
+    The unemployment peak is not asserted against Laforte here: it depends on
+    the start date (sweep below), and these runs are not Laforte's experiment.
+    """
+    p = COMMITTED["ping"]["base"] if run == "2026q1" else COMMITTED["ping_2040_fed_pings_settings"]
+    _laforte_checks(p)
+    if run == "2026q1":
+        assert p["picxfe_trough"][1] == "2027Q4"  # quarter 8 after a 2026Q1 shock
+
+
+def test_ping_core_pce_is_not_baseline_or_settings_dependent():
+    """The Board's pings.prg settings from 2040Q1 give the same core PCE trough."""
     a = COMMITTED["ping"]["base"]["picxfe_trough"][0]
     b = COMMITTED["ping_2040_fed_pings_settings"]["picxfe_trough"][0]
     assert b == pytest.approx(a, rel=0.05)
 
 
-def test_ping_unemployment_agrees_across_baselines():
-    """2026Q1 and 2040Q1 unemployment peaks within 15% (1.06x on October 2026 data)."""
-    a = COMMITTED["ping"]["base"]["lur_peak"][0]
-    b = COMMITTED["ping_2040_fed_pings_settings"]["lur_peak"][0]
-    assert a == pytest.approx(b, rel=0.15)
+def test_start_date_sweep():
+    """The 100bp ping from eight start dates (pings settings, 40 quarters).
+
+    Core PCE and the output gap stay within 10% of Laforte from every start
+    date. The unemployment peak rises with the start date (1.04x in 2020Q1 to
+    1.38x in 2035Q1, back to 1.19x in 2040Q1): the unemployment response per
+    unit of output gap drifts with the baseline. Its 1.00-1.45x range is a
+    sanity bound fitted to the October 2026 LONGBASE, NOT a published
+    comparison; the published comparison is the 2020Q1 test above. The real
+    regression guard is test_committed_json_is_current (abs 1e-6).
+    """
+    sweep = COMMITTED["ping_sweep_fed_pings_settings"]
+    assert list(sweep) == list(it.SWEEP_STARTS)
+    for start, p in sweep.items():
+        assert p["picxfe_trough"][0] == pytest.approx(FED_2018_NEW["core_pce_trough"], rel=0.10), (
+            start
+        )
+        assert p["xgap2_trough"][0] == pytest.approx(FED_2018_NEW["output_gap_trough"], rel=0.10), (
+            start
+        )
+        ratio = p["lur_peak"][0] / FED_2018_NEW["lur_peak"]
+        assert 1.00 <= ratio <= 1.45, (start, ratio)
+
+
+def test_2020q1_demo_settings_is_recorded_not_gated():
+    """With the demo settings the ZLB binds from a near-zero 2020 funds rate,
+    so the response is weaker; recorded for completeness only."""
+    d = COMMITTED["ping_2020q1_demo_settings"]
+    lfl = COMMITTED["ping_sweep_fed_pings_settings"]["2020Q1"]
+    assert abs(d["xgap2_trough"][0]) < abs(lfl["xgap2_trough"][0])
 
 
 def test_var_expectations_carry_the_inflation_response():
