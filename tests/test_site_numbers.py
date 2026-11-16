@@ -25,14 +25,14 @@ def numbers(longbase):
 
 def test_output_gap_trough(numbers):
     assert numbers["xgap2_trough"] == {
-        "value": pytest.approx(-0.5012, abs=1e-4),
+        "value": pytest.approx(-0.5042, abs=1e-4),
         "quarter": "2027Q3",
     }
 
 
 def test_wage_bill_2027(numbers):
     wb = numbers["wage_bill_2027_pct"]
-    assert wb["pl_plus_lhp"] == pytest.approx(-0.6453, abs=1e-4)
+    assert wb["pl_plus_lhp"] == pytest.approx(-0.6470, abs=1e-4)
     # The adapter's additive approximation is within 0.001pp of the product.
     assert abs(wb["pl_plus_lhp"] - wb["exact_product"]) < 1e-3
 
@@ -41,10 +41,10 @@ def test_headline_irf_values(numbers):
     """The VALIDATION.md 100bp table, pinned rather than banded."""
     assert numbers["rff_impact"] == pytest.approx(1.0001, abs=1e-4)
     assert numbers["xgdp_trough_pct"] == {
-        "value": pytest.approx(-0.5512, abs=1e-4),
+        "value": pytest.approx(-0.5554, abs=1e-4),
         "quarter": "2027Q4",
     }
-    assert numbers["lur_peak"] == {"value": pytest.approx(0.2584, abs=1e-4), "quarter": "2027Q4"}
+    assert numbers["lur_peak"] == {"value": pytest.approx(0.2758, abs=1e-4), "quarter": "2028Q1"}
     assert numbers["picxfe_trough"]["value"] == pytest.approx(-0.0336, abs=1e-4)
     # Four-quarter core inflation (the Fed charts' concept) troughs later.
     assert numbers["core_pce_4q_trough"] == {

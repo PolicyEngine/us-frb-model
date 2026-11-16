@@ -44,11 +44,11 @@ def test_sweep_checks_pass(families):
 
 
 def test_multipliers_match_the_gated_runs(families):
-    """Same numbers as tests/test_multipliers.py (0.725/0.643; 0.22/0.32)."""
+    """Same numbers as tests/test_multipliers.py (0.747/0.663; 0.23/0.32)."""
     purchases = families["purchases"]["purchases_+1.0pct_gdp"]["multiplier"]
     taxes = families["taxes"]["tax_cut_+2.0pp"]["multiplier"]
-    assert purchases[1] == pytest.approx(0.725, abs=0.001)
-    assert purchases[2] == pytest.approx(0.643, abs=0.001)
+    assert purchases[1] == pytest.approx(0.747, abs=0.001)
+    assert purchases[2] == pytest.approx(0.663, abs=0.001)
     assert taxes[1] == pytest.approx(0.22, abs=0.01)
     assert taxes[2] == pytest.approx(0.32, abs=0.01)
 

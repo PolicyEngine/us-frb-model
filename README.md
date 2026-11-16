@@ -15,6 +15,12 @@ unmodified under `vendor/` (see `vendor/README.md`). This package is an
 independent reimplementation that follows pyfrbus semantics exactly and is
 validated against it (see `VALIDATION.md`).
 
+**Data vintage.** The bundled `LONGBASE.TXT` is the Board's October 2026
+vintage (data package of 13 October 2026), with history through 2026Q2. The
+published experiments still shock in 2026Q1, two quarters before that data
+edge, so they stay comparable with the April 2026 vintage used until
+16 November 2026; `VALIDATION.md` gives both where they differ.
+
 ## Install
 
 ```bash
@@ -65,7 +71,7 @@ A runnable version is in `examples/monetary_policy_shock.py`.
   for MCE only, on the stacked residual (`ftol`, 1e-8) followed by one more
   Newton step; `ConvergenceError` otherwise. All four modes are gated against
   the Board's pyfrbus on a 100bp shock, all 284 variables x 20 quarters, at
-  < 1e-6 (observed 1e-9 to 1.5e-8; tests/test_mce.py, VALIDATION.md Test 5). The
+  < 1e-6 (observed 1.4e-9 to 9.0e-9; tests/test_mce.py, VALIDATION.md Test 5). The
   results in `results/expectations_comparison.md`,
   `results/expectations_matched_closures.md` and
   `results/episode_2022_tightening_mce_*.md` compare VAR and MCE.
@@ -82,19 +88,19 @@ actually tells you:
 - **Cross-validation (the real evidence).** Four shock scenarios — monetary,
   fiscal `egfe`, tax `trp`, and a non-inertial Taylor variant — agree with the
   Fed's own pyfrbus across all 284 endogenous variables and 20 quarters to
-  2.1e-8 abs / 4.9e-8 rel at worst (monetary 6.0e-9 abs; fiscal 1.8e-8,
-  tax 1.7e-8, Taylor variant 2.1e-8; `VALIDATION.md` Tests 2 and 2a). The
-  exact values vary between machines and dependency versions at this scale
-  (one macOS run: monetary 8.3e-9 abs / 9.4e-8 rel), all far inside the 1e-6
-  gate. For scale, the Board's own pyfrbus 1.0.0 and 1.1.1 releases differ from *each
-  other* by 1.3e-8 on the monetary shock, so this is the same order as the
-  reference implementation's own noise floor.
+  2.0e-8 abs / 1.5e-8 rel at worst on the October 2026 data (monetary 1.4e-8
+  abs; fiscal 9.5e-9, tax 2.0e-8, Taylor variant 1.9e-8; `VALIDATION.md`
+  Tests 2 and 2a). The exact values vary between machines and dependency
+  versions at this scale, all far inside the 1e-6 gate. For scale, the Board's
+  own pyfrbus 1.0.0 and 1.1.1 releases differ from *each other* by 1.4e-8 on
+  the monetary shock, so this is the same order as the reference
+  implementation's own noise floor.
 - **Fiscal multipliers.** Purchases and tax cuts lie inside the published
-  ranges in `VALIDATION.md` Test 4: purchases 0.72 in year 1 under the
-  inertial Taylor rule and 0.90 in year 2 with the funds rate pegged; tax cuts
-  0.22 in year 1. The rule × horizon grid is ordered as theory requires.
-  **The 0.72 is for a 1%-of-GDP rise and is size-dependent:** the same model
-  gives about 0.80 for small shocks and 0.90 for a 1%-of-GDP cut, because GDP
+  ranges in `VALIDATION.md` Test 4: purchases 0.75 in year 1 under the
+  inertial Taylor rule and 0.93 in year 2 with the funds rate pegged; tax cuts
+  0.23 in year 1. The rule × horizon grid is ordered as theory requires.
+  **The 0.75 is for a 1%-of-GDP rise and is size-dependent:** the same model
+  gives about 0.83 for small shocks and 0.93 for a 1%-of-GDP cut, because GDP
   aggregates component growth in logs (issue #11). Transfers give 0.28–0.32 in year
   1: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with
   the funds rate pegged and the fiscal rule off. Both are below purchases and
@@ -107,7 +113,7 @@ actually tells you:
   notes is the pre-2018 vintage (issue #14). After a fiscal shock ends, output undershoots by about
   45% of the peak as the funds rate comes back.
 - **Tracking invariant.** After `init_trac`, solving the baseline reproduces
-  LONGBASE to 5.6e-17. **This is an identity, not a validation result** —
+  LONGBASE to 7.3e-12 (one ulp on a level of order 1e4). **This is an identity, not a validation result** —
   `init_trac` defines the add-factors as minus the residuals at the input
   data, so it holds for *any* input; the repo gates a scrambled-baseline
   version of the same test to keep that honest. Do not cite it as agreement
@@ -115,11 +121,13 @@ actually tells you:
 
 Nothing here is a forecast evaluation. LONGBASE is the Board's illustrative
 baseline, not a Fed forecast, and no pseudo-out-of-sample accuracy of any kind
-is established for this model. The two-quarter LONGBASE backtest in
-`VALIDATION.md` is close on GDP growth, unemployment and the funds rate, and
-under-projected core PCE inflation (annualized q/q): 2.77% against 4.42% in
-2026Q1 (−1.65pp) and 2.76% against 3.42% in 2026Q2 (−0.65pp). That is a
-property of the Fed's baseline data, not of this implementation.
+is established for this model. The LONGBASE backtest in `VALIDATION.md`
+scores the October 2026 vintage's first projected quarter, 2026Q3: close on
+unemployment and the funds rate, GDP growth under-projected by 1.23pp (2.14%
+against 3.37%) and core PCE inflation over-projected by 0.80pp (3.27% against
+2.47%, annualized q/q). The April 2026 vintage under-projected core PCE by
+1.65pp in 2026Q1 and 0.65pp in 2026Q2 (`backtests/longbase_2026-04_vs_outturns.md`).
+Both are properties of the Fed's baseline data, not of this implementation.
 
 ## Development
 

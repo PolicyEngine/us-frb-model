@@ -195,7 +195,7 @@ jobs:
           FRESH_VENDOR_CSV: ${{ runner.temp }}/fresh_vendor.csv
         run: uv run python scripts/check_reference_drift.py
 
-  # NON-gating: compare the pinned April 2026 LONGBASE baseline against
+  # NON-gating: compare the pinned October 2026 LONGBASE baseline against
   # realized FRED outturns and print the report. LONGBASE is the Fed's
   # baseline, not this implementation's forecast, so a widening gap is
   # information, never a build failure (the report machinery itself IS gated,

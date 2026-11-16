@@ -30,22 +30,50 @@ FED_2018_NEW = {"core_pce_trough": -0.0345, "output_gap_trough": -0.4861, "lur_p
 FED_2018_PREVIOUS = {"core_pce_trough": -0.0617}
 
 
-def test_ping_matches_board_published_post_2018_simulation():
-    p = COMMITTED["ping"]["base"]
-    # core PCE (annualised q/q) trough, in quarter 8 in both runs
+# Unemployment-peak band: 30%, not the 10% used for core PCE and the output gap.
+# The peak overshoots Laforte's 0.2189 by a steady ~20%, with about +-4% of
+# baseline/vintage noise on top: 0.258 (2026Q1 shock, April 2026 LONGBASE),
+# 0.272 (2040Q1, Board pings settings, April), 0.276 (2026Q1, October 2026
+# LONGBASE) and 0.261 (2040Q1, October), i.e. 1.18-1.26x. The solver matches
+# the Board's pyfrbus at <= 2e-8 on both vintages, so this is a property of the
+# model and data, not an implementation gap. Widened from 25% when the repo
+# moved to the October 2026 vintage (decision logged in the PR).
+LUR_PEAK_REL = 0.30
+
+
+@pytest.mark.parametrize("run", ["2026q1", "2040q1_fed_pings_settings"])
+def test_ping_matches_board_published_post_2018_simulation(run):
+    p = (
+        COMMITTED["ping"]["base"]
+        if run == "2026q1"
+        else COMMITTED["ping_2040_fed_pings_settings"]
+    )
+    # core PCE (annualised q/q) trough
     assert p["picxfe_trough"][0] == pytest.approx(FED_2018_NEW["core_pce_trough"], rel=0.10)
-    assert p["picxfe_trough"][1] == "2027Q4"  # quarter 8 after a 2026Q1 shock
+    if run == "2026q1":
+        assert p["picxfe_trough"][1] == "2027Q4"  # quarter 8 after a 2026Q1 shock
     assert p["xgap2_trough"][0] == pytest.approx(FED_2018_NEW["output_gap_trough"], rel=0.10)
-    assert p["lur_peak"][0] == pytest.approx(FED_2018_NEW["lur_peak"], rel=0.25)
+    assert p["lur_peak"][0] == pytest.approx(FED_2018_NEW["lur_peak"], rel=LUR_PEAK_REL)
     # and well short of the pre-2018 model, so the old comparator is not like-for-like
     assert p["picxfe_trough"][0] > 0.7 * FED_2018_PREVIOUS["core_pce_trough"]
 
 
-def test_ping_is_not_baseline_or_settings_dependent():
-    """The Board's pings.prg settings from 2040Q1 give the same trough."""
+def test_ping_core_pce_is_not_baseline_or_settings_dependent():
+    """The Board's pings.prg settings from 2040Q1 give the same core PCE trough.
+
+    Unemployment is more baseline-dependent (the labour block responds to the
+    starting state), so it gets a looser cross-run check below.
+    """
     a = COMMITTED["ping"]["base"]["picxfe_trough"][0]
     b = COMMITTED["ping_2040_fed_pings_settings"]["picxfe_trough"][0]
     assert b == pytest.approx(a, rel=0.05)
+
+
+def test_ping_unemployment_agrees_across_baselines():
+    """2026Q1 and 2040Q1 unemployment peaks within 15% (1.06x on October 2026 data)."""
+    a = COMMITTED["ping"]["base"]["lur_peak"][0]
+    b = COMMITTED["ping_2040_fed_pings_settings"]["lur_peak"][0]
+    assert a == pytest.approx(b, rel=0.15)
 
 
 def test_var_expectations_carry_the_inflation_response():
@@ -91,7 +119,7 @@ def test_mpc_out_of_transfers_equals_mpc_out_of_labour_income():
 
 def test_hand_to_mouth_share_drives_the_transfers_multiplier():
     i = COMMITTED["income"]
-    assert i["transfers_taylor_srp"]["multiplier"]["1"] == pytest.approx(0.278, abs=0.005)
+    assert i["transfers_taylor_srp"]["multiplier"]["1"] == pytest.approx(0.283, abs=0.005)
     lift = (
         i["transfers_taylor_srp_htm040"]["multiplier"]["1"]
         / i["transfers_taylor_srp"]["multiplier"]["1"]

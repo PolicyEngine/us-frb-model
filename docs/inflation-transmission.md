@@ -1,7 +1,12 @@
 # Inflation transmission in this FRB/US implementation
 
+Numbers are on the October 2026 LONGBASE (recomputed 16 November 2026,
+`results/inflation_transmission.json`). The April 2026 vintage gave the same
+conclusions; where a figure moved by more than rounding, the April value is
+in brackets.
+
 Question (issue #14): the 2022–23 tightening counterfactual gives real GDP
-−3.3% and unemployment +1.71pp at 2023Q4, but core PCE only −0.14pp (mean
+−3.2% and unemployment +1.68pp at 2023Q4 (−3.3%, +1.71pp), but core PCE only −0.14pp (mean
 −0.12pp over 2022–24). The 100bp benchmark ping gives a core PCE trough of
 −0.034pp against "as much as 0.08" in the 2014 FEDS Note. Is the weak
 inflation response (a) faithful to FRB/US, or (b) an implementation gap?
@@ -27,7 +32,7 @@ on 6 Nov 2026. The shock is in 2020Q1.
 |---|---|---|---|
 | core PCE inflation (annualised q/q `picxfe`; the Board's table gives no concept, and the quarter-8 timing matches q/q, not 4q, whose trough here is quarter 10), trough | **−0.034pp, quarter 8** | **−0.0345pp, quarter 8 (2021Q4)** | −0.0617pp, quarter 6 |
 | output gap, trough | −0.50pp, quarter 7 | −0.486pp, quarter 8 | −0.459pp, quarter 9 |
-| unemployment, peak | +0.26pp, quarter 8 | +0.219pp, quarter 8 | +0.215pp, quarter 9 |
+| unemployment, peak | +0.28pp, quarter 9 (+0.26pp, quarter 8) | +0.219pp, quarter 8 | +0.215pp, quarter 9 |
 | funds rate, impact / undershoot | +1.00 / −0.26pp | +1.00 / −0.27pp | +0.95 / −0.30pp |
 
 The note's explanation of the smaller inflation response, verbatim: "the
@@ -47,7 +52,10 @@ thresholds (`rffmin=-9999`, `dmptrsh=0`) and fixes `rstar` (`drstar=0`) for
 40 quarters. LONGBASE already has `drstar=0` and `dmptrsh=0`, and the floor
 never binds for a +100bp shock from a 3.8% baseline. Rerunning the ping from
 2040Q1 with the pings.prg settings gives the same trough (−0.034pp), so the
-result depends on neither the baseline nor the settings.
+core PCE result depends on neither the baseline nor the settings. The
+unemployment peak does depend on the baseline: 0.276pp from 2026Q1 and
+0.261pp from 2040Q1 (April 2026 vintage: 0.258 and 0.272), 1.19–1.26× the
+Board's 0.219, so its gate band is 30%.
 
 ## 2. Where the response comes from: channel shut-offs
 
@@ -55,10 +63,10 @@ Each row reruns the experiment with one channel removed.
 
 | channel removed | ping: core PCE trough | episode: core PCE 4q, 2023Q4 | share of the response |
 |---|---|---|---|
-| none (model as published) | −0.034 | −0.143 | — |
+| none (model as published) | −0.034 | −0.142 | — |
 | VAR expectations `zpicxfe`, `zpieci` held at baseline | −0.000 | −0.002 | **~99%** |
-| long-run expectations `ptr` held at baseline | −0.032 | −0.141 | ~5% / ~1% |
-| real exchange rate `fpxr` held at baseline | −0.027 | −0.095 | ~20% / ~34% |
+| long-run expectations `ptr` held at baseline | −0.032 | −0.140 | ~6% / ~1% |
+| real exchange rate `fpxr` held at baseline | −0.028 | −0.095 | ~17% / ~33% |
 
 * **Expectations carry almost the whole response.** `picxfe` puts weight
   0.98 (`y_picxfe(3)`) on `zpicxfe`, and `pieci` puts the same weight on
@@ -88,10 +96,10 @@ which supports reading the units as identical.
 
 | NKPC parameters | ping: core PCE trough | episode: core PCE 4q, 2023Q4 |
 |---|---|---|
-| current model.xml | −0.034 | −0.143 |
-| wage slope only → −0.024 (2013 Bayesian) | −0.034 | −0.143 |
+| current model.xml | −0.034 | −0.142 |
+| wage slope only → −0.024 (2013 Bayesian) | −0.034 | −0.142 |
 | 2013 Bayesian 1985–2012, all five | −0.033 | −0.141 |
-| 2013 ML 1985–2007, all five | −0.034 | −0.141 |
+| 2013 ML 1985–2007, all five | −0.034 | −0.140 |
 
 Changing the structural slopes moves nothing. Under VAR expectations, the
 inflation response is set by the auxiliary forecasting system (`zpicxfe`,
@@ -130,8 +138,8 @@ pegged and the tax trends exogenous:
 
 | 1% of GDP for 8 quarters | Δyht/Δgtr | consumption per unit income, q1 | hand-to-mouth prediction, q1 | yr 1 | GDP per unit income, yr 1 |
 |---|---|---|---|---|---|
-| transfers | 1.020 | 0.305 | 0.291 | 0.359 | 0.309 |
-| after-tax labour income (`yhl_aerr`) | — | 0.288 | 0.291 | 0.351 | 0.301 |
+| transfers | 1.022 | 0.306 | 0.292 | 0.362 | 0.315 |
+| after-tax labour income (`yhl_aerr`) | — | 0.289 | 0.292 | 0.354 | 0.306 |
 
 * The transmission is clean. Households receive 1.02 of each real unit
   (the pgdp/pcnia deflator ratio).
@@ -143,8 +151,9 @@ pegged and the tax trends exogenous:
   MPC is therefore y_eco(4)·y_ecnia(1)·ecnia/(yhl+yht) ≈ 0.29.
 * The transfers multiplier scales with that one coefficient. Setting
   `y_eco(4)` to 0.40, the share in the 2009–10 model used by Coenen et al.,
-  raises the year-1 multiplier from 0.278 to 0.360 (Taylor, surplus rule)
-  and from 0.315 to 0.409 (peg, rule off). CBO's range for transfers assumes
+  raises the year-1 multiplier from 0.283 to 0.367 (Taylor, surplus rule)
+  and from 0.321 to 0.416 (peg, rule off) (April 2026 vintage: 0.278 to 0.360
+  and 0.315 to 0.409). CBO's range for transfers assumes
   that recipients have higher MPCs than average. FRB/US has no channel for
   that, so a multiplier below CBO's derived range is a property of the
   model, not of this code.
@@ -155,9 +164,10 @@ pegged and the tax trends exogenous:
 same patched copy as the 100bp cross-validation) on the identical history and
 counterfactual runs, and writes `tests/data/vendor_episode_2022_{hist,cf}.csv`.
 Across all 284 endogenous variables and 16 quarters this implementation agrees
-with it to 8.5e-9 abs on the history run and 5.0e-8 abs (2.3e-7 rel) on the
-counterfactual. Both runs give the same effects at 2023Q4: core PCE 4q
-−0.1429pp, mean 2022–24 −0.1180pp, GDP −3.2764%, unemployment +1.7103pp.
+with it to 1.0e-8 abs on the history run and 1.5e-8 abs on the
+counterfactual (April 2026 vintage: 8.5e-9 and 5.0e-8). Both runs give the
+same effects at 2023Q4: core PCE 4q −0.1422pp, mean 2022–24 −0.1171pp, GDP
+−3.2337%, unemployment +1.6778pp.
 The weak inflation effect is therefore what the Board's own code produces.
 Gate: `tests/test_inflation_transmission.py::test_episode_matches_vendor_pyfrbus`
 (1e-6 abs and rel, the Test 2 tolerances).

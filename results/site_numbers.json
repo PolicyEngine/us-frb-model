@@ -6,16 +6,16 @@
   },
   "rff_impact": 1.0001,
   "xgdp_trough_pct": {
-    "value": -0.5512,
+    "value": -0.5554,
     "quarter": "2027Q4"
   },
   "xgap2_trough": {
-    "value": -0.5012,
+    "value": -0.5042,
     "quarter": "2027Q3"
   },
   "lur_peak": {
-    "value": 0.2584,
-    "quarter": "2027Q4"
+    "value": 0.2758,
+    "quarter": "2028Q1"
   },
   "picxfe_trough": {
     "value": -0.0336,
@@ -26,9 +26,9 @@
     "quarter": "2028Q2"
   },
   "wage_bill_2027_pct": {
-    "pl_pct": -0.0758,
-    "lhp_pct": -0.5695,
-    "pl_plus_lhp": -0.6453,
-    "exact_product": -0.6449
+    "pl_pct": -0.0763,
+    "lhp_pct": -0.5706,
+    "pl_plus_lhp": -0.647,
+    "exact_product": -0.6465
   }
 }

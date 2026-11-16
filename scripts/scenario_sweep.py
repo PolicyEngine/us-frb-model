@@ -416,9 +416,11 @@ def main(argv: list[str] | None = None) -> int:
     }
     check_rows = checks(families)
     report = {
-        "description": "FRB/US scenario sweep on LONGBASE (April 2026), VAR "
+        "description": "FRB/US scenario sweep on LONGBASE (October 2026), VAR "
         "expectations, demo fiscal configuration. Deviations from baseline: "
-        "rff, xgap2, lur, picxfe, core_pce_4q in pp; xgdp_pct in % of baseline.",
+        "rff, xgap2, lur, picxfe, core_pce_4q in pp; xgdp_pct in % of baseline. "
+        "The October 2026 vintage has history through 2026Q2, so the shocks start "
+        "two quarters before the data edge.",
         "window": [str(START), str(END)],
         "fiscal_shock_window": [str(START), str(FISCAL_END)],
         "runs": {

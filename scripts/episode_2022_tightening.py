@@ -1,7 +1,7 @@
 """The 2022-23 tightening: history against a no-tightening counterfactual.
 
-LONGBASE (April 2026 vintage) carries the realised quarterly history through
-2025Q4, including the funds rate path: 0.08% in 2021Q4, 0.12% in 2022Q1,
+LONGBASE (October 2026 vintage) carries the realised quarterly history through
+2026Q2, including the funds rate path: 0.08% in 2021Q4, 0.12% in 2022Q1,
 5.33% by 2023Q4. This script asks what FRB/US (VAR expectations) says that
 path did to output, unemployment and core PCE inflation.
 
