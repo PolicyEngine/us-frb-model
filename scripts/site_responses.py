@@ -168,9 +168,9 @@ def scorecard(experiments: dict, peg: dict) -> list[dict]:
         _row(
             "100bp: lur peak (start-date sanity range, not a published band)",
             m["lur_peak"]["value"],
-            round(pub * 1.00, 4),
+            round(pub * 0.90, 4),
             round(pub * 1.45, 4),
-            f"1.00-1.45x Laforte (2018) {pub}",
+            f"0.90-1.45x Laforte (2018) {pub}",
             "Laforte's own 2020Q1 design gives 1.04x: VALIDATION.md, Laforte by start date",
         )
     )

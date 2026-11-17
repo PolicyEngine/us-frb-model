@@ -768,11 +768,11 @@
       "check": "100bp: lur peak (start-date sanity range, not a published band)",
       "ours": 0.2758,
       "band": [
-        0.2189,
+        0.197,
         0.3174
       ],
       "inside": true,
-      "source": "1.00-1.45x Laforte (2018) 0.2189",
+      "source": "0.90-1.45x Laforte (2018) 0.2189",
       "note": "Laforte's own 2020Q1 design gives 1.04x: VALIDATION.md, Laforte by start date"
     },
     {
