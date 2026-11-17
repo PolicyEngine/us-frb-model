@@ -85,7 +85,7 @@ def test_start_date_sweep():
     Core PCE and the output gap stay within 10% of Laforte from every start
     date. The unemployment peak rises with the start date (1.04x in 2020Q1 to
     1.38x in 2035Q1, back to 1.19x in 2040Q1): the unemployment response per
-    unit of output gap drifts with the baseline. Its 1.00-1.45x range is a
+    unit of output gap drifts with the baseline. Its 0.90-1.45x range is a
     sanity bound fitted to the October 2026 LONGBASE, NOT a published
     comparison; the published comparison is the 2020Q1 test above. The real
     regression guard is test_committed_json_is_current (abs 1e-6).
@@ -100,7 +100,9 @@ def test_start_date_sweep():
             start
         )
         ratio = p["lur_peak"][0] / FED_2018_NEW["lur_peak"]
-        assert 1.00 <= ratio <= 1.45, (start, ratio)
+        # lower end 0.90, not 1.00: the 2020Q1 run is 1.04x here and 1.01x on the
+        # April 2026 LONGBASE, too close to 1.00 for a vintage-robust bound
+        assert 0.90 <= ratio <= 1.45, (start, ratio)
 
 
 def test_2020q1_demo_settings_is_recorded_not_gated():

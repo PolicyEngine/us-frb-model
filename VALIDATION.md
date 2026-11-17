@@ -257,7 +257,7 @@ note from every date, gated). The unemployment peak is: the unemployment
 response per unit of output-gap trough drifts with the baseline (0.48 in 2020,
 0.55 in 2026, 0.64 in 2035, against Laforte's 0.45). So the unemployment peak
 is gated against Laforte only on Laforte's design (within 10%); across the
-sweep it carries a 1.00–1.45× sanity bound fitted to this vintage, which is
+sweep it carries a 0.90–1.45× sanity bound (observed 1.04–1.38×), which is
 labelled as such and is not a published comparison. The committed sweep is
 pinned to a fresh solve at 1e-6 (`test_committed_json_is_current`). With the
 demo settings from 2020Q1 the ZLB binds from a near-zero funds rate and the
