@@ -816,7 +816,7 @@
         0.45
       ],
       "inside": true,
-      "source": "Whalen & Reichling: CBO tax-cut multiplier about 0.3",
+      "source": "regression band; CBO 2015 Table 3 rows 0.3-1.5 and 0.1-0.6 are Fed-not-tightening (docs/benchmarks.md)",
       "note": ""
     },
     {
@@ -827,19 +827,19 @@
         0.45
       ],
       "inside": true,
-      "source": "as above",
+      "source": "regression band, as above",
       "note": ""
     },
     {
-      "check": "transfers multiplier, yr 1 (sanity: 0.15 < x < purchases)",
+      "check": "transfers multiplier, yr 1 (sanity bound 0.15 < x < purchases, not a published band)",
       "ours": 0.2832,
       "band": [
         0.15,
         0.7465
       ],
       "inside": true,
-      "source": "CBO ARRA tables; Whalen & Reichling (2015)",
-      "note": "below every matched published benchmark: docs/benchmarks.md, issue #13"
+      "source": "transfers must raise GDP by less than purchases",
+      "note": "the model is BELOW every matched published benchmark, incl. CBO 0.4-2.1: docs/benchmarks.md, issue #13"
     }
   ]
 }

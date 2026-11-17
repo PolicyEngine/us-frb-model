@@ -66,8 +66,13 @@ BANDS = {
     "purchases_y1": (0.7, 1.0, "Coenen et al. (2012); Whalen & Reichling (CBO WP 2015-02)"),
     "purchases_y1_cbo": (0.45, 1.82, "CBO typical-Fed path, converted (docs/benchmarks.md s.2)"),
     "purchases_peg_y2": (0.8, 1.2, "Coenen et al. (2012), two-year accommodation"),
-    "taxes_y1": (0.15, 0.45, "Whalen & Reichling: CBO tax-cut multiplier about 0.3"),
-    "taxes_y2": (0.15, 0.45, "as above"),
+    "taxes_y1": (
+        0.15,
+        0.45,
+        "regression band; CBO 2015 Table 3 rows 0.3-1.5 and 0.1-0.6 are Fed-not-tightening "
+        "(docs/benchmarks.md)",
+    ),
+    "taxes_y2": (0.15, 0.45, "regression band, as above"),
 }
 
 
@@ -181,12 +186,13 @@ def scorecard(experiments: dict, peg: dict) -> list[dict]:
     rows.append(_row("tax-cut multiplier, yr 2", mult["taxes"][2], *BANDS["taxes_y2"]))
     rows.append(
         _row(
-            "transfers multiplier, yr 1 (sanity: 0.15 < x < purchases)",
+            "transfers multiplier, yr 1 (sanity bound 0.15 < x < purchases, not a published band)",
             mult["transfers"][1],
             0.15,
             round(mult["purchases"][1], 4),
-            "CBO ARRA tables; Whalen & Reichling (2015)",
-            "below every matched published benchmark: docs/benchmarks.md, issue #13",
+            "transfers must raise GDP by less than purchases",
+            "the model is BELOW every matched published benchmark, incl. CBO 0.4-2.1: "
+            "docs/benchmarks.md, issue #13",
         )
     )
     return rows

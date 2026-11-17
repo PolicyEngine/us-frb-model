@@ -81,6 +81,8 @@ def test_signs_make_sense():
         assert s["xgdp_pct_year"]["1"] > 0, inst
 
 
-def test_every_headline_is_inside_its_published_band():
+def test_every_scorecard_row_is_inside_its_band():
+    """Published bands, plus two labelled sanity bounds (unemployment by start
+    date, transfers below purchases)."""
     outside = [r["check"] for r in COMMITTED["scorecard"] if not r["inside"]]
     assert not outside, outside
