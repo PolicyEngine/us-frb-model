@@ -304,7 +304,7 @@ and `results/expectations_comparison.md` compares the modes. 100bp shock:
 output gap trough −0.50 (VAR), −0.19 (mcap), −0.19 (mcap+wp); core PCE trough
 −0.034, −0.018, −0.010. Purchases multiplier (Taylor rule, `dfpsrp=1`), year 1/year 2: 0.747/0.663 (VAR),
 0.795/0.716 (mcap), 0.799/0.728 (mcap+wp). On this closure MCE adds ~0.05 in year 1, a fraction of
-the gap to the Coenen FRB-US line in section 4 (≈0.95).
+the gap to the Coenen FRB-US line in section 3 (≈0.95).
 
 Matched closures (`scripts/expectations_comparison.py --matched`,
 `results/expectations_matched_closures.md`; closures over 2026Q1–2030Q4,
@@ -316,7 +316,7 @@ LONGBASE settings after, 40-year window). Year 1 / year 2:
 | peg, surplus rule | 0.792 / 0.934 | 0.859 / 0.929 | 0.858 / 0.921 | approx. 1.05 / 1.25 (2-year accommodation) |
 | peg, taxes exogenous | 0.816 / 1.037 | 0.906 / 1.109 | 0.909 / 1.112 | same |
 
-The VAR rows equal the section 4 rows (a check that the 40-year window does
+The VAR rows equal the section 3 rows (a check that the 40-year window does
 not change VAR answers). The peg here lasts five years, against Coenen's two,
 so the remaining peg shortfall is if anything understated. Under MCE the long
 rate falls in year 1 under the peg (−0.08 to −0.12pp) because agents know the

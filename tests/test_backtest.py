@@ -69,3 +69,16 @@ def test_core_pce_baseline_is_on_the_outturn_concept(longbase):
     for quarter in bt.QUARTERS:
         assert abs(baseline[quarter] - compounded[quarter]) < 1e-6
         assert baseline[quarter] > longbase["picxfe"][quarter]
+
+
+def test_committed_report_matches_the_snapshot(longbase):
+    """backtests/longbase_vs_outturns.json is what the pinned snapshot and
+    LONGBASE produce (catches a committed report left stale after either moves)."""
+    committed = json.loads(
+        (
+            Path(__file__).resolve().parents[1] / "backtests" / "longbase_vs_outturns.json"
+        ).read_text()
+    )
+    fresh = bt.build_report(bt.load_snapshot(), longbase)
+    assert committed["rows"] == fresh["rows"]
+    assert committed["quarters"] == fresh["quarters"]

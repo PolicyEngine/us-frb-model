@@ -254,7 +254,8 @@ Sources:
 Reading: against the Board's own ping of the current model generation
 (Laforte 2018), the core PCE trough agrees to 0.001pp and in the same
 quarter (8). The output-gap trough agrees to 0.02pp. Unemployment peaks
-0.04pp higher here. The 2014 and 2013 publications (−0.08pp) describe the
+0.06pp higher here (0.04pp on the April 2026 vintage); the peak depends on the
+start date, so the like-for-like comparison is Laforte's own 2020Q1 design. The 2014 and 2013 publications (−0.08pp) describe the
 pre-2018 model, whose wage–price block was re-estimated in 2018. The Board's
 "previous version" column (−0.062pp) shows the same direction. So −0.034pp is
 FRB/US as the Board now publishes it, not an implementation gap. It remains a
@@ -273,10 +274,12 @@ last quarter's funds rate forward):
 
 | quarters shocked | peak Δrff | when | Δrff q1..q4 | xgdp trough |
 |---|---|---|---|---|
-| 1 | +1.000 pp | 2026Q1 | 1.000, 0.822, 0.654, 0.490 | −0.55% |
-| 2 | +1.822 pp | 2026Q2 | 1.000, 1.822, 1.478, 1.147 | −1.08% |
-| 4 | **+2.971 pp** | 2026Q4 | 1.000, 1.822, 2.478, 2.971 | −2.08% |
-| 8 | +3.680 pp | 2027Q4 | (as above, then flattening) | −3.82% |
+| 1 | +1.000 pp | 2026Q1 | 1.000, 0.823, 0.656, 0.491 | −0.56% |
+| 2 | +1.823 pp | 2026Q2 | 1.000, 1.823, 1.479, 1.148 | −1.09% |
+| 4 | **+2.971 pp** | 2026Q4 | 1.000, 1.823, 2.479, 2.971 | −2.10% |
+| 8 | +3.674 pp | 2027Q4 | (as above, then flattening) | −3.83% |
+
+(October 2026 vintage, recomputed 17 November 2026.)
 
 A caller who reads "the shock is held for 4 periods" and expects a sustained
 +100bp will overstate the tightening roughly **threefold**. The same applies to
@@ -320,7 +323,7 @@ configuration; policy switches shared with `scripts/scenarios.py`.
 |---|---|---|---|
 | purchases, yr 1, inertial Taylor rule | 0.75 | 0.7–1.0 | Coenen et al. (AEJ: Macro 2012); Whalen & Reichling (CBO WP 2015-02) |
 | purchases, yr 2, funds rate pegged | 0.93 | 0.8–1.2 | Coenen et al. 2012, two-year monetary accommodation |
-| tax cut, yr 1 | 0.23 | 0.15–0.45 | Whalen & Reichling: CBO tax-cut multiplier ≈ 0.3 |
+| tax cut, yr 1 | 0.23 | 0.15–0.45 | regression band: CBO 2015 Table 3 gives no central value (rows 0.3–1.5 and 0.1–0.6, Fed not tightening); see below |
 | tax cut, yr 2 | 0.32 | 0.15–0.45 | as above; also gated yr2 > yr1 |
 
 The bands gate on economics, not on reproducing the exact decimals (bit-level
@@ -343,7 +346,8 @@ vintage (2026-08) and were not rerun:
 
 Under an active rule the multiplier **decays** as policy leans against the
 stimulus, and decays faster under the non-inertial rule because that rule
-raises the funds rate 0.59pp in year 1 against 0.23pp for the inertial one.
+raises the funds rate 0.59pp in year 1 against 0.24pp for the inertial one
+(April 2026 vintage: 0.59pp and 0.23pp).
 Under a peg it **builds** towards 1. This ordering is now gated
 (`test_purchases_multiplier_grid_is_ordered_as_theory_requires`).
 
