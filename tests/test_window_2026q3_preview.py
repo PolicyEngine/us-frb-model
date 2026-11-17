@@ -28,3 +28,14 @@ def test_schema():
 def test_control_run_is_the_validated_one():
     """The 2026Q1 monetary run is the published, pyfrbus-validated experiment."""
     assert PREVIEW["control_2026q1_monetary_vs_pyfrbus_max_abs"] < 1e-6
+
+
+def test_peak_responses_have_the_shock_sign():
+    """Rate rise and tax rise contract output; a purchases rise expands it."""
+    for name, runs in PREVIEW["scenarios"].items():
+        for r in runs.values():
+            gdp, lur = r["xgdp_pct_peak"]["value"], r["lur_peak"]["value"]
+            if name in ("monetary", "tax_trp"):
+                assert gdp < 0 < lur, name
+            else:
+                assert gdp > 0 > lur, name

@@ -5,7 +5,8 @@ Every published experiment shocks in 2026Q1. Under the October 2026 LONGBASE
 edge (VALIDATION.md, "Data vintage and the window"). Moving the published
 window is a separate decision for the repo owner. This script shows what it
 would change: the same three VAR scenarios (scripts/scenarios.py: monetary
-100bp, fiscal egfe +1%, tax trp +2pp) solved over 20 quarters from 2026Q1
+100bp rate rise, egfe_aerr +1% and trp_aerr +2pp tax rise, each for one
+quarter) solved over 20 quarters from 2026Q1
 (as published) and from 2026Q3 (the first projected quarter).
 
 INFORMATIONAL ONLY. Nothing here is gated against a published band, and the
@@ -63,7 +64,8 @@ def run(model: Frbus, longbase: pd.DataFrame, name: str, start: str) -> tuple[di
     sim = model.solve(s, e, adds)
     b, x = base.loc[s:e], sim.loc[s:e]
     gdp = 100 * (x["xgdp"] / b["xgdp"] - 1)
-    sign = -1 if name in ("monetary", "taylor_noninertial") else +1
+    # contractionary shocks: a funds-rate rise and a tax rise (trp_aerr +2pp)
+    sign = -1 if name in ("monetary", "taylor_noninertial", "tax_trp") else +1
     gdp_how, lur_how = ("min", "max") if sign < 0 else ("max", "min")
     summary = {
         "window": [str(s), str(e)],
