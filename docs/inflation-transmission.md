@@ -53,9 +53,13 @@ thresholds (`rffmin=-9999`, `dmptrsh=0`) and fixes `rstar` (`drstar=0`) for
 never binds for a +100bp shock from a 3.8% baseline. Rerunning the ping from
 2040Q1 with the pings.prg settings gives the same trough (−0.034pp), so the
 core PCE result depends on neither the baseline nor the settings. The
-unemployment peak does depend on the baseline: 0.276pp from 2026Q1 and
-0.261pp from 2040Q1 (April 2026 vintage: 0.258 and 0.272), 1.19–1.26× the
-Board's 0.219, so its gate band is 30%.
+unemployment peak does depend on the start date. From Laforte's own date and
+settings (2020Q1, pings.prg) it is 0.228pp against the Board's 0.219 (1.04×),
+with core PCE at 0.96× and the output gap at 0.97×. From later start dates it
+rises to 1.26× (2026Q1) and 1.38× (2035Q1), then falls back to 1.19× (2040Q1),
+while core PCE and the gap stay within 10% throughout. The full sweep and the
+gates are in VALIDATION.md, "Laforte's own design, and the unemployment peak by
+start date".
 
 ## 2. Where the response comes from: channel shut-offs
 

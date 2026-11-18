@@ -302,6 +302,24 @@ def model_coef(variant: str, name: str) -> float:
     return current_coefs([name])[name]
 
 
+# Start dates for the state-dependence sweep of the 100bp ping (40 quarters,
+# Board pings.prg settings). 2020Q1 is Laforte (2018)'s own start date.
+SWEEP_STARTS = ("2020Q1", "2024Q1", "2026Q1", "2026Q3", "2028Q1", "2030Q1", "2035Q1", "2040Q1")
+SWEEP_QUARTERS = 40
+
+
+def ping_sweep(longbase: pd.DataFrame, fed_pings: bool = True) -> dict:
+    out = {}
+    for s in SWEEP_STARTS:
+        start = pd.Period(s)
+        r = ping(longbase, "base", start, start + SWEEP_QUARTERS - 1, fed_pings=fed_pings)
+        out[s] = {
+            k: r[k]
+            for k in ("start", "picxfe_trough", "xgap2_trough", "lur_peak", "core_pce_4q_trough")
+        }
+    return out
+
+
 def compute(longbase: pd.DataFrame) -> dict:
     names = sorted({k for v in COEF_SETS.values() for k in v})
     return {
@@ -310,6 +328,12 @@ def compute(longbase: pd.DataFrame) -> dict:
         "ping": {v: ping(longbase, v) for v in PRICE_VARIANTS},
         "ping_2040_fed_pings_settings": ping(
             longbase, "base", pd.Period("2040Q1"), pd.Period("2044Q4"), fed_pings=True
+        ),
+        # Laforte (2018)'s own design: 2020Q1 shock, pings.prg settings.
+        "ping_sweep_fed_pings_settings": ping_sweep(longbase, fed_pings=True),
+        # 2020Q1 with the demo settings: the ZLB binds, so not the Board's design.
+        "ping_2020q1_demo_settings": ping(
+            longbase, "base", pd.Period("2020Q1"), pd.Period("2020Q1") + SWEEP_QUARTERS - 1
         ),
         "episode_A": {v: episode(longbase, v) for v in PRICE_VARIANTS},
         "income": {
@@ -350,6 +374,28 @@ def render(r: dict) -> str:
         f"Same ping from 2040Q1 with `programs/pings.prg` settings (rffmin=-9999, dmptrsh=0, drstar=0): "  # noqa: E501
         f"picxfe trough {f(p['picxfe_trough'][0])} ({p['picxfe_trough'][1]}), core PCE 4q trough "
         f"{f(p['core_pce_4q_trough'][0])}, xgap2 trough {f(p['xgap2_trough'][0])}, lur peak {f(p['lur_peak'][0])}.",  # noqa: E501
+        "",
+        "## 100bp ping by start date (pings.prg settings, 40 quarters)",
+        "",
+        "Laforte (2018) Fig. 2, new model: core PCE -0.0345 (q8), output gap -0.4861 (q8), "
+        "unemployment +0.2189 (q8); shock in 2020Q1.",
+        "",
+        "| start | core PCE trough | ratio | output gap trough | ratio | unemployment peak | ratio |",  # noqa: E501
+        "|---|---|---|---|---|---|---|",
+    ]
+    for s, q in r["ping_sweep_fed_pings_settings"].items():
+        out.append(
+            f"| {s} | {f(q['picxfe_trough'][0], 4)} ({q['picxfe_trough'][1]}) "
+            f"| {q['picxfe_trough'][0] / -0.0345:.2f} "
+            f"| {f(q['xgap2_trough'][0])} ({q['xgap2_trough'][1]}) | {q['xgap2_trough'][0] / -0.4861:.2f} "  # noqa: E501
+            f"| {f(q['lur_peak'][0])} ({q['lur_peak'][1]}) | {q['lur_peak'][0] / 0.2189:.2f} |"
+        )
+    d = r["ping_2020q1_demo_settings"]
+    out += [
+        "",
+        f"2020Q1 with the demo settings (ZLB binds; not the Board's design): core PCE "
+        f"{f(d['picxfe_trough'][0], 4)}, output gap {f(d['xgap2_trough'][0])}, "
+        f"unemployment {f(d['lur_peak'][0])}.",
         "",
         "## 2022-23 tightening, variant A (history minus funds rate at the floor)",
         "",

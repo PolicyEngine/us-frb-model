@@ -230,6 +230,51 @@ experiment under VAR expectations:
 | funds rate | +1.00pp, then −0.26pp undershoot (2029Q3) | +1.00pp, undershoot −0.27pp | "initially rises 1 percentage point … gradually returns" | +1.0pp, undershoot ≈ −0.3pp |
 | output gap duration | below baseline through 2030Q4 | turns positive in quarter 22 (2025Q2) | "below baseline for five or six years" | returns to zero after about 3½ years, then overshoots |
 
+#### Laforte's own design, and the unemployment peak by start date
+
+The table above shocks in 2026Q1 with the demo settings; Laforte shocked in
+2020Q1 with the Board's `programs/pings.prg` settings (no ZLB, no thresholds,
+`rstar` fixed). The same ping on that design (`results/inflation_transmission.json`,
+`ping_sweep_fed_pings_settings`, 40 quarters) is the like-for-like comparison,
+and it is the primary published-comparator gate
+(`tests/test_inflation_transmission.py::test_like_for_like_run_matches_laforte_2018`,
+all three within 10%):
+
+| start (pings settings) | core PCE trough | × Laforte | output gap trough | × Laforte | unemployment peak | × Laforte |
+|---|---|---|---|---|---|---|
+| **2020Q1 (Laforte's date)** | **−0.0330 (q9)** | **0.96** | **−0.471 (q8)** | **0.97** | **+0.228 (q9)** | **1.04** |
+| 2024Q1 | −0.0331 | 0.96 | −0.482 | 0.99 | +0.246 | 1.12 |
+| 2026Q1 (published window) | −0.0336 | 0.98 | −0.504 | 1.04 | +0.276 | 1.26 |
+| 2026Q3 | −0.0340 | 0.99 | −0.503 | 1.03 | +0.281 | 1.28 |
+| 2028Q1 | −0.0344 | 1.00 | −0.495 | 1.02 | +0.291 | 1.33 |
+| 2030Q1 | −0.0346 | 1.00 | −0.491 | 1.01 | +0.300 | 1.37 |
+| 2035Q1 | −0.0347 | 1.01 | −0.472 | 0.97 | +0.302 | 1.38 |
+| 2040Q1 | −0.0342 | 0.99 | −0.453 | 0.93 | +0.261 | 1.19 |
+| Laforte (2018) Fig. 2 | −0.0345 (q8) | 1 | −0.486 (q8) | 1 | +0.219 (q8) | 1 |
+
+Core PCE and the output gap are not start-date dependent (within 10% of the
+note from every date, gated). The unemployment peak is: the unemployment
+response per unit of output-gap trough drifts with the baseline (0.48 in 2020,
+0.55 in 2026, 0.64 in 2035, against Laforte's 0.45). So the unemployment peak
+is gated against Laforte only on Laforte's design (within 10%); across the
+sweep it carries a 0.90–1.45× sanity bound (observed 1.04–1.38×), which is
+labelled as such and is not a published comparison. The committed sweep is
+pinned to a fresh solve at 1e-6 (`test_committed_json_is_current`). With the
+demo settings from 2020Q1 the ZLB binds from a near-zero funds rate and the
+response is weaker (gap −0.38, unemployment +0.19); it is recorded, not gated.
+
+Caveat: the 2020Q1 baseline here is realised history in the October 2026
+LONGBASE, not the 2018 LONGBASE projection Laforte shocked, which is archived
+only as an EViews database. The 4% agreement is strong, but it is not a pure
+replication. It does not hinge on the vintage: on the April 2026 LONGBASE the
+same run gives 0.96×, 0.98× and 1.01× (unemployment peak in q10).
+
+History of this gate: #21 widened the unemployment band from 25% to 30% on the
+2026Q1 and 2040Q1 runs, on four runs read as "a steady ~20% overshoot". The
+sweep showed the ratio moves with the start date (1.04–1.38×), so that band
+and its justification are withdrawn and replaced by the like-for-like gate
+above (decision logged in the PR).
+
 Sources:
 
 * Laforte, "Overview of the changes to the FRB/US model (2018)", FEDS Notes,
