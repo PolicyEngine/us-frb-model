@@ -1,0 +1,211 @@
+{
+  "label": "informational; 2026Q3 runs not cross-validated against pyfrbus; not gated",
+  "data_edge": "2026Q2 (HISTDATA.TXT, October 2026 LONGBASE)",
+  "scenarios": {
+    "monetary": {
+      "2026Q1": {
+        "window": [
+          "2026Q1",
+          "2030Q4"
+        ],
+        "rff_impact": 1.0001,
+        "xgdp_pct_peak": {
+          "value": -0.5554,
+          "quarter": "2027Q4",
+          "quarter_after_shock": 8
+        },
+        "xgap2_peak": {
+          "value": -0.5042,
+          "quarter": "2027Q3",
+          "quarter_after_shock": 7
+        },
+        "lur_peak": {
+          "value": 0.2758,
+          "quarter": "2028Q1",
+          "quarter_after_shock": 9
+        },
+        "picxfe_peak": {
+          "value": -0.0336,
+          "quarter": "2027Q4",
+          "quarter_after_shock": 8
+        },
+        "baseline_at_start": {
+          "rff": 3.64,
+          "lur": 4.336,
+          "xgap2": -0.228,
+          "picxfe": 3.861
+        }
+      },
+      "2026Q3": {
+        "window": [
+          "2026Q3",
+          "2031Q2"
+        ],
+        "rff_impact": 1.0001,
+        "xgdp_pct_peak": {
+          "value": -0.5522,
+          "quarter": "2028Q2",
+          "quarter_after_shock": 8
+        },
+        "xgap2_peak": {
+          "value": -0.5027,
+          "quarter": "2028Q1",
+          "quarter_after_shock": 7
+        },
+        "lur_peak": {
+          "value": 0.2811,
+          "quarter": "2028Q3",
+          "quarter_after_shock": 9
+        },
+        "picxfe_peak": {
+          "value": -0.034,
+          "quarter": "2028Q2",
+          "quarter_after_shock": 8
+        },
+        "baseline_at_start": {
+          "rff": 3.841,
+          "lur": 4.167,
+          "xgap2": -0.002,
+          "picxfe": 3.214
+        }
+      }
+    },
+    "fiscal_egfe": {
+      "2026Q1": {
+        "window": [
+          "2026Q1",
+          "2030Q4"
+        ],
+        "rff_impact": 0.0056,
+        "xgdp_pct_peak": {
+          "value": 0.0373,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "xgap2_peak": {
+          "value": 0.0372,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "lur_peak": {
+          "value": -0.0158,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "picxfe_peak": {
+          "value": 0.0008,
+          "quarter": "2026Q2",
+          "quarter_after_shock": 2
+        },
+        "baseline_at_start": {
+          "rff": 3.64,
+          "lur": 4.336,
+          "xgap2": -0.228,
+          "picxfe": 3.861
+        }
+      },
+      "2026Q3": {
+        "window": [
+          "2026Q3",
+          "2031Q2"
+        ],
+        "rff_impact": 0.0056,
+        "xgdp_pct_peak": {
+          "value": 0.0373,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "xgap2_peak": {
+          "value": 0.0373,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "lur_peak": {
+          "value": -0.0159,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "picxfe_peak": {
+          "value": 0.0008,
+          "quarter": "2026Q4",
+          "quarter_after_shock": 2
+        },
+        "baseline_at_start": {
+          "rff": 3.841,
+          "lur": 4.167,
+          "xgap2": -0.002,
+          "picxfe": 3.214
+        }
+      }
+    },
+    "tax_trp": {
+      "2026Q1": {
+        "window": [
+          "2026Q1",
+          "2030Q4"
+        ],
+        "rff_impact": -0.0348,
+        "xgdp_pct_peak": {
+          "value": -0.2322,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "xgap2_peak": {
+          "value": -0.2317,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "lur_peak": {
+          "value": 0.0985,
+          "quarter": "2026Q1",
+          "quarter_after_shock": 1
+        },
+        "picxfe_peak": {
+          "value": -0.0056,
+          "quarter": "2026Q4",
+          "quarter_after_shock": 4
+        },
+        "baseline_at_start": {
+          "rff": 3.64,
+          "lur": 4.336,
+          "xgap2": -0.228,
+          "picxfe": 3.861
+        }
+      },
+      "2026Q3": {
+        "window": [
+          "2026Q3",
+          "2031Q2"
+        ],
+        "rff_impact": -0.0346,
+        "xgdp_pct_peak": {
+          "value": -0.2308,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "xgap2_peak": {
+          "value": -0.2308,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "lur_peak": {
+          "value": 0.0982,
+          "quarter": "2026Q3",
+          "quarter_after_shock": 1
+        },
+        "picxfe_peak": {
+          "value": -0.0056,
+          "quarter": "2027Q2",
+          "quarter_after_shock": 4
+        },
+        "baseline_at_start": {
+          "rff": 3.841,
+          "lur": 4.167,
+          "xgap2": -0.002,
+          "picxfe": 3.214
+        }
+      }
+    }
+  },
+  "control_2026q1_monetary_vs_pyfrbus_max_abs": 1.4e-08
+}
