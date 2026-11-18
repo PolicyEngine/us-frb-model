@@ -63,9 +63,11 @@ TARGETS: dict[str, tuple[str, list[str], tuple[str, ...]]] = {
     ),
 }
 
-# Every other results/*.json and the test that already re-solves it. The fast
-# suite checks that this list and TARGETS together cover results/ exactly, so
-# a new results file cannot be added without a currentness check.
+# Every other results/*.json and the test file that recomputes it (in full for
+# most; test_benchmarks.py compares the grid's multipliers and the episode's
+# quarterly paths, not every field, and none compares the rendered markdown).
+# The fast suite checks that this list and TARGETS together cover results/
+# exactly, so a new results file cannot be added without being put in one.
 COVERED_ELSEWHERE = {
     "benchmark_multipliers.json": "tests/test_benchmarks.py",
     "episode_2022_tightening.json": "tests/test_benchmarks.py",
