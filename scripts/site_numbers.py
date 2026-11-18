@@ -3,8 +3,8 @@
 No solve: everything comes from committed data. The 100bp monetary shock
 reference path (tests/data/vendor_shock_2026q1_2030q4.csv, the Fed's
 pyfrbus on the Board's demo shock; this implementation matches it to
-6.0e-9, see VALIDATION.md) is compared with the LONGBASE baseline it was
-solved from (vendor/data_only_package/LONGBASE.TXT).
+1.4e-8 on the October 2026 LONGBASE, see VALIDATION.md) is compared with the
+LONGBASE baseline it was solved from (vendor/data_only_package/LONGBASE.TXT).
 
 Quantities (deviation from LONGBASE):
 

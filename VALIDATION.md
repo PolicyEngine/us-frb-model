@@ -218,6 +218,11 @@ scenarios whose conclusion turns on the inflation response should say so.
 
 ### Against the Fed's published FRB/US simulations
 
+The same responses, quarter by quarter and for the fiscal experiments too,
+are exported for the site in `results/site_responses.{json,md}`, with a
+benchmark scorecard (`scripts/site_responses.py`, pinned by
+`tests/test_site_responses.py`).
+
 All of the values in this table come from committed data with no solve
 (`scripts/site_numbers.py` → `results/site_numbers.json`, pinned by
 `tests/test_site_numbers.py`). Two Board publications report the same

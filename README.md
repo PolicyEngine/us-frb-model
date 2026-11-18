@@ -82,6 +82,13 @@ A runnable version is in `examples/monetary_policy_shock.py`.
 
 ## Validation
 
+**For the site:** `results/site_responses.{json,md}` (from
+`scripts/site_responses.py`) has the quarter-by-quarter funds rate, real GDP,
+unemployment, output gap and core PCE responses for the 100bp monetary,
+purchases, transfers and tax experiments, plus a scorecard of every headline
+against its published band. `tests/test_site_responses.py` keeps it in step
+with the model and the other results files.
+
 See `VALIDATION.md` for full tables. Summary, in order of how much each one
 actually tells you:
 
