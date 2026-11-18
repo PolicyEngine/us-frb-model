@@ -24,7 +24,7 @@ jobs:
           uv pip install -e ".[dev]"
       - name: Ruff
         run: uv run ruff check src tests examples scripts
-      - name: Tests (fast suite; slow-marked tests run in scheduled-validation)
+      - name: Tests (fast suite; slow-marked tests run in correctness-gates)
         run: uv run pytest -q -m "not slow"
 
   # Hard correctness gates, run as separate steps so a failure names the
@@ -227,6 +227,14 @@ jobs:
           fi
           sha256sum "$RUNNER_TEMP/longbase.txt"
           uv run python scripts/laforte_start_date_evidence.py --longbase "$RUNNER_TEMP/longbase.txt" | tee "$RUNNER_TEMP/evidence_${{ matrix.vintage }}.json"
+      - name: Site export on this branch (october only)
+        if: matrix.vintage == 'october'
+        run: uv run python scripts/site_responses.py --out "$RUNNER_TEMP/site"
+      - uses: actions/upload-artifact@v4
+        if: matrix.vintage == 'october'
+        with:
+          name: fresh-site_responses
+          path: ${{ runner.temp }}/site
       - uses: actions/upload-artifact@v4
         with:
           name: evidence-${{ matrix.vintage }}
