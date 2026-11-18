@@ -163,6 +163,75 @@ jobs:
       - name: Fail if the committed reference was modified in place
         run: git diff --exit-code -- tests/data/
 
+  # Currentness of the committed long-solve results. The files below come from
+  # long stacked (MCE) solves that no test re-runs, so nothing else notices
+  # when a change to the solver, the model file, the LONGBASE vintage or the
+  # generating script leaves one behind. Each matrix entry re-runs the
+  # generating script into a scratch directory and compares: JSON structure
+  # exactly, floats to 1e-6, rendered markdown as text. Gating, on every
+  # PR/push. The fresh files are uploaded, so a stale file is refreshed by
+  # committing the artifact rather than by a local heavy solve.
+  # (tests/test_results_current.py checks this matrix lists every target.)
+  long-solve-currentness:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - expectations_comparison
+          - expectations_matched_closures
+          - laforte_vintage_check
+          - episode_2022_tightening_mce_mcap
+          - episode_2022_tightening_mce_mcap_wp
+          - window_2026q3_preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          uv pip install -e ".[dev]"
+      - name: Gate - committed ${{ matrix.target }} equals a fresh solve (1e-6)
+        run: >-
+          uv run python scripts/check_results_current.py
+          "${{ matrix.target }}" --keep "$RUNNER_TEMP/fresh"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fresh-${{ matrix.target }}
+          path: ${{ runner.temp }}/fresh
+
+  # TEMPORARY (evidence for this PR; removed before it leaves draft): the
+  # Laforte start-date ratios on the October 2026 and April 2026 LONGBASE.
+  laforte-evidence:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        vintage: [october, april]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          uv pip install -e ".[dev]"
+      - name: Ratios to Laforte (2018) by start date
+        run: |
+          if [ "${{ matrix.vintage }}" = april ]; then
+            git show 2b62608^:vendor/data_only_package/LONGBASE.TXT > "$RUNNER_TEMP/longbase.txt"
+          else
+            cp vendor/data_only_package/LONGBASE.TXT "$RUNNER_TEMP/longbase.txt"
+          fi
+          sha256sum "$RUNNER_TEMP/longbase.txt"
+          uv run python scripts/laforte_start_date_evidence.py --longbase "$RUNNER_TEMP/longbase.txt" | tee "$RUNNER_TEMP/evidence_${{ matrix.vintage }}.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ matrix.vintage }}
+          path: ${{ runner.temp }}/evidence_${{ matrix.vintage }}.json
+
   # Heavier revalidation on a schedule: the full suite on every supported
   # Python, plus the vendor regeneration gate, so drift in transitive
   # dependencies surfaces even when nobody opens a PR.
