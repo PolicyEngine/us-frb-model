@@ -29,7 +29,8 @@ def vendor_csv(scenario: str) -> Path:
 
 # Documented gate tolerances (see VALIDATION.md, Test 2). Both this
 # implementation and the vendor solve F(x)=0 to xtol=1e-8, so agreement is
-# expected at solver-tolerance scale (observed 6.0e-9 abs / 4.9e-8 rel).
+# expected at solver-tolerance scale (observed 1.4e-8 abs / 9.5e-9 rel on the
+# October 2026 LONGBASE).
 CROSSVAL_ABS_TOL = 1e-6
 CROSSVAL_REL_TOL = 1e-6
 

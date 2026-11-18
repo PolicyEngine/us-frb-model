@@ -5,7 +5,8 @@ The hard gate (slow-marked, run as a CI correctness-gate step) compares the
 ``"all"`` against
 committed solutions from the Board's own pyfrbus on the identical experiment
 (scripts/generate_vendor_mce_reference.sh), at the same 1e-6 tolerance as the
-VAR cross-validation gate; observed agreement is 1e-9 to 1.5e-8.
+VAR cross-validation gate; observed agreement is 1.4e-9 to 9.0e-9 (October
+2026 LONGBASE).
 """
 
 import os
@@ -185,6 +186,8 @@ def test_mce_ping_matches_laforte_2018(longbase):
     # Real side: output gap trough within 10%, unemployment peak within 25%.
     assert abs(ours["xgap2_trough"][0] / pub["gap_trough"][0] - 1) < 0.10
     assert abs(ours["lur_peak"][0] / pub["lur_peak"][0] - 1) < 0.25
-    # Core inflation: same sign, within a factor of two (observed 1.45x).
+    # Core inflation: larger than published but bounded. Observed 1.33x on the
+    # October 2026 LONGBASE and 1.45x on the April 2026 one; tightened from
+    # 0.5-2.0 (too loose to catch a regression) in the 17 Nov results review.
     ratio = ours["picxfe_trough"][0] / pub["core_trough"][0]
-    assert 0.5 < ratio < 2.0
+    assert 1.0 < ratio < 1.6

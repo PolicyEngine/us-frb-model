@@ -1,7 +1,8 @@
 """Does the model vintage explain the core PCE gap to Laforte (2018) Figure 11?
 
 Under MCE (mcap+wp) the 100bp ping gives a core PCE trough of about -0.011pp
-here against -0.0077pp in Laforte (2018) Figure 11 (1.45x; VALIDATION.md,
+here against -0.0077pp in Laforte (2018) Figure 11 (1.33x on the October 2026
+LONGBASE, 1.45x on April's; VALIDATION.md,
 Test 5). Laforte ran the November 2018 model; this repo vendors the model.xml
 of pyfrbus 1.0.0 (sha256 3227f4d2..., identical to the frbus_package.zip the
 Board served in April 2022, i.e. the January 2021 release).

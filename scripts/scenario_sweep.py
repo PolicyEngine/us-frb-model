@@ -88,23 +88,23 @@ REPORT_VARS = ["rff", "xgdp", "xgap2", "lur", "picxfe", "pcxfe"]
 # the sweep, re-measure and re-pin, and say so in the PR.
 #                   var: (200 vs 2x100, 4x25 vs 100, +100 vs -100)
 MONETARY_BOUNDS = {
-    "xgdp_pct": (0.017, 0.013, 0.034),  # measured 0.0138, 0.0105, 0.0282
-    "xgap2": (0.017, 0.013, 0.035),  # measured 0.0140, 0.0106, 0.0284
-    "lur": (0.023, 0.018, 0.047),  # measured 0.0187, 0.0143, 0.0387
-    "core_pce_4q": (0.013, 0.010, 0.027),  # measured 0.0105, 0.0080, 0.0217
-    "rff": (0.006, 0.005, 0.013),  # measured 0.0049, 0.0037, 0.0101
+    "xgdp_pct": (0.017, 0.013, 0.034),  # measured 0.0139, 0.0106, 0.0285
+    "xgap2": (0.017, 0.013, 0.035),  # measured 0.0139, 0.0106, 0.0283
+    "lur": (0.023, 0.018, 0.047),  # measured 0.0178, 0.0136, 0.0368
+    "core_pce_4q": (0.013, 0.010, 0.027),  # measured 0.0107, 0.0082, 0.0220
+    "rff": (0.006, 0.005, 0.013),  # measured 0.0050, 0.0038, 0.0102
 }
 # family: (symmetry, linearity); purchases is gated on the log-aggregation
 # prediction instead (PURCHASES_PREDICTION_REL).
 FISCAL_BOUNDS = {
     "transfers": (0.020, 0.010),  # measured 0.0160, 0.0077
-    "taxes": (0.012, 0.006),  # measured 0.0094, 0.0046
+    "taxes": (0.012, 0.006),  # measured 0.0096, 0.0047
 }
 # Purchases enter GDP through log aggregation, y*log(egfe/egfe(-1)), so a
 # shock of a = x / egfe_share is not linear in x even in an otherwise linear
 # model. The +-0.1% symmetry gap and the 5x linearity gap are both predicted
-# by that formula (0.0218 and 0.0401 at egfe_share 0.0464; measured 0.0216
-# and 0.0398, 1% off). The gate is the measured gap within 3% of the
+# by that formula (0.0225 and 0.0412 at egfe_share 0.0450; measured 0.0222
+# and 0.0408, 1% off; October 2026 LONGBASE). The gate is the measured gap within 3% of the
 # prediction: a gap that grows OR shrinks means something other than the
 # aggregation is moving the response.
 PURCHASES_PREDICTION_REL = 0.03
