@@ -291,8 +291,9 @@ eight dates, then 0.90× for all eight because the 2020Q1 run sits at
 1.01–1.04×. That reason applies to 2020Q1 only, which the like-for-like gate
 already holds to 0.90–1.10×; the later dates never come below 1.07×, so they
 take 1.00× back (18 November 2026). On the April data the 2024Q1 run is 7%
-above that floor and the ratio at a given date moved by up to 8 points between
-the two vintages, so a new vintage can trip it; that is a prompt to look, and
+above that floor and the ratio at a given date moved by up to 9 points between
+the two vintages (2026Q3: 1.284× October, 1.195× April), so a new vintage can
+trip it; that is a prompt to look, and
 the range is fitted to observations, not derived.
 
 Sources:
