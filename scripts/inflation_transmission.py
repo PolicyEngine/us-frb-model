@@ -306,6 +306,13 @@ def model_coef(variant: str, name: str) -> float:
 # Board pings.prg settings). 2020Q1 is Laforte (2018)'s own start date.
 SWEEP_STARTS = ("2020Q1", "2024Q1", "2026Q1", "2026Q3", "2028Q1", "2030Q1", "2035Q1", "2040Q1")
 SWEEP_QUARTERS = 40
+# Sanity range for the unemployment peak, as a multiple of Laforte's 0.2189,
+# from the seven start dates after Laforte's own (NOT a published comparison;
+# 2020Q1 is gated against Laforte at +-10%). Observed 1.12-1.38x on the October
+# 2026 LONGBASE and 1.07-1.32x on the April 2026 one
+# (scripts/laforte_start_date_evidence.py). Used by
+# tests/test_inflation_transmission.py and the scripts/site_responses.py scorecard.
+LATER_START_LUR_RANGE = (1.00, 1.45)
 
 
 def ping_sweep(longbase: pd.DataFrame, fed_pings: bool = True) -> dict:

@@ -85,9 +85,20 @@ def test_start_date_sweep():
     Core PCE and the output gap stay within 10% of Laforte from every start
     date. The unemployment peak rises with the start date (1.04x in 2020Q1 to
     1.38x in 2035Q1, back to 1.19x in 2040Q1): the unemployment response per
-    unit of output gap drifts with the baseline. Its 0.90-1.45x range is a
-    sanity bound fitted to the October 2026 LONGBASE, NOT a published
-    comparison; the published comparison is the 2020Q1 test above. The real
+    unit of output gap drifts with the baseline.
+
+    Unemployment bounds, by start date:
+    * 2020Q1 (Laforte's date): within 10% of Laforte, the same number the
+      like-for-like test above gates.
+    * the seven later dates: 1.00-1.45x, a sanity range fitted to the observed
+      values, NOT a published comparison. Observed 1.12-1.38x on the October
+      2026 LONGBASE and 1.07-1.32x on the April 2026 one
+      (scripts/laforte_start_date_evidence.py, CI run 44379823376).
+
+    History of the lower end: 1.00x for all eight dates, then 0.90x for all
+    eight because the 2020Q1 run sits at 1.01-1.04x. That reason applies to
+    2020Q1 only (the later dates never come below 1.07x), so 2020Q1 now takes
+    the like-for-like band and the later dates take 1.00x back. The real
     regression guard is test_committed_json_is_current (abs 1e-6).
     """
     sweep = COMMITTED["ping_sweep_fed_pings_settings"]
@@ -100,9 +111,9 @@ def test_start_date_sweep():
             start
         )
         ratio = p["lur_peak"][0] / FED_2018_NEW["lur_peak"]
-        # lower end 0.90, not 1.00: the 2020Q1 run is 1.04x here and 1.01x on the
-        # April 2026 LONGBASE, too close to 1.00 for a vintage-robust bound
-        assert 0.90 <= ratio <= 1.45, (start, ratio)
+        lo, hi = (0.90, 1.10) if start == "2020Q1" else it.LATER_START_LUR_RANGE
+        assert lo <= ratio <= hi, (start, ratio)
+    assert it.LATER_START_LUR_RANGE == (1.00, 1.45)
 
 
 def test_2020q1_demo_settings_is_recorded_not_gated():

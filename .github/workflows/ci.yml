@@ -24,7 +24,7 @@ jobs:
           uv pip install -e ".[dev]"
       - name: Ruff
         run: uv run ruff check src tests examples scripts
-      - name: Tests (fast suite; slow-marked tests run in scheduled-validation)
+      - name: Tests (fast suite; slow-marked tests run in correctness-gates)
         run: uv run pytest -q -m "not slow"
 
   # Hard correctness gates, run as separate steps so a failure names the
@@ -162,6 +162,47 @@ jobs:
         run: uv run python scripts/check_reference_drift.py
       - name: Fail if the committed reference was modified in place
         run: git diff --exit-code -- tests/data/
+
+  # Currentness of the committed long-solve results. The files below come from
+  # long stacked (MCE) solves that no test re-runs, so nothing else notices
+  # when a change to the solver, the model file, the LONGBASE vintage or the
+  # generating script leaves one behind. Each matrix entry re-runs the
+  # generating script into a scratch directory and compares: JSON structure
+  # exactly, floats to 1e-6, rendered markdown as text. Gating, on every
+  # PR/push. The fresh files are uploaded, so a stale file is refreshed by
+  # committing the artifact rather than by a local heavy solve.
+  # (tests/test_results_current.py checks this matrix lists every target.)
+  long-solve-currentness:
+    runs-on: ubuntu-latest
+    # Each entry takes under 3 minutes; a non-converging solve raises, but a
+    # hung install or solve would otherwise run to the 6-hour default.
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - expectations_comparison
+          - expectations_matched_closures
+          - laforte_vintage_check
+          - episode_2022_tightening_mce_mcap
+          - episode_2022_tightening_mce_mcap_wp
+          - window_2026q3_preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          uv pip install -e ".[dev]"
+      - name: Gate - committed ${{ matrix.target }} equals a fresh solve (1e-6)
+        run: >-
+          uv run python scripts/check_results_current.py
+          "${{ matrix.target }}" --keep "$RUNNER_TEMP/fresh"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fresh-${{ matrix.target }}
+          path: ${{ runner.temp }}/fresh
 
   # Heavier revalidation on a schedule: the full suite on every supported
   # Python, plus the vendor regeneration gate, so drift in transitive

@@ -47,6 +47,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 import benchmark_multipliers as bm  # noqa: E402
+import inflation_transmission as it  # noqa: E402
 
 from frbus import load_data  # noqa: E402
 
@@ -162,15 +163,17 @@ def scorecard(experiments: dict, peg: dict) -> list[dict]:
     # The unemployment peak depends on the start date (1.04x Laforte on
     # Laforte's own 2020Q1 design, 1.26x from 2026Q1, up to 1.38x from 2035Q1;
     # VALIDATION.md). It is compared with Laforte only on Laforte's design, so
-    # this 2026Q1 row carries the start-date sanity range, not a published band.
+    # this 2026Q1 row carries the sanity range of the start dates after
+    # Laforte's (observed 1.07-1.38x over two vintages), not a published band.
     pub = LAFORTE_2018["lur"]
+    lo, hi = it.LATER_START_LUR_RANGE
     rows.append(
         _row(
             "100bp: lur peak (start-date sanity range, not a published band)",
             m["lur_peak"]["value"],
-            round(pub * 0.90, 4),
-            round(pub * 1.45, 4),
-            f"0.90-1.45x Laforte (2018) {pub}",
+            round(pub * lo, 4),
+            round(pub * hi, 4),
+            f"{lo:.2f}-{hi:.2f}x Laforte (2018) {pub}",
             "Laforte's own 2020Q1 design gives 1.04x: VALIDATION.md, Laforte by start date",
         )
     )

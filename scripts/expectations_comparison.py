@@ -12,7 +12,9 @@ expectations model-consistent) and ``"mcap+wp"`` (financial plus wage-price):
    ("Model-consistent expectations"; footnote 3: MCE for "the variables of
    the financial and wage-price sectors", i.e. mcap+wp), run from 2040Q1 with
    the programs/pings.prg settings (rffmin=-9999, dmptrsh=0, drstar=0), the
-   same set-up as the VAR ping gate in scripts/inflation_transmission.py.
+   same set-up as the VAR ping gate in scripts/inflation_transmission.py, and
+   from 2020Q1, the date Laforte shocked (the like-for-like run gated in
+   tests/test_mce.py).
 
 MCE solves stack the whole window, and leads past the window read the
 baseline (the terminal condition). Experiments 1 and 2 therefore use a
@@ -53,6 +55,9 @@ SHOCK_END = pd.Period("2027Q4")
 SIZE = 0.01
 PING_START = pd.Period("2040Q1")
 PING_END = PING_START + 159
+# Laforte (2018) shocked in 2020Q1: the like-for-like start date for Figure 11.
+LAFORTE_START = pd.Period("2020Q1")
+LAFORTE_END = LAFORTE_START + 159
 SERIES = ("rff", "rg10", "xgap2", "lur", "picxfe")
 
 
@@ -125,7 +130,7 @@ CLOSURE_END = pd.Period("2030Q4")
 
 
 def purchases_closure(longbase, mode, monetary: str, fiscal: str) -> dict:
-    """Purchases multiplier on the matched closures of docs/benchmarks.md section 4.
+    """Purchases multiplier on the matched closures of docs/benchmarks.md section 3.
 
     The closures of scripts/benchmark_multipliers.py, applied over 2026Q1-2030Q4
     only (peg: funds rate on its baseline path, ``dmpex=1``; exog: trend tax
@@ -212,6 +217,11 @@ def compute(longbase) -> dict:
                 monetary(longbase, m, PING_START, PING_END, fed_pings=True)
                 for m in (None, "mcap+wp")
             ],
+            # Laforte's own start date (2020Q1), same settings and window length.
+            "ours_2020q1": [
+                monetary(longbase, m, LAFORTE_START, LAFORTE_END, fed_pings=True)
+                for m in (None, "mcap+wp")
+            ],
         },
     }
 
@@ -273,7 +283,8 @@ def render(r: dict) -> str:
         "",
         "Figure 11 is a 100bp funds-rate shock under model-consistent expectations "
         "for the financial and wage-price sectors (footnote 3), 2018 model vintage. "
-        "Ours: same shock from 2040Q1, pings.prg settings, 160-quarter window.",
+        "Ours: same shock, pings.prg settings, 160-quarter window, from 2020Q1 "
+        "(the date Laforte shocked; the like-for-like run) and from 2040Q1.",
         "",
         "| | 10y impact | output gap trough | unemployment peak | core PCE trough "
         "| rff q2 | rff q4 |",
@@ -283,10 +294,11 @@ def render(r: dict) -> str:
         f"| {p['core_trough'][0]:+.4f} (q{p['core_trough'][1]}) | {p['rff_q'][1]:.4f} "
         f"| {p['rff_q'][3]:.4f} |",
     ]
-    for x in lf["ours"]:
+    for x in lf["ours_2020q1"] + lf["ours"]:
         rff = x["path_q1_q12"]["rff"]
         out.append(
-            f"| ours, {x['mode']} | {x['rg10_impact']:+.4f} | {x['xgap2_trough'][0]:+.4f} "
+            f"| ours, {x['mode']}, from {x['window'][0]} | {x['rg10_impact']:+.4f} "
+            f"| {x['xgap2_trough'][0]:+.4f} "
             f"(q{x['xgap2_trough'][2]}) | {x['lur_peak'][0]:+.4f} (q{x['lur_peak'][2]}) "
             f"| {x['picxfe_trough'][0]:+.4f} (q{x['picxfe_trough'][2]}) | {rff[1]:.4f} "
             f"| {rff[3]:.4f} |"
