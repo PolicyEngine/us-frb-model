@@ -201,45 +201,6 @@ jobs:
           name: fresh-${{ matrix.target }}
           path: ${{ runner.temp }}/fresh
 
-  # TEMPORARY (evidence for this PR; removed before it leaves draft): the
-  # Laforte start-date ratios on the October 2026 and April 2026 LONGBASE.
-  laforte-evidence:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        vintage: [october, april]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: astral-sh/setup-uv@v5
-      - name: Install
-        run: |
-          uv venv --python 3.12
-          uv pip install -e ".[dev]"
-      - name: Ratios to Laforte (2018) by start date
-        run: |
-          if [ "${{ matrix.vintage }}" = april ]; then
-            git show 2b62608^:vendor/data_only_package/LONGBASE.TXT > "$RUNNER_TEMP/longbase.txt"
-          else
-            cp vendor/data_only_package/LONGBASE.TXT "$RUNNER_TEMP/longbase.txt"
-          fi
-          sha256sum "$RUNNER_TEMP/longbase.txt"
-          uv run python scripts/laforte_start_date_evidence.py --longbase "$RUNNER_TEMP/longbase.txt" | tee "$RUNNER_TEMP/evidence_${{ matrix.vintage }}.json"
-      - name: Site export on this branch (october only)
-        if: matrix.vintage == 'october'
-        run: uv run python scripts/site_responses.py --out "$RUNNER_TEMP/site"
-      - uses: actions/upload-artifact@v4
-        if: matrix.vintage == 'october'
-        with:
-          name: fresh-site_responses
-          path: ${{ runner.temp }}/site
-      - uses: actions/upload-artifact@v4
-        with:
-          name: evidence-${{ matrix.vintage }}
-          path: ${{ runner.temp }}/evidence_${{ matrix.vintage }}.json
-
   # Heavier revalidation on a schedule: the full suite on every supported
   # Python, plus the vendor regeneration gate, so drift in transitive
   # dependencies surfaces even when nobody opens a PR.

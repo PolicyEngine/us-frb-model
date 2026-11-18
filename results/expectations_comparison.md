@@ -24,10 +24,12 @@ The 20-quarter rows show how much a short window's terminal condition (expectati
 
 ## Against the Board's published MCE ping (Laforte 2018, Figure 11)
 
-Figure 11 is a 100bp funds-rate shock under model-consistent expectations for the financial and wage-price sectors (footnote 3), 2018 model vintage. Ours: same shock from 2040Q1, pings.prg settings, 160-quarter window.
+Figure 11 is a 100bp funds-rate shock under model-consistent expectations for the financial and wage-price sectors (footnote 3), 2018 model vintage. Ours: same shock, pings.prg settings, 160-quarter window, from 2020Q1 (the date Laforte shocked; the like-for-like run) and from 2040Q1.
 
 | | 10y impact | output gap trough | unemployment peak | core PCE trough | rff q2 | rff q4 |
 |---|---|---|---|---|---|---|
 | Laforte 2018, new version | +0.1555 | -0.1864 (q6) | +0.0976 (q4) | -0.0077 (q6) | 0.8374 | 0.5610 |
-| ours, var | +0.3315 | -0.4530 (q7) | +0.2610 (q7) | -0.0342 (q8) | 0.8254 | 0.5033 |
-| ours, mcap+wp | +0.1545 | -0.1805 (q6) | +0.1174 (q6) | -0.0102 (q6) | 0.8370 | 0.5601 |
+| ours, var, from 2020Q1 | +0.3315 | -0.4710 (q8) | +0.2283 (q9) | -0.0330 (q9) | 0.8289 | 0.5105 |
+| ours, mcap+wp, from 2020Q1 | +0.1547 | -0.1719 (q6) | +0.0928 (q6) | -0.0088 (q6) | 0.8387 | 0.5643 |
+| ours, var, from 2040Q1 | +0.3315 | -0.4530 (q7) | +0.2610 (q7) | -0.0342 (q8) | 0.8254 | 0.5033 |
+| ours, mcap+wp, from 2040Q1 | +0.1545 | -0.1805 (q6) | +0.1174 (q6) | -0.0102 (q6) | 0.8370 | 0.5601 |

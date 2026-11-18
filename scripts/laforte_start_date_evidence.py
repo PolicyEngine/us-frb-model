@@ -14,7 +14,9 @@ in git history:
 
     git show 2b62608^:vendor/data_only_package/LONGBASE.TXT > /tmp/longbase_april.txt
 
-Stores nothing. Six 160-quarter stacked solves: run it in CI.
+Stores nothing, and no CI job runs it routinely. Three 160-quarter stacked
+solves per vintage (about two minutes on a GitHub runner): the bands were set
+from a temporary job on PR #27 (Actions run 44379823376, both vintages).
 """
 
 from __future__ import annotations
