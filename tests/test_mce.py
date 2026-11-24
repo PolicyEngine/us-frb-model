@@ -162,32 +162,89 @@ def test_var_solver_defaults_unchanged():
 
 # Laforte (2018) FEDS Note, Figure 11, "New Version": 100bp funds-rate shock
 # under MCE for the financial and wage-price sectors (footnote 3: MCAP+WP).
-# docs/data/laforte2018_fig11_mce_ping.json. The model vintage differs (2018
-# vs the vendored model), so the bands are wider for the wage-price outcomes
-# than for the financial ones; see VALIDATION.md, Test 5.
+# docs/data/laforte2018_fig11_mce_ping.json. Laforte shocked in 2020Q1, so the
+# 2020Q1 run is the like-for-like comparison; the 2040Q1 run keeps the wider
+# bands it had. See VALIDATION.md, Test 5.
 LAFORTE_JSON = Path(__file__).resolve().parents[1] / "docs" / "data" / (
     "laforte2018_fig11_mce_ping.json"
 )
 
 
-@pytest.mark.slow
-def test_mce_ping_matches_laforte_2018(longbase):
+def _laforte_fig11(longbase, start):
     import json
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
     import expectations_comparison as ec
 
     pub = json.loads(LAFORTE_JSON.read_text())["summary"]
-    ours = ec.monetary(longbase, "mcap+wp", ec.PING_START, ec.PING_END, fed_pings=True)
-    path = ours["path_q1_q12"]
-    # Financial block: the funds-rate path and the 10-year yield on impact.
-    assert np.allclose(path["rff"][:8], pub["rff_q"], atol=0.01)
+    ours = ec.monetary(longbase, "mcap+wp", start, start + 159, fed_pings=True)
+    ratios = {
+        "gap": ours["xgap2_trough"][0] / pub["gap_trough"][0],
+        "lur": ours["lur_peak"][0] / pub["lur_peak"][0],
+        "core": ours["picxfe_trough"][0] / pub["core_trough"][0],
+    }
+    rff = ours["path_q1_q12"]["rff"][:8]
+    print(  # shown in the CI log by -rA
+        f"Laforte Fig. 11 from {start}: "
+        + ", ".join(f"{k} {v:.4f}x" for k, v in ratios.items())
+        + f"; 10y impact {ours['rg10_impact']:+.4f} (published {pub['r10_impact']:+.4f})"
+        + f"; rff q1-q8 max abs diff {np.abs(np.array(rff) - pub['rff_q']).max():.4f}"
+        + f"; trough/peak quarters gap q{ours['xgap2_trough'][2]}, "
+        + f"lur q{ours['lur_peak'][2]}, core q{ours['picxfe_trough'][2]}"
+    )
+    # Financial block, on any start date: the funds-rate path and the 10-year
+    # yield on impact, within 0.01pp.
+    assert np.allclose(rff, pub["rff_q"], atol=0.01)
     assert abs(ours["rg10_impact"] - pub["r10_impact"]) < 0.01
-    # Real side: output gap trough within 10%, unemployment peak within 25%.
-    assert abs(ours["xgap2_trough"][0] / pub["gap_trough"][0] - 1) < 0.10
-    assert abs(ours["lur_peak"][0] / pub["lur_peak"][0] - 1) < 0.25
-    # Core inflation: larger than published but bounded. Observed 1.33x on the
-    # October 2026 LONGBASE and 1.45x on the April 2026 one; tightened from
-    # 0.5-2.0 (too loose to catch a regression) in the 17 Nov results review.
-    ratio = ours["picxfe_trough"][0] / pub["core_trough"][0]
-    assert 1.0 < ratio < 1.6
+    return ours, pub, ratios
+
+
+@pytest.mark.slow
+def test_mce_ping_like_for_like_matches_laforte_2018(longbase):
+    """Primary published-comparator gate for MCE: Laforte's own start date.
+
+    Laforte (2018) Figure 11 shocks in 2020Q1; this is that run (pings.prg
+    settings, mcap+wp, 160 quarters). Observed ratios to the figure, from
+    scripts/laforte_start_date_evidence.py (CI run 44379823376):
+
+                          output gap   unemployment   core PCE
+    October 2026 LONGBASE   0.922x        0.951x        1.146x
+    April 2026 LONGBASE     0.930x        0.922x        1.112x
+
+    with the 10-year impact within 0.001pp and the funds-rate path within
+    0.007pp on both. Bands, against the ones the 2040Q1 run carried:
+    * output gap within 10% (unchanged; note the margin is only 2-3pp);
+    * unemployment within 15% (tightened from 25%; it moved 3pp between the
+      two vintages, so 10% would leave 2pp);
+    * core PCE 1.0-1.3x (upper end tightened from 1.6x; lower end unchanged).
+    Timing: the note has the gap and core troughs in quarter 6 and the
+    unemployment peak in quarter 4. Ours: q6 and q6 on both vintages;
+    unemployment q6 (October) and q4 (April), so q4-q6 is allowed.
+
+    Caveat, as for the VAR gate: the 2020Q1 baseline here is realised history
+    in today's LONGBASE, not the 2018 projection Laforte shocked, so this is
+    close to, not exactly, a replication.
+    """
+    ours, pub, r = _laforte_fig11(longbase, pd.Period("2020Q1"))
+    assert abs(r["gap"] - 1) < 0.10
+    assert abs(r["lur"] - 1) < 0.15
+    assert 1.0 < r["core"] < 1.3
+    assert ours["xgap2_trough"][2] == pub["gap_trough"][1] == 6
+    assert ours["picxfe_trough"][2] == pub["core_trough"][1] == 6
+    assert ours["lur_peak"][2] in (4, 5, 6)
+
+
+@pytest.mark.slow
+def test_mce_ping_from_2040q1_stays_in_its_range(longbase):
+    """The same ping from 2040Q1: a start-date sanity range, not the like-for-like
+    comparison (that is the 2020Q1 test above). Bands unchanged from the test
+    this replaces (test_mce_ping_matches_laforte_2018): gap within 10%,
+    unemployment within 25%, core PCE 1.0-1.6x. Observed 0.968x, 1.203x and
+    1.328x on the October 2026 LONGBASE; 0.965x, 1.201x and 1.454x on the
+    April 2026 one. The core ratio depends on the start date (1.57x from
+    2030Q1 on the October data, which no test gates).
+    """
+    _, _, r = _laforte_fig11(longbase, pd.Period("2040Q1"))
+    assert abs(r["gap"] - 1) < 0.10
+    assert abs(r["lur"] - 1) < 0.25
+    assert 1.0 < r["core"] < 1.6

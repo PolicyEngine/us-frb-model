@@ -261,9 +261,17 @@ Core PCE and the output gap are not start-date dependent (within 10% of the
 note from every date, gated). The unemployment peak is: the unemployment
 response per unit of output-gap trough drifts with the baseline (0.48 in 2020,
 0.55 in 2026, 0.64 in 2035, against Laforte's 0.45). So the unemployment peak
-is gated against Laforte only on Laforte's design (within 10%); across the
-sweep it carries a 0.90–1.45× sanity bound (observed 1.04–1.38×), which is
-labelled as such and is not a published comparison. The committed sweep is
+is gated against Laforte only on Laforte's design (within 10%). From the
+seven later start dates it carries a 1.00–1.45× sanity range, which is
+labelled as such and is not a published comparison. Observed, minimum to
+maximum over the start dates (`scripts/laforte_start_date_evidence.py`):
+
+| LONGBASE | all eight dates | 2020Q1 | the seven later dates |
+|---|---|---|---|
+| October 2026 | 1.043–1.379× | 1.043× | 1.123× (2024Q1) to 1.379× (2035Q1) |
+| April 2026 | 1.007–1.324× | 1.007× | 1.073× (2024Q1) to 1.324× (2035Q1) |
+
+The committed sweep is
 pinned to a fresh solve at 1e-6 (`test_committed_json_is_current`). With the
 demo settings from 2020Q1 the ZLB binds from a near-zero funds rate and the
 response is weaker (gap −0.38, unemployment +0.19); it is recorded, not gated.
@@ -278,7 +286,15 @@ History of this gate: #21 widened the unemployment band from 25% to 30% on the
 2026Q1 and 2040Q1 runs, on four runs read as "a steady ~20% overshoot". The
 sweep showed the ratio moves with the start date (1.04–1.38×), so that band
 and its justification are withdrawn and replaced by the like-for-like gate
-above (decision logged in the PR).
+above (decision logged in the PR). The sweep's lower end was 1.00× for all
+eight dates, then 0.90× for all eight because the 2020Q1 run sits at
+1.01–1.04×. That reason applies to 2020Q1 only, which the like-for-like gate
+already holds to 0.90–1.10×; the later dates never come below 1.07×, so they
+take 1.00× back (18 November 2026). On the April data the 2024Q1 run is 7%
+above that floor and the ratio at a given date moved by up to 9 points between
+the two vintages (2026Q3: 1.284× October, 1.195× April), so a new vintage can
+trip it; that is a prompt to look, and
+the range is fitted to observations, not derived.
 
 Sources:
 
@@ -594,21 +610,52 @@ Gate tolerance 1e-6 abs and rel, the same as Test 2.
 **Against the Board's published MCE ping (slow gate).** Laforte (2018), FEDS
 Notes, Figure 11, "New Version" (MCE for the financial and wage-price
 sectors, footnote 3, so `mcap+wp`); values in
-`docs/data/laforte2018_fig11_mce_ping.json`. Ours: same shock from 2040Q1 with
-the `programs/pings.prg` settings over 160 quarters.
+`docs/data/laforte2018_fig11_mce_ping.json`. Laforte shocked in 2020Q1, so
+the like-for-like run is the same shock from 2020Q1 with the
+`programs/pings.prg` settings over 160 quarters; the 2040Q1 run (the only one
+gated until 18 November 2026) is kept as a second start date
+(`results/expectations_comparison.md`).
 
 | | 10y impact | output gap trough | unemployment peak | core PCE trough | rff q2 | rff q4 |
 |---|---|---|---|---|---|---|
 | Laforte 2018 | +0.156 | −0.186 (q6) | +0.098 (q4) | −0.0077 (q6) | 0.837 | 0.561 |
-| ours, mcap+wp | +0.154 | −0.181 (q6) | +0.117 (q6) | −0.0102 (q6) | 0.837 | 0.560 |
-| ours, VAR | +0.332 | −0.453 (q7) | +0.261 (q7) | −0.0342 (q8) | 0.825 | 0.503 |
+| **ours, mcap+wp, from 2020Q1 (like-for-like)** | **+0.155** | **−0.172 (q6)** | **+0.093 (q6)** | **−0.0088 (q6)** | **0.839** | **0.564** |
+| ours, mcap+wp, from 2040Q1 | +0.154 | −0.181 (q6) | +0.117 (q6) | −0.0102 (q6) | 0.837 | 0.560 |
+| ours, VAR, from 2040Q1 | +0.332 | −0.453 (q7) | +0.261 (q7) | −0.0342 (q8) | 0.825 | 0.503 |
 
-The financial block and the output gap match closely. Unemployment (1.2×)
-and core inflation (1.33×; 1.45× on the April 2026 vintage) are larger than
-published. The pyfrbus match above
-is the test of the implementation; the gap is not tuned away. Gate bands: rff
-q1–q8 and 10y impact within 0.01pp, output gap trough within 10%,
-unemployment peak within 25%, core PCE trough within a factor of 2.
+Ratios to the figure, on both vintages (`scripts/laforte_start_date_evidence.py`,
+CI run 44379823376):
+
+| start, LONGBASE | output gap | unemployment | core PCE | 10y impact, ours − published | rff q1–q8, max abs diff |
+|---|---|---|---|---|---|
+| **2020Q1, October 2026** | **0.922×** | **0.951×** | **1.146×** | −0.0008pp | 0.0070pp |
+| 2020Q1, April 2026 | 0.930× | 0.922× | 1.112× | −0.0007pp | 0.0063pp |
+| 2030Q1, October 2026 (not gated) | 1.001× | 1.237× | 1.570× | −0.0027pp | 0.0043pp |
+| 2030Q1, April 2026 (not gated) | 1.010× | 1.195× | 1.449× | −0.0022pp | 0.0046pp |
+| 2040Q1, October 2026 | 0.968× | 1.203× | 1.328× | −0.0010pp | 0.0018pp |
+| 2040Q1, April 2026 | 0.965× | 1.201× | 1.454× | −0.0017pp | 0.0018pp |
+
+On Laforte's start date the financial block matches, the output gap and the
+unemployment peak are 5–8% below the figure, and core inflation is 11–15%
+above it. From later start dates unemployment (1.2×) and core inflation
+(1.33–1.57×) are larger than published. The pyfrbus match above is the test of
+the implementation; the gap is not tuned away.
+
+Gate bands (`tests/test_mce.py`):
+
+| quantity | 2040Q1 run (the only gate until 18 Nov 2026; unchanged) | 2020Q1 like-for-like run (new, primary) | observed, 2020Q1 (October / April) |
+|---|---|---|---|
+| rff q1–q8 | within 0.01pp | within 0.01pp | 0.0070 / 0.0063 |
+| 10y impact | within 0.01pp | within 0.01pp | −0.0008 / −0.0007 |
+| output gap trough | within 10% | within 10% | 0.922× / 0.930× |
+| unemployment peak | within 25% | within 15% | 0.951× / 0.922× |
+| core PCE trough | 1.0–1.6× | 1.0–1.3× | 1.146× / 1.112× |
+| timing | none | gap and core troughs in q6 (as published); unemployment peak in q4–q6 (published q4) | q6, q6, q6 / q6, q6, q4 |
+
+No band is wider than before. The output-gap band has only 2–3 points of
+margin on the 2020Q1 run. As for the VAR gate, the 2020Q1 baseline is realised
+history in today's LONGBASE, not the 2018 projection Laforte shocked, so the
+like-for-like run is close to, not exactly, a replication.
 
 **Is the gap the model vintage? No, not the coefficients.** Laforte ran the
 November 2018 model; the vendored model.xml is the January 2021 release
@@ -666,15 +713,17 @@ tightening); docs/benchmarks.md section 5 summarises them.
 
 ## How this is enforced in CI
 
-`.github/workflows/ci.yml` gates every push and pull request on all three
-tests. Nothing below is `continue-on-error`, and the tolerances quoted above
+`.github/workflows/ci.yml` gates every push and pull request on the tests
+above. Apart from the backtest report, nothing below is `continue-on-error`, and the tolerances quoted above
 are the ones asserted in code -- they are not to be loosened to make a build
 pass.
 
 | job | gate |
 |---|---|
-| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), Test 3, the Test 4 fiscal multipliers and the scenario sweep (`-m slow`) as separate steps, so a failure names the broken invariant |
+| `correctness-gates` | Test 1 (< 1e-8 abs, < 1e-10 rel), Test 2 vs the committed reference (< 1e-6 abs and rel), Test 3, the Test 4 fiscal multipliers, the scenario sweep, the benchmark grid and the 2022–23 episode, inflation transmission (including the Laforte VAR gates and the committed-JSON-is-current checks) and Test 5 (MCE against the committed pyfrbus references and the two Laforte Fig. 11 runs), as separate steps, so a failure names the broken invariant |
 | `vendor-reference` | Re-runs the Fed's pyfrbus from `vendor/pyfrbus_package` in a throwaway venv and gates this implementation against that **freshly generated** solution, not just the committed CSV; then `scripts/check_reference_drift.py` checks the committed anchor still matches the vendor package (< 1e-6 abs, < 1e-5 rel, an order of magnitude above the ~1.4e-8 build-to-build noise floor documented in Test 2b) |
+| `vendor-mce-reference` | The same for Test 5: the Board's pyfrbus with `mce=...` for each of the four modes, this implementation's stacked solve against that fresh solution (< 1e-6), and the drift check on the committed MCE anchors |
+| `long-solve-currentness` | Re-runs each long-solve script (`expectations_comparison.py`, `--matched`, `laforte_vintage_check.py`, `episode_2022_tightening.py --mce mcap` and `mcap+wp`, `window_2026q3_preview.py`) into a scratch directory and requires the committed `results/` file to equal it: JSON structure exactly, floats to 1e-6, rendered markdown as text (`scripts/check_results_current.py`). Under 3 minutes per file. The fresh files are uploaded as artifacts, so a stale file is refreshed from the run |
 | `scheduled-validation` | Weekly (Mondays 05:17 UTC) and on demand: full suite on Python 3.11/3.12, the Test 4 fiscal-multiplier gate (`-m slow`), plus the vendor regeneration gate, so drift in transitive dependencies surfaces without a PR |
 | `longbase-backtest` | Weekly, **non-gating** (`continue-on-error`): re-runs `scripts/backtest_longbase.py --fetch` against fresh FRED data and prints the LONGBASE-vs-outturn report |
 
