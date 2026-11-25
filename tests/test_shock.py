@@ -110,22 +110,21 @@ def test_monetary_irf_economic_sanity(shock_sim):
     (backward-looking) expectations, demo fiscal configuration.
 
     A tightening must lower output and inflation and raise unemployment, with
-    magnitudes inside the band below. The band is NOT fitted to this model's
-    output; it is taken from the published simulation properties of FRB/US
-    under VAR expectations:
-
-      * Brayton, Laubach & Reifschneider, "The FRB/US Model: A Tool for
-        Macroeconomic Policy Analysis", FEDS Notes, 2014 -- a 100bp funds-rate
-        tightening lowers real GDP by a few tenths of a percent, peaking after
-        roughly two years, and lowers core inflation by a few hundredths to
-        ~0.2pp over the same horizon.
-      * FRB/US package documentation shipped in
-        ``vendor/frbus_package/documentation/``.
+    magnitudes inside the bands below. The bands are wide sanity ranges chosen
+    by this repo, not published figures. They contain the published responses
+    to this experiment that VALIDATION.md lists with their sources ("Against
+    the Fed's published FRB/US simulations"): an output-gap trough of -0.4 to
+    -0.53pp, an unemployment peak of +0.22pp and a core-inflation trough of
+    -0.03 to -0.13pp. None of those publications states a real GDP trough.
+    The comparison with the published numbers is
+    tests/test_inflation_transmission.py (Laforte 2018, within 10%), not this
+    test.
 
     Observed values in this implementation (VALIDATION.md, Test 3):
-    rff impact +1.000pp, xgdp trough -0.55% in 2027Q4, lur peak +0.26pp,
-    picxfe trough -0.034pp. The bands are deliberately wider than these so the
-    test gates on economics, not on bit-level reproduction (that is Tests 1-2).
+    rff impact +1.000pp, xgdp trough -0.56% in 2027Q4, lur peak +0.28pp in
+    2028Q1, picxfe trough -0.034pp (October 2026 LONGBASE). The bands are
+    deliberately wider than these so the test gates on economics, not on
+    bit-level reproduction (that is Tests 1-2).
     """
     base, sim = shock_sim
     rff_delta = sim.loc[START:END, "rff"] - base.loc[START:END, "rff"]
@@ -139,10 +138,10 @@ def test_monetary_irf_economic_sanity(shock_sim):
     assert pi_delta.min() < 0, "tightening must lower core inflation"
     assert lur_delta.max() > 0, "tightening must raise unemployment"
 
-    # --- magnitudes, inside the documented band ----------------------------
+    # --- magnitudes, inside the sanity bands ------------------------------
     # Impact response is the shock itself, ~100bp.
     assert 0.8 < rff_delta.iloc[0] < 1.2, f"rff impact {rff_delta.iloc[0]:.3f}pp"
-    # Output trough: "a few tenths to ~1 percent".
+    # Output trough: a few tenths to about 1 percent.
     assert -1.2 < gdp_pct.min() < -0.2, f"xgdp trough {gdp_pct.min():.3f}%"
     # Okun-consistent unemployment response.
     assert 0.1 < lur_delta.max() < 0.6, f"lur peak {lur_delta.max():.3f}pp"
