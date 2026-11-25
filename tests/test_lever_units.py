@@ -179,3 +179,17 @@ def test_single_impulses_that_do_not_decay(responses):
     assert ecnia[4] > 0.9 * ecnia[0]
     assert all(b > a for a, b in zip(ebfi[:4], ebfi[1:5], strict=True))
     assert ebfi[4] == pytest.approx(1.847, abs=2e-3)
+
+
+def test_levels_the_units_are_read_against(baselines):
+    """The 2026Q1 baseline levels VALIDATION.md quotes beside the table.
+
+    Federal purchases are 4.5% of real GDP (4.3% in nominal terms), so 0.01 on
+    ``egfe_aerr`` is about 0.045% of GDP; the oil price is $66 a barrel, so
+    +10 on ``poil_aerr`` is +15%.
+    """
+    base = baselines["monetary"].loc[START]
+    assert base["egfe"] / base["xgdp"] == pytest.approx(0.0451, abs=5e-4)
+    assert base["egfen"] / base["xgdpn"] == pytest.approx(0.0427, abs=5e-4)
+    assert base["poil"] == pytest.approx(65.97, abs=0.05)
+    assert 100 * 10 / base["poil"] == pytest.approx(15.2, abs=0.1)
