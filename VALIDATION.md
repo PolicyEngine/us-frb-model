@@ -182,15 +182,20 @@ the same system whatever the vendor's Jacobian did on the way.
 
 100bp funds-rate shock, deviations from baseline:
 
-| property | value | published FRB/US VAR properties |
+| property | value | sanity band asserted (`tests/test_shock.py::test_monetary_irf_economic_sanity`) |
 |---|---|---|
-| rff impact response | +1.000 pp | ~+1 pp |
-| xgdp trough | −0.56% (2027Q4) | output falls a few tenths to ~1% after ~2 yrs |
-| lur peak | +0.28 pp (2028Q1) | rises ~0.1–0.3 pp |
-| picxfe trough | −0.034 pp | core inflation falls modestly |
+| rff impact response | +1.000 pp | 0.8 to 1.2 pp |
+| xgdp trough | −0.56% (2027Q4) | −1.2% to −0.2%, 3 to 15 quarters after the shock |
+| lur peak | +0.28 pp (2028Q1) | 0.1 to 0.6 pp |
+| picxfe trough | −0.034 pp | −0.15 to −0.005 pp |
 
-Signs and magnitudes are consistent with the simulation properties described
-in the FRB/US documentation (`vendor/frbus_package/documentation/`).
+The bands are wide sanity ranges chosen by this repo. They are not published
+figures: none of the publications cited below states a real GDP trough for
+this experiment. The bands contain the published output-gap, unemployment and
+inflation responses listed under "Against the Fed's published FRB/US
+simulations" (output gap −0.4 to −0.53pp, unemployment +0.22pp, core
+inflation −0.03 to −0.13pp). The comparison with published numbers is that
+table and the Laforte gate, not this one.
 
 Two internal-coherence cross-checks on the same run (recomputed 2026-11-16 on
 the October 2026 vintage):
@@ -363,6 +368,51 @@ holding +0.01 for four quarters raises the **level** of federal purchases by
 Gated by `tests/test_shock.py::test_sustained_add_factor_shocks_compound`. Any
 wrapper exposing a `periods` argument must document this on **every** lever it
 exposes, not only the monetary ones.
+
+#### Every lever: its unit, and whether it stacks
+
+`<name>_aerr` is added to the right-hand side of the equation for `<name>` as
+`model.xml` writes it, so its unit is the unit of that equation's left-hand
+side. The table covers the nine levers PolicyEngine Macro exposes
+(PolicyEngine/macro#212). Each row is the lever's own variable after the shock
+in the second column is applied in 2026Q1 only, and after it is applied in
+each of 2026Q1–Q4 (October 2026 vintage, demo fiscal settings; pinned by
+`tests/test_lever_units.py`, which also asserts the left-hand sides):
+
+| lever | shock per quarter | left-hand side in `model.xml` | one quarter: q1 | one quarter: q4 | four quarters: q4 | q4 ÷ impact | real GDP, q1 |
+|---|---|---|---|---|---|---|---|
+| `rffintay_aerr` | 1.0 | `rffintay` (level, own lag 0.85 through `rff`) | +1.00pp | +0.49pp | **+2.97pp** | 2.97 | +0.00% |
+| `rfftay_aerr` | 1.0 | `rfftay` (level, no own lag) | +1.00pp | −0.16pp | +0.55pp | 0.55 | +0.00% |
+| `egfe_aerr` | 0.01 | `d(log(egfe))` (quarterly log growth) | +1.00% | +0.56% | **+2.90%** | 2.89 | +0.04% |
+| `egse_aerr` | 0.01 | `d(log(egse))` | +1.01% | +0.75% | **+3.71%** | 3.68 | +0.03% |
+| `trp_aerr` | 0.01 | `trp` (rate as a decimal, own lags 0.60 and 0.24) | +0.99pp | +0.34pp | **+2.33pp** | 2.34 | −0.12% |
+| `trci_aerr` | 0.01 | `trci` (rate as a decimal, own lag 0.81) | +1.00pp | +0.51pp | **+2.95pp** | 2.95 | 0.00% |
+| `ecnia_aerr` | 0.01 | `log(ecnia)` with `log(ecnia(-1))` on the right | +1.06% | +1.01% | **+4.19%** | 3.95 | +0.60% |
+| `ebfi_aerr` | 0.01 | `dlog(ebfi)` (own growth lags 0.32 and 0.19) | +1.00% | +1.79% | **+5.95%** | 5.92 | +0.12% |
+| `poil_aerr` | 10.0 | `poil` (identity, dollars per barrel) | +$10.03 | −$0.00 | +$10.00 | 1.00 | −0.02% |
+
+Readings:
+
+* **Seven of the nine stack.** Four shocked quarters leave the variable 2.3 to
+  5.9 times its impact response. A tax-rate shock of `0.01` held for a year is
+  +2.33pp on the personal rate, not +1pp (macro#212 measured 2.37pp on an
+  earlier commit).
+* **Two do not.** The non-inertial Taylor rule has no lag of the funds rate,
+  and the oil price is an identity. Holding `rfftay_aerr` at 1.0 for four
+  quarters never takes the funds rate above +1.00pp (it is +0.55pp by q4 as
+  the rule responds to the weaker economy); holding `poil_aerr` at 10 holds
+  the oil price $10 higher. A wrapper that carries the inertial rule's "+3pp"
+  warning onto `rfftay_aerr` is wrong for that lever.
+* **Two do not decay after a single quarter.** `ecnia` is a random walk in
+  logs, so one impulse is close to a permanent +1% on consumption and +0.6% on
+  real GDP: large for one unit of a lever. `ebfi` growth feeds on its own two
+  lags (0.52 and 0.30, each times the 0.62 weight on that term), so one
+  impulse of 0.01 is +1.0% on impact and +1.8% a year later.
+* `egfe` is 4.5% of real GDP in 2026Q1 (4.3% in nominal terms), so `0.01` on
+  `egfe_aerr` is about 0.045% of GDP on impact, with a first-quarter GDP
+  response of 0.037%.
+* `poil_aerr` is in dollars per barrel. +10 is +15% in 2026Q1, when the
+  LONGBASE price is $66.
 
 ## Test 4 — fiscal multipliers gated against published ranges (slow gate)
 
