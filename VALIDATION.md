@@ -631,8 +631,9 @@ of this implementation produces the gap. It splits as follows (issue #29).
 
 * **Data revision, about 0.5pp of the 2026Q1 gap.** The frozen record scores
   the August 2026 FRED snapshot (4.42%). The October LONGBASE, in which
-  2026Q1 is history, has 3.94% for the same quarter, and its quarterly index
-  levels equal the quarterly averages of the current FRED snapshot. Against
+  2026Q1 is history, has 3.94% for the same quarter, and its 2026Q1 index
+  level equals the quarterly average of the current FRED snapshot (the
+  snapshot starts in January 2026, so the 2025Q4 level is not checked). Against
   that data the miss is 1.17pp, not 1.65pp. For 2026Q2 the revision is 0.10pp.
 * **2026Q1 is a residual of the price equation.** The residual of the `picxfe`
   equation at the data (`init_trac`) is +1.56pp in 2026Q1 on the October
@@ -642,10 +643,12 @@ of this implementation produces the gap. It splits as follows (issue #29).
   data (2.30) than in the April baseline (2.49). So the realised values of
   the equation's inputs do not explain the 2026Q1 rise: all of it is a
   price-equation shock about twice the 2021–25 standard deviation.
-* **2026Q2 is propagation.** The 2026Q2 residual is +0.13pp on the October
-  history, smaller than the April baseline's +0.26pp. The gap is in the part
-  the equation accounts for, 3.14 against 2.46: with the 2026Q1 rise and the
-  other realised inputs in place, the equation produces the 2026Q2 outturn.
+* **2026Q2 is accounted for by the equation at the realised inputs.** The
+  2026Q2 residual is +0.13pp on the October history, smaller than the April
+  baseline's +0.26pp. The gap is in the part the equation accounts for, 3.14
+  against 2.46. Which of the equation's terms carry it was not computed, so
+  this does not say how much is carry-over from 2026Q1 and how much is new
+  movement in the inputs in 2026Q2.
 
 The published −1.65pp and −0.65pp stand as the record against the data
 available in August 2026. The October-history figures above are pinned in

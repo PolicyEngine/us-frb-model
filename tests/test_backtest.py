@@ -111,8 +111,9 @@ def test_core_pce_2026q1_miss_is_a_price_equation_residual(model, longbase):
     core = bt.baseline_paths(longbase)["PCEPILFE"]
     assert abs(core["2026Q1"] - 3.937) < 5e-3
     assert abs(core["2026Q2"] - 3.314) < 5e-3
-    # The October history's quarterly index is the quarterly average of the
-    # committed FRED snapshot, so the 3.94 is current FRED data too.
+    # The October history's 2026Q1 index level is the quarterly average of the
+    # committed FRED snapshot. (The snapshot starts in January 2026, so the
+    # 2025Q4 level behind the 3.94 growth rate is not checked here.)
     snap = bt.load_snapshot()["PCEPILFE"]
     q1 = snap[snap.index.to_period("Q") == "2026Q1"].mean()
     assert abs(q1 - longbase["pcxfe"]["2026Q1"]) < 5e-3
