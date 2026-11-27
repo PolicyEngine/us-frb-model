@@ -116,6 +116,10 @@ def test_monetary_irf_economic_sanity(shock_sim):
     the Fed's published FRB/US simulations"): an output-gap trough of -0.4 to
     -0.53pp, an unemployment peak of +0.22pp and a core-inflation trough of
     -0.03 to -0.13pp. None of those publications states a real GDP trough.
+    The 2014 FEDS Note (Brayton, Laubach & Reifschneider), which this
+    docstring used to cite for the bands, was re-read on 26 Nov 2026: for the
+    funds-rate shock it reports the output gap, inflation and the funds rate
+    only, with no real GDP or unemployment figure.
     The comparison with the published numbers is
     tests/test_inflation_transmission.py (Laforte 2018, within 10%), not this
     test.
