@@ -191,7 +191,9 @@ the same system whatever the vendor's Jacobian did on the way.
 
 The bands are wide sanity ranges chosen by this repo. They are not published
 figures: none of the publications cited below states a real GDP trough for
-this experiment. The bands contain the published output-gap, unemployment and
+this experiment. That includes the 2014 FEDS Note, which an earlier version of
+this table cited for an output range; the note was re-read on 26 Nov 2026 and
+has no such range (see Sources). The bands contain the published output-gap, unemployment and
 inflation responses listed under "Against the Fed's published FRB/US
 simulations" (output gap −0.4 to −0.53pp, unemployment +0.22pp, core
 inflation −0.03 to −0.13pp). The comparison with published numbers is that
@@ -315,8 +317,14 @@ Sources:
 * Brayton, Laubach and Reifschneider, "The FRB/US Model: A Tool for
   Macroeconomic Policy Analysis", FEDS Notes, 3 April 2014,
   <https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html>.
-  The −0.4 and −0.08 are stated in the text of the Figure 1 notes. They are
-  not read off the chart. The note is not vendored here.
+  The −0.4 and −0.08 are stated in Figure 1's accessible description (the
+  figure's text alternative), not in the body text. They are not read off the
+  chart. The note is not vendored here. Re-read on 26 Nov 2026: for the
+  funds-rate shock, Figure 1 and its description cover the output gap,
+  inflation, the funds rate and the expected real funds rate only. The note
+  gives no real GDP or unemployment response to that shock; its only real GDP
+  growth and unemployment figures are the baseline and confidence bands of
+  Figure 2, which is a stochastic simulation.
 * `vendor/frbus_package/documentation/price_wage_sector_083013.pdf`, page 16
   (Figure 3, "FRB/US Ping Simulations: VAR Expectations"). The Bayesian 85-12
   price–wage sector is the specification the model adopted. The values above
