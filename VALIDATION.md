@@ -615,6 +615,47 @@ rate within 0.2pp, but underprojected core PCE inflation by 1.65pp in 2026Q1
 and 0.65pp in 2026Q2. Under the October vintage those two quarters are
 history, so they are no longer a projection test.
 
+**What drives the −1.65pp.** Neither side of that row is a solve of this
+model: it is the April baseline's `pcxfe` path against FRED, so no equation
+of this implementation produces the gap. It splits as follows (issue #29).
+
+| | 2026Q1 | 2026Q2 |
+|---|---|---|
+| April LONGBASE projection, compounded q/q | 2.77 | 2.76 |
+| FRED outturn in the frozen record (snapshot of 4 Aug 2026) | 4.42 | 3.42 |
+| published error | −1.65 | −0.65 |
+| the same quarter in the October LONGBASE history | 3.94 | 3.31 |
+| error against the October history | −1.17 | −0.55 |
+| `picxfe` equation residual, April baseline / October history (pp, log rate) | +0.24 / +1.56 | +0.26 / +0.13 |
+| `picxfe` less its residual, April baseline / October history | 2.49 / 2.30 | 2.46 / 3.14 |
+
+* **Data revision, about 0.5pp of the 2026Q1 gap.** The frozen record scores
+  the August 2026 FRED snapshot (4.42%). The October LONGBASE, in which
+  2026Q1 is history, has 3.94% for the same quarter, and its quarterly index
+  levels equal the quarterly averages of the current FRED snapshot. Against
+  that data the miss is 1.17pp, not 1.65pp. For 2026Q2 the revision is 0.10pp.
+* **2026Q1 is a residual of the price equation.** The residual of the `picxfe`
+  equation at the data (`init_trac`) is +1.56pp in 2026Q1 on the October
+  history, against +0.06pp in 2025Q4 and a standard deviation of 0.77pp over
+  2021–25 (0.45pp over 2015–19). The April baseline carried +0.24pp. The
+  part of `picxfe` that the equation accounts for was lower on the realised
+  data (2.30) than in the April baseline (2.49). So the realised values of
+  the equation's inputs do not explain the 2026Q1 rise: all of it is a
+  price-equation shock about twice the 2021–25 standard deviation.
+* **2026Q2 is propagation.** The 2026Q2 residual is +0.13pp on the October
+  history, smaller than the April baseline's +0.26pp. The gap is in the part
+  the equation accounts for, 3.14 against 2.46: with the 2026Q1 rise and the
+  other realised inputs in place, the equation produces the 2026Q2 outturn.
+
+The published −1.65pp and −0.65pp stand as the record against the data
+available in August 2026. The October-history figures above are pinned in
+`tests/test_backtest.py::test_core_pce_2026q1_miss_is_a_price_equation_residual`.
+The April-vintage figures come from `LONGBASE.TXT` at commit `2b62608^`; that
+file is no longer vendored, so they are a recorded run (26 Nov 2026), not a
+gate. The residuals are computed under VAR expectations with the expectation
+terms at their data values, and no cause is assigned to the 2026Q1 residual
+here.
+
 ## Test 5 — model-consistent expectations (opt-in) against pyfrbus and Laforte (2018)
 
 `Frbus(path, mce=...)` swaps in the `<mce_equation>` variants of the selected

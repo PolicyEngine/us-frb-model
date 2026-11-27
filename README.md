@@ -139,6 +139,9 @@ unemployment and the funds rate, GDP growth under-projected by 1.23pp (2.14%
 against 3.37%) and core PCE inflation over-projected by 0.80pp (3.27% against
 2.47%, annualized q/q). The April 2026 vintage under-projected core PCE by
 1.65pp in 2026Q1 and 0.65pp in 2026Q2 (`backtests/longbase_2026-04_vs_outturns.md`).
+About 0.5pp of the 2026Q1 gap is later revision of the outturn, and the rest is
+a residual of the core PCE price equation in that quarter, not a response to
+the equation's inputs (`VALIDATION.md`, "What drives the −1.65pp").
 Both are properties of the Fed's baseline data, not of this implementation.
 
 ## Results

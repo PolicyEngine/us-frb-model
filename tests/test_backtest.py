@@ -82,3 +82,51 @@ def test_committed_report_matches_the_snapshot(longbase):
     fresh = bt.build_report(bt.load_snapshot(), longbase)
     assert committed["rows"] == fresh["rows"]
     assert committed["quarters"] == fresh["quarters"]
+
+
+def test_frozen_april_record_core_pce_rows():
+    """The published April-vintage core PCE errors, as frozen."""
+    frozen = json.loads(
+        (
+            Path(__file__).resolve().parents[1] / "backtests" / "longbase_2026-04_vs_outturns.json"
+        ).read_text()
+    )
+    rows = {r["quarter"]: r for r in frozen["rows"] if r["fred_id"] == "PCEPILFE"}
+    assert (rows["2026Q1"]["longbase"], rows["2026Q1"]["outturn"]) == (2.77, 4.422)
+    assert rows["2026Q1"]["error"] == -1.652
+    assert rows["2026Q2"]["error"] == -0.654
+
+
+def test_core_pce_2026q1_miss_is_a_price_equation_residual(model, longbase):
+    """Diagnosis of the April vintage's -1.65pp core PCE miss (VALIDATION.md,
+    "What drives the -1.65pp"), on the side the tree can reproduce.
+
+    In the October vintage 2026Q1-Q2 are history. That history puts core PCE
+    at 3.94% and 3.31% (the frozen record's August FRED snapshot had 4.42% and
+    3.42%), and the residual of the picxfe equation at the data is +1.56pp in
+    2026Q1 against a 2021-25 standard deviation of 0.77pp, then +0.13pp in
+    2026Q2. These pin the October LONGBASE, not a published figure, and move
+    with a new vintage.
+    """
+    core = bt.baseline_paths(longbase)["PCEPILFE"]
+    assert abs(core["2026Q1"] - 3.937) < 5e-3
+    assert abs(core["2026Q2"] - 3.314) < 5e-3
+    # The October history's quarterly index is the quarterly average of the
+    # committed FRED snapshot, so the 3.94 is current FRED data too.
+    snap = bt.load_snapshot()["PCEPILFE"]
+    q1 = snap[snap.index.to_period("Q") == "2026Q1"].mean()
+    assert abs(q1 - longbase["pcxfe"]["2026Q1"]) < 5e-3
+
+    trac = model.init_trac("2015Q1", "2026Q2", longbase)["picxfe_trac"]
+    assert abs(trac["2026Q1"] - 1.558) < 5e-3
+    assert abs(trac["2026Q2"] - 0.125) < 5e-3
+    assert abs(trac["2025Q4"] - 0.064) < 5e-3
+    sd_2021_25 = trac["2021Q1":"2025Q4"].std()
+    assert abs(sd_2021_25 - 0.768) < 5e-3
+    assert abs(trac["2015Q1":"2019Q4"].std() - 0.448) < 5e-3
+    assert trac["2026Q1"] > 2 * sd_2021_25
+    # The part the equation accounts for: below the April baseline's 2.49 in
+    # 2026Q1, well above its 2.46 in 2026Q2.
+    fitted = longbase["picxfe"] - trac
+    assert abs(fitted["2026Q1"] - 2.303) < 5e-3
+    assert abs(fitted["2026Q2"] - 3.135) < 5e-3
